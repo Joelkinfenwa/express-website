@@ -8,7 +8,7 @@ const ROOT = new URL('.', import.meta.url).pathname;
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
 const config = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));
-const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'metaPixelId']);
+const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyStoreDomain', 'shopifyStorefrontToken', 'shopifyTestsCollection', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'metaPixelId']);
 
 // Environment variables override the file (useful in Vercel: SITE_<KEY>).
 for (const k of Object.keys(config)) {
@@ -21,6 +21,10 @@ const missing = Object.entries(config).filter(([k, v]) => !k.startsWith('_') && 
 if (missing.length) {
   console.error('\nBuild stopped. Fill these values in site.config.json (or SITE_* environment variables):\n  - ' + missing.join('\n  - ') + '\n');
   process.exit(1);
+}
+
+if (!config.shopifyStoreDomain || !config.shopifyStorefrontToken || !config.shopifyTestsCollection) {
+  console.warn('\nNote: Shopify is not connected. The test builder will show sample tests and checkout is switched off until the three SITE_SHOPIFY_* values are set.\n');
 }
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

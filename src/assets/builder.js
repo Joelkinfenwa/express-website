@@ -193,8 +193,21 @@
   });
   $('bt-checkout').addEventListener('click', checkout);
 
-  // Load
-  if (!cfg.store || !cfg.token || !cfg.collection) { fallback(); return; }
+  // Preview mode: Shopify not connected yet. Sample tests so the page can be tried; checkout stays off.
+  if (!cfg.store || !cfg.token || !cfg.collection) {
+    var SAMPLE = [['Full blood count',25],['Liver function',25],['Kidney function',25],['Cholesterol and lipids',25],['HbA1c',30],['C-reactive protein',29],
+      ['Testosterone',39],['SHBG and free testosterone',39],['Oestradiol',39],['Cortisol',35],['TSH',25],['Free T4',25],
+      ['Vitamin D',45],['Vitamin B12',35],['Iron studies and ferritin',39],['PSA',39]];
+    state.tests = SAMPLE.map(function (r, i) { return { id: 'sample-' + i, title: r[0], price: r[1], cat: categorise({ title: r[0], tags: [] }) }; });
+    var note = document.createElement('p');
+    note.setAttribute('style', 'margin:0;padding:12px 16px;border-radius:14px;background:#FBEDE4;font-size:14px;font-weight:600');
+    note.textContent = 'Preview mode: sample tests and prices. Live tests and checkout appear once Shopify is connected.';
+    catsEl.parentNode.insertBefore(note, catsEl);
+    $('bt-checkout').removeEventListener('click', checkout);
+    $('bt-checkout').addEventListener('click', function () { status('Checkout is switched off in preview mode until Shopify is connected.', 'error'); });
+    render();
+    return;
+  }
   var loads = [loadAll(null, [])];
   if (cfg.homeVisitVariant) {
     loads.push(gql('query($id:ID!){node(id:$id){... on ProductVariant{price{amount}}}}', { id: cfg.homeVisitVariant })
