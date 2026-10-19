@@ -1,0 +1,38 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/products/:path*", "destination": "https://shop.expresspathology.com.au/products/:path*", "permanent": true },
+    { "source": "/collections/:path*", "destination": "https://shop.expresspathology.com.au/collections/:path*", "permanent": true },
+    { "source": "/pages/:path*", "destination": "https://shop.expresspathology.com.au/pages/:path*", "permanent": true },
+    { "source": "/blogs/:path*", "destination": "https://shop.expresspathology.com.au/blogs/:path*", "permanent": true },
+    { "source": "/policies/:path*", "destination": "https://shop.expresspathology.com.au/policies/:path*", "permanent": true },
+    { "source": "/cart", "destination": "https://shop.expresspathology.com.au/cart", "permanent": false },
+    { "source": "/cart/:path*", "destination": "https://shop.expresspathology.com.au/cart/:path*", "permanent": false },
+    { "source": "/account", "destination": "https://shop.expresspathology.com.au/account", "permanent": false },
+    { "source": "/account/:path*", "destination": "https://shop.expresspathology.com.au/account/:path*", "permanent": false },
+    { "source": "/checkouts/:path*", "destination": "https://shop.expresspathology.com.au/checkouts/:path*", "permanent": false },
+    { "source": "/apps/:path*", "destination": "https://shop.expresspathology.com.au/apps/:path*", "permanent": false },
+    { "source": "/search", "destination": "https://shop.expresspathology.com.au/search", "permanent": false },
+    { "source": "/home", "destination": "/", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    }
+  ]
+}

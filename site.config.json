@@ -1,0 +1,26 @@
+{
+  "_readme": "Every value without a default must be filled in before the site will build. Keys starting with _ are notes. Optional: shopifyHomeVisitVariantId, gaMeasurementId, metaPixelId.",
+  "siteUrl": "https://expresspathology.com.au",
+  "shopUrl": "https://shop.expresspathology.com.au",
+  "bookingUrl": "",
+  "nurseApplyUrl": "https://bookings.expresspathology.com.au/admin/nurses/new",
+
+  "metroFee": "",
+  "regionalFee": "",
+  "cancellationPolicy": "",
+  "labBillingNote": "",
+
+  "phone": "",
+  "email": "",
+  "supportHours": "",
+  "abn": "",
+
+  "shopifyStoreDomain": "",
+  "shopifyStorefrontToken": "",
+  "shopifyApiVersion": "2026-01",
+  "shopifyTestsCollection": "",
+  "shopifyHomeVisitVariantId": "",
+
+  "gaMeasurementId": "",
+  "metaPixelId": ""
+}

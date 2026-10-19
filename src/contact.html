@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Express Pathology | Express Pathology</title>
+<meta name="description" content="Contact Express Pathology about a booking, results, ordering a test or partnering with us.">
+<link rel="canonical" href="{{siteUrl}}/contact">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contact Express Pathology | Express Pathology">
+<meta property="og:description" content="Contact Express Pathology about a booking, results, ordering a test or partnering with us.">
+<meta property="og:image" content="{{siteUrl}}/assets/img/og.jpg">
+<meta property="og:url" content="{{siteUrl}}/contact">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17302A">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<!--analytics-->
+</head>
+<body>
+<div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55">
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<nav aria-label="Main" class="nav">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<div class="nav-links" id="nav-links"><a href="/#how">At-home collection</a><a href="/tests">Blood tests</a><a href="/partners">Partners</a><a href="/about">About</a><a href="/prepare">Help</a></div>
+<div class="nav-actions"><a href="{{shopUrl}}/account" class="quiet">Sign in</a><a href="{{bookingUrl}}" class="btn btn-dark">Book a nurse</a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div>
+</nav>
+</header>
+<main id="main">
+
+
+<main style="max-width: 1320px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-wrap: wrap; gap: 56px">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(42px, 5.4vw, 72px); line-height: 1.02; letter-spacing: -0.035em">How can we help?</h1>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #1C2420">
+<a href="{{bookingUrl}}" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid #DCE0D8"><span style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 18px">Book or manage a visit</span><span style="color: #4B5650">Online, any time</span></span><span aria-hidden="true" style="font-size: 22px">→</span></a>
+<a href="/partners#enquire" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid #DCE0D8"><span style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 18px">Partnerships</span><span style="color: #4B5650">Clinics, platforms and providers</span></span><span aria-hidden="true" style="font-size: 22px">→</span></a>
+<a href="/careers" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid #DCE0D8"><span style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 18px">Join as a nurse</span><span style="color: #4B5650">Apply to our mobile network</span></span><span aria-hidden="true" style="font-size: 22px">→</span></a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 700; color: #66706A">Phone</span><span style="font-weight: 600">{{phone}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 700; color: #66706A">Email</span><span style="font-weight: 600"><a href="mailto:{{email}}">{{email}}</a></span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 700; color: #66706A">Hours</span><span style="font-weight: 600">{{supportHours}}</span></div>
+</div>
+</div>
+
+<form data-enquiry="contact" action="/api/enquiry" method="post" style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; box-sizing: border-box">
+<span style="grid-column: 1 / -1; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">Send us a message</span>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="c-name" style="font-size: 14px; font-weight: 700">Name</label><input id="c-name" name="name" required type="text" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="c-email" style="font-size: 14px; font-weight: 700">Email</label><input id="c-email" name="email" required type="email" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="c-topic" style="font-size: 14px; font-weight: 700">Topic</label><select id="c-topic" name="topic" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 12px; font: inherit; background: #FFFFFF; color: #1C2420"><option>An existing booking</option><option>Results</option><option>Ordering a test</option><option>Partnerships</option><option>Feedback or a complaint</option><option>Something else</option></select></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="c-msg" style="font-size: 14px; font-weight: 700">Message</label><textarea id="c-msg" name="message" required rows="5" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
+<span style="grid-column: 1 / -1; font-size: 14px; color: #66706A">Please do not include test results or medical history in this form.</span>
+<div class="sr-only" aria-hidden="true"><label>Leave this empty<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></div>
+<p class="form-status" role="status" aria-live="polite"></p>
+<button type="submit" style="grid-column: 1 / -1; min-height: 54px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer">Send message</button>
+</form>
+</main>
+
+</main>
+<footer class="site-footer">
+<div class="footer-inner">
+<div class="footer-cols">
+<div class="footer-col"><span class="footer-brand">express<em>.</em></span><span>Mobile blood collection and pathology infrastructure across Australia.</span></div>
+<div class="footer-col"><strong>Patients</strong><a href="{{bookingUrl}}">Book a home visit</a><a href="/tests">Blood tests</a><a href="/prepare">Preparing for your visit</a><a href="{{shopUrl}}/pages/collection-centres">Collection centres</a></div>
+<div class="footer-col"><strong>Partners</strong><a href="/partners">Partner with Express</a><a href="/telehealth">Telehealth</a><a href="/partners#integrate">Integration</a><a href="/partners#enquire">Partner enquiries</a></div>
+<div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/careers">Nurse careers</a><a href="/contact">Contact</a><a href="{{shopUrl}}/policies/privacy-policy">Privacy policy</a><a href="{{shopUrl}}/policies/terms-of-service">Terms of service</a></div>
+</div>
+<div class="footer-legal">
+<p>Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
+<p>© 2026 Express Pathology · ABN {{abn}}</p>
+</div>
+</div>
+</footer>
+
+
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

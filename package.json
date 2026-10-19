@@ -1,0 +1,12 @@
+{
+  "name": "express-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "expresspathology.com.au — marketing site, partner pages and Shopify-connected test builder",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "node build.mjs && npx --yes serve dist -l 4173"
+  },
+  "engines": { "node": ">=18" }
+}
