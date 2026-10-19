@@ -1,26 +1,22 @@
 {
-  "_readme": "Every value without a default must be filled in before the site will build. Keys starting with _ are notes. Optional: shopifyHomeVisitVariantId, gaMeasurementId, metaPixelId.",
+  "_readme": "Every value without a default must be filled in before the site will build. Keys starting with _ are notes. Optional: abn, supportHours, shopifyHomeVisitVariantId, gaMeasurementId, metaPixelId (elements marked data-if are hidden when their value is empty).",
   "siteUrl": "https://expresspathology.com.au",
   "shopUrl": "https://shop.expresspathology.com.au",
-  "bookingUrl": "",
+  "bookingUrl": "/book",
   "nurseApplyUrl": "https://bookings.expresspathology.com.au/admin/nurses/new",
-
-  "metroFee": "",
-  "regionalFee": "",
-  "cancellationPolicy": "",
-  "labBillingNote": "",
-
-  "phone": "",
-  "email": "",
+  "metroFee": "$129",
+  "regionalFee": "$149",
+  "cancellationPolicy": "You can reschedule or cancel free of charge up to 24 hours before your appointment. Changes made within 24 hours of the appointment, or a missed visit, may incur the home visit fee.",
+  "phone": "02 9545 2940",
+  "phoneTel": "+61295452940",
+  "email": "express@expresspathology.com.au",
   "supportHours": "",
   "abn": "",
-
   "shopifyStoreDomain": "",
   "shopifyStorefrontToken": "",
   "shopifyApiVersion": "2026-01",
   "shopifyTestsCollection": "",
   "shopifyHomeVisitVariantId": "",
-
   "gaMeasurementId": "",
   "metaPixelId": ""
 }

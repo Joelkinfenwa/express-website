@@ -8,7 +8,7 @@ const ROOT = new URL('.', import.meta.url).pathname;
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
 const config = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));
-const OPTIONAL = new Set(['shopifyHomeVisitVariantId', 'gaMeasurementId', 'metaPixelId']);
+const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'metaPixelId']);
 
 // Environment variables override the file (useful in Vercel: SITE_<KEY>).
 for (const k of Object.keys(config)) {
@@ -50,6 +50,9 @@ function walk(dir) {
     if (extname(name) !== '.html') { copyFileSync(p, dest); continue; }
     let html = readFileSync(p, 'utf8');
     html = html.replace('<!--analytics-->', analytics());
+    // data-if="key": keep the element (minus the marker) when key has a value, drop it entirely when empty
+    html = html.replace(/<(\w+)([^>]*?) data-if="(\w+)"([^>]*)>([\s\S]*?)<\/\1>/g, (m, tag, a, key, b, inner) =>
+      config[key] && String(config[key]).trim() ? `<${tag}${a}${b}>${inner}</${tag}>` : '');
     html = html.replace(/\{\{(\w+)\}\}/g, (m, k) => {
       if (!(k in config)) { problems.push(`${rel}: unknown token ${m}`); return m; }
       return esc(config[k]);

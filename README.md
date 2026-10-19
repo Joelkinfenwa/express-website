@@ -10,7 +10,7 @@ The Express Pathology website: patient pages, partner pages and a build-your-own
 
 | Path | What it is |
 |---|---|
-| `src/*.html` | One file per page: home, tests, partners, telehealth, about, careers, prepare, contact, 404 |
+| `src/*.html` | One file per page: home, book (home visit request), tests, partners, telehealth, about, careers, prepare, contact, 404 |
 | `src/assets/site.css` | Shared styles, header, footer, mobile rules |
 | `src/assets/site.js` | Mobile menu and enquiry forms |
 | `src/assets/builder.js` | Build-your-own-test (Shopify Storefront API) |
@@ -23,11 +23,11 @@ The Express Pathology website: patient pages, partner pages and a build-your-own
 
 | Key | Example | Notes |
 |---|---|---|
-| `bookingUrl` | `https://…` | Where "Book a nurse" goes. Postcode forms add `?postcode=2000` |
+| `bookingUrl` | `/book` | Where "Book a nurse" goes. Currently the home visit request page. Postcode forms add `?postcode=2000` |
 | `metroFee`, `regionalFee` | `$99` | Shown exactly as written |
 | `cancellationPolicy` | One or two sentences | Shown in pricing and in the FAQ |
-| `labBillingNote` | One sentence | How lab testing is billed for home visits |
-| `phone`, `email`, `supportHours`, `abn` | | Contact page, footer and structured data |
+| `phone`, `phoneTel`, `email` | | Contact page, footer and structured data |
+| `supportHours`, `abn` | | Optional. Hidden from the site when empty |
 | `shopifyStoreDomain` | `express-pathology.myshopify.com` | The myshopify.com address |
 | `shopifyStorefrontToken` | | Public Storefront API token from the Headless channel. This token is designed to be used on a public website |
 | `shopifyTestsCollection` | `individual-tests` | Handle of the collection holding the individual tests |

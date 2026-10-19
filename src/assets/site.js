@@ -11,6 +11,10 @@
     });
   }
 
+  var pc = new URLSearchParams(location.search).get('postcode');
+  var pcInput = document.getElementById('b-postcode');
+  if (pc && pcInput) pcInput.value = pc.replace(/[^0-9]/g, '').slice(0, 4);
+
   Array.prototype.forEach.call(document.querySelectorAll('form[data-enquiry]'), function (form) {
     var status = form.querySelector('.form-status');
     var button = form.querySelector('button[type="submit"]');
@@ -27,11 +31,11 @@
         .then(function () {
           form.reset();
           status.setAttribute('data-state', 'ok');
-          status.textContent = 'Thank you. Your message has been sent and our team will be in touch.';
+          status.textContent = form.getAttribute('data-enquiry') === 'booking' ? 'Thank you. Your request has been received and our team will contact you to confirm your appointment time.' : 'Thank you. Your message has been sent and our team will be in touch.';
         })
         .catch(function () {
           status.setAttribute('data-state', 'error');
-          status.textContent = 'Your message could not be sent. Please try again, or email us directly.';
+          status.textContent = 'Your message could not be sent. Please try again, or call or email us directly.';
         })
         .then(function () { button.disabled = false; });
     });
