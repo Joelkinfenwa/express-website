@@ -5,6 +5,7 @@
   --clay:#A4502E; --muted:#4B5650; --soft:#66706A; --line:#DCE0D8; --line2:#D3D8D0;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;font-size:16px;line-height:1.55}
 img{max-width:100%;display:block}
@@ -102,3 +103,7 @@ button[disabled]{opacity:.6;cursor:progress}
   form[action][style*="border-radius: 999px"] button{width:100%}
   [style*="linear-gradient(90deg, rgba(18,34,29,0.86)"]{background:linear-gradient(180deg,rgba(18,34,29,0.55) 0%,rgba(18,34,29,0.85) 55%) !important}
 }
+
+/* Booking form fields always fit their column */
+#lb-step3 input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), #lb-step3 select{width:100%;min-width:0}
+#lb-step3 div{min-width:0}

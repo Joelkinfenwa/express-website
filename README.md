@@ -68,3 +68,19 @@ npm run preview
 ```
 
 You need a filled-in `site.config.json` first.
+
+## Live booking (Doorstep)
+
+The /book page books home visits straight into Doorstep through the site's own server functions (`api/doorstep/*`, shared code in `lib/doorstep.js`). Credentials never reach the browser.
+
+Set these in Vercel under Settings, then Environment Variables:
+
+| Name | Value |
+|---|---|
+| `DOORSTEP_CLIENT_ID` | Client ID for the website's own partner account in Doorstep |
+| `DOORSTEP_CLIENT_SECRET` | Its client secret |
+| `DOORSTEP_API_BASE` | Leave unset to use the **sandbox**. For live bookings set `https://api.bookings.expresspathology.com.au` and use production credentials |
+
+Without the two credentials, /book shows the "request a home visit" form instead. In sandbox mode the page shows a notice that no nurse will be sent.
+
+Booking flow: postcode, then coverage check, then 14 days of live slots shown in the patient's local time, then patient details. The site creates or updates the patient, creates the booking with an idempotency key, and attaches the referral if one was uploaded. If a slot is taken in the meantime, the patient is asked to pick another time.

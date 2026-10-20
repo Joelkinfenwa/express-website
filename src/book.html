@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Request a home visit | Express Pathology</title>
+<title>Book a home visit | Express Pathology</title>
 <meta name="description" content="Request a registered nurse to collect your blood test at home or at work. Metro and regional home visits across Australia.">
 <link rel="canonical" href="{{siteUrl}}/book">
 <meta property="og:type" content="website">
@@ -32,7 +32,79 @@
 </nav>
 </header>
 <main id="main">
-<section style="max-width: 1320px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-wrap: wrap; gap: 56px">
+<section id="live-mode" hidden style="max-width: 1320px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start">
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Book a home visit</span>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 68px); line-height: 1.02; letter-spacing: -0.035em">Choose an exact time for your nurse.</h1>
+<p style="margin: 0; font-size: 19px; color: #4B5650">Every time shown is one we can keep. A registered nurse comes to your home or workplace and delivers your samples to a NATA-accredited laboratory.</p>
+<div id="lb-sandbox" hidden style="padding: 12px 16px; border-radius: 14px; background: #FBEDE4; font-size: 14px; font-weight: 600">Test mode: bookings go to the sandbox booking system and no nurse is sent.</div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #1C2420">
+<div style="display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid #DCE0D8"><span style="color: #66706A">Location</span><span style="font-weight: 600; text-align: right" id="lb-sum-loc">Not selected</span></div>
+<div style="display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid #DCE0D8"><span style="color: #66706A">Time</span><span style="font-weight: 600; text-align: right" id="lb-sum-time">Not selected</span></div>
+<div style="display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid #DCE0D8"><span style="color: #66706A">Home visit</span><span style="font-weight: 600; text-align: right">{{metroFee}} metro · {{regionalFee}} regional</span></div>
+</div>
+<p style="margin: 0; font-size: 15px; color: #4B5650">{{cancellationPolicy}}</p>
+<p style="margin: 0; font-size: 15px; color: #4B5650">Prefer to talk? Call <a href="tel:{{phoneTel}}" style="font-weight: 700; text-decoration: underline">{{phone}}</a>.</p>
+</div>
+
+<div style="flex: 1 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: 36px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+
+<!-- Step 1 -->
+<div id="lb-step1" style="display: flex; flex-direction: column; gap: 14px">
+<span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">1. Where is the visit?</span>
+<form id="lb-pc-form" style="display: flex; flex-wrap: wrap; gap: 10px">
+<label for="lb-postcode" class="sr-only">Postcode</label>
+<input id="lb-postcode" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="Postcode, e.g. 2000" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; flex: 1 1 200px; border-radius: 999px; padding: 0 20px; min-height: 54px; font-size: 17px">
+<button type="submit" style="min-height: 54px; padding: 0 26px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; cursor: pointer">See available times</button>
+</form>
+<p class="form-status" id="lb-pc-status" role="status" aria-live="polite"></p>
+</div>
+
+<!-- Step 2 -->
+<div id="lb-step2" hidden style="display: flex; flex-direction: column; gap: 16px; border-top: 1px solid #DCE0D8; padding-top: 22px">
+<span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">2. Choose a time</span>
+<span style="font-size: 14px; color: #66706A" id="lb-tz"></span>
+<div id="lb-days" role="tablist" aria-label="Day" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px"></div>
+<div id="lb-slots" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px"></div>
+<p class="form-status" id="lb-slot-status" role="status" aria-live="polite"></p>
+</div>
+
+<!-- Step 3 -->
+<form id="lb-step3" hidden novalidate style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; border-top: 1px solid #DCE0D8; padding-top: 22px">
+<span style="grid-column: 1 / -1; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">3. Your details</span>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-first" style="font-size: 14px; font-weight: 700">First name</label><input id="lb-first" name="firstName" type="text" required autocomplete="given-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-last" style="font-size: 14px; font-weight: 700">Last name</label><input id="lb-last" name="lastName" type="text" required autocomplete="family-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-email" style="font-size: 14px; font-weight: 700">Email</label><input id="lb-email" name="email" type="email" required autocomplete="email" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-mobile" style="font-size: 14px; font-weight: 700">Mobile</label><input id="lb-mobile" name="mobile" type="tel" required autocomplete="tel" placeholder="04xx xxx xxx" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-dob" style="font-size: 14px; font-weight: 700">Date of birth (optional)</label><input id="lb-dob" name="dateOfBirth" type="date" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="lb-line1" style="font-size: 14px; font-weight: 700">Street address for the visit</label><input id="lb-line1" name="line1" type="text" required autocomplete="address-line1" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="lb-suburb" style="font-size: 14px; font-weight: 700">Suburb</label><input id="lb-suburb" name="suburb" type="text" required autocomplete="address-level2" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
+<div style="display: flex; gap: 12px"><div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label for="lb-state" style="font-size: 14px; font-weight: 700">State</label><select id="lb-state" name="state" required style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; padding: 0 10px"><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select></div><div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label for="lb-pc2" style="font-size: 14px; font-weight: 700">Postcode</label><input id="lb-pc2" name="postcode" readonly style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; background: #F7F4EF"></div></div>
+<fieldset style="grid-column: 1 / -1; margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: center"><legend style="font-size: 14px; font-weight: 700; margin-bottom: 8px">Do you have a request form from your doctor?</legend><label style="display: flex; gap: 8px; align-items: center; min-height: 44px"><input type="radio" name="hasReferral" value="yes" checked style="width: 20px; height: 20px; accent-color: #17302A">Yes</label><label style="display: flex; gap: 8px; align-items: center; min-height: 44px"><input type="radio" name="hasReferral" value="no" style="width: 20px; height: 20px; accent-color: #17302A">No</label></fieldset>
+<div id="lb-upload" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 18px; border: 2px dashed #D3D8D0"><label for="lb-file" style="font-size: 14px; font-weight: 700">Upload your request form (optional, PDF, JPG or PNG, under 3.5 MB)</label><input id="lb-file" type="file" accept="application/pdf,image/jpeg,image/png" style="font: inherit"><span style="font-size: 13px; color: #66706A">Your nurse uses it to prepare the correct tubes. You can also hand it to them on the day.</span></div>
+<label style="grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; min-height: 44px"><input type="checkbox" name="fastingRequired" style="width: 20px; height: 20px; accent-color: #17302A">My test requires fasting</label>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="lb-notes" style="font-size: 14px; font-weight: 700">Access notes for your nurse (optional)</label><textarea id="lb-notes" name="notes" rows="3" placeholder="Unit number, parking, gate code, mobility needs" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
+<label style="grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start"><input type="checkbox" name="consent" required style="width: 20px; height: 20px; margin-top: 2px; accent-color: #17302A"><span style="font-size: 15px; color: #4B5650">I agree to the <a href="{{shopUrl}}/policies/terms-of-service" style="text-decoration: underline">terms of service</a> and <a href="{{shopUrl}}/policies/privacy-policy" style="text-decoration: underline">privacy policy</a>, and consent to my details being shared with the laboratory and my requesting doctor.</span></label>
+<div class="sr-only" aria-hidden="true"><label>Leave this empty<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></div>
+<p class="form-status" id="lb-book-status" role="status" aria-live="polite"></p>
+<button type="submit" id="lb-submit" style="grid-column: 1 / -1; min-height: 56px; border: 0; border-radius: 999px; background: #F2A981; color: #1C2420; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer">Confirm booking</button>
+</form>
+
+<!-- Step 4 -->
+<div id="lb-done" hidden style="display: flex; flex-direction: column; gap: 18px">
+<span aria-hidden="true" style="width: 60px; height: 60px; border-radius: 50%; background: #17302A; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2A981" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 36px; letter-spacing: -0.03em" tabindex="-1" id="lb-done-title">Your nurse is booked.</h2>
+<p style="margin: 0; font-size: 18px; color: #4B5650" id="lb-done-line"></p>
+<div style="display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid #1C2420; border-bottom: 1px solid #DCE0D8"><span style="color: #66706A">Booking reference</span><span style="font-weight: 700" id="lb-done-ref"></span></div>
+<p style="margin: 0; color: #4B5650" id="lb-done-referral"></p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px"><a href="/prepare" class="btn btn-dark">How to prepare</a><a href="/tests" class="btn" style="border: 1px solid #1C2420">Need a test? Order one</a></div>
+</div>
+
+</div>
+</section>
+
+<section id="request-mode" style="max-width: 1320px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-wrap: wrap; gap: 56px">
 <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Home visit</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 68px); line-height: 1.02; letter-spacing: -0.035em">Request a nurse to your door.</h1>
@@ -83,5 +155,6 @@
 
 </div>
 <script src="/assets/site.js" defer></script>
+<script src="/assets/booking.js" defer></script>
 </body>
 </html>
