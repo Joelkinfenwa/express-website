@@ -30,7 +30,7 @@
   "builderExtra": [
     "cortisol"
   ],
-  "builderBaseHandle": "",
+  "builderBaseHandle": "build-your-own-test",
   "builderHomeVisitHandle": "home-collection",
   "panelMinPrice": 99,
   "featured": [

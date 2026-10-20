@@ -103,7 +103,9 @@
     $('bt-count').textContent = sel.length === 1 ? '1 test' : sel.length + ' tests';
     $('bt-subtotal').textContent = fmt.format(subtotal);
     $('bt-collection').textContent = home ? (homeVisitPrice != null ? fmt.format(homeVisitPrice) : 'Home visit') : 'Included';
-    var basePrice = cat.base ? cat.base.price : 0;
+    var basePrice = cat.base && sel.length ? cat.base.price : 0;
+    $('bt-base-row').hidden = !cat.base;
+    if (cat.base) $('bt-base').textContent = fmt.format(cat.base.price);
     $('bt-total').textContent = home && homeVisitPrice != null ? fmt.format(subtotal + basePrice + homeVisitPrice)
       : home ? fmt.format(subtotal + basePrice) + ' + visit' : fmt.format(subtotal + basePrice);
     $('bt-nudge').style.display = subtotal >= 200 ? 'block' : 'none';
