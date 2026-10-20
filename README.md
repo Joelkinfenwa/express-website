@@ -28,15 +28,10 @@ The Express Pathology website: patient pages, partner pages and a build-your-own
 | `cancellationPolicy` | One or two sentences | Shown in pricing and in the FAQ |
 | `phone`, `phoneTel`, `email` | | Contact page, footer and structured data |
 | `supportHours`, `abn` | | Optional. Hidden from the site when empty |
-| `shopifyStoreDomain` | `express-pathology.myshopify.com` | The myshopify.com address |
-| `shopifyStorefrontToken` | | Public Storefront API token from the Headless channel. This token is designed to be used on a public website |
-| `shopifyTestsCollection` | `individual-tests` | Handle of the collection holding the individual tests |
-| `shopifyHomeVisitVariantId` | `gid://shopify/ProductVariant/…` | Optional. A home visit fee product, added to the cart when the patient chooses a nurse |
 | `gaMeasurementId`, `metaPixelId` | | Optional analytics |
 
 Each value can also be set in Vercel as an environment variable named `SITE_` plus the key in capitals with underscores, for example `SITE_METRO_FEE`.
 
-**Test categories:** the builder sorts tests by keywords in the product title. To place a test in a category yourself, add a Shopify tag `category:hormones` (or `general`, `heart`, `thyroid`, `nutrients`, `sexual`, `mens`).
 
 ## 2. Forms
 
@@ -84,3 +79,20 @@ Set these in Vercel under Settings, then Environment Variables:
 Without the two credentials, /book shows the "request a home visit" form instead. In sandbox mode the page shows a notice that no nurse will be sent.
 
 Booking flow: postcode, then coverage check, then 14 days of live slots shown in the patient's local time, then patient details. The site creates or updates the patient, creates the booking with an idempotency key, and attaches the referral if one was uploaded. If a slot is taken in the meantime, the patient is asked to pick another time.
+
+## Tests, prices and test pages (Shopify)
+
+Every build reads the store's public product feed (`expresspathology.myshopify.com/products.json`), so names, prices and what each test includes always match Shopify. No token is needed. If the store can't be reached, the build uses `data/products.snapshot.json`.
+
+- **Which products appear:** `data/catalog.config.json`. Products tagged "Shop All" are public, minus the `exclude` list (partner panels, duplicates, drafts). Products tagged "hidden" are the build-your-own add-ons.
+- **Each public product** gets its own page at `/tests/<handle>`, with what's included, walk-in and home visit options, and structured data for Google.
+- **Checkout** uses Shopify cart links (`/cart/<variant>:1`), so Afterpay, Order Printer Pro and order emails keep working unchanged.
+- **Corrections** to Shopify content for the website go in `data/product-overrides.json`.
+- To change a price or what a test includes, edit it in Shopify and redeploy in Vercel (or wait for the next deploy).
+
+## Home visit request form (until live Doorstep booking is connected)
+
+`/book` shows a request form. The patient uploads their doctor's request form (photos are compressed in the browser) and it is emailed to you as an attachment.
+
+- **Email delivery:** set `RESEND_API_KEY`, `ENQUIRY_TO` (for example express@expresspathology.com.au) and `ENQUIRY_FROM` (an address on a domain verified in Resend) in Vercel.
+- **Postcode check:** add postcodes to `data/coverage.json` (`metro` and `regional` lists). The form then shows whether home visits are available, and the metro or regional fee.

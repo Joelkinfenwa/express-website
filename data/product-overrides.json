@@ -1,0 +1,6 @@
+{
+  "_readme": "Corrections to Shopify product content for the website. Keys are product handles. Supported fields: title, markers (list), categories (list), blurb.",
+  "hep-b-antigen": { "markers": ["Hepatitis B antigen"] },
+  "hba1c": { "markers": ["HbA1c"] },
+  "elite-health-assessment": { "markers": ["Advanced longevity panel of 14+ biomarkers"], "categories": ["longevity", "general"] }
+}

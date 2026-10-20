@@ -1,0 +1,5 @@
+{
+  "_readme": "Postcodes where home visits are offered. Fill from the coverage list (metro = within 40 km of a nurse base; regional = manually serviceable). The request form uses this to show coverage and the fee.",
+  "metro": [],
+  "regional": []
+}

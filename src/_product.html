@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{@title}} blood test | Express Pathology</title>
+<meta name="description" content="{{@metaDescription}}">
+<link rel="canonical" href="{{siteUrl}}/tests/{{@handle}}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{@title}} | Express Pathology">
+<meta property="og:description" content="{{@metaDescription}}">
+<meta property="og:image" content="{{siteUrl}}/assets/img/og.jpg">
+<meta property="og:url" content="{{siteUrl}}/tests/{{@handle}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17302A">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{{@jsonld}}</script>
+<!--analytics-->
+</head>
+<body>
+<div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55">
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<nav aria-label="Main" class="nav">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<div class="nav-links" id="nav-links"><a href="/#how">At-home collection</a><a href="/tests" aria-current="page">Blood tests</a><a href="/partners">Partners</a><a href="/about">About</a><a href="/prepare">Help</a></div>
+<div class="nav-actions"><a href="{{shopUrl}}/account" class="quiet">Sign in</a><a href="{{bookingUrl}}" class="btn btn-dark">Book a nurse</a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div>
+</nav>
+</header>
+<main id="main">
+<nav aria-label="Breadcrumb" style="max-width: 1320px; margin: 0 auto; padding: 8px 24px 20px; font-size: 14px; color: #5A645E">
+<a href="/" style="color: #5A645E">Home</a> / <a href="/tests" style="color: #5A645E">Blood tests</a> / <span style="color: #1C2420; font-weight: 600">{{@title}}</span>
+</nav>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 72px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+<span style="align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #E8EDE6; font-size: 13px; font-weight: 700">{{@kindLabel}} · {{@categoryLabel}}</span>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 72px); line-height: 1.02; letter-spacing: -0.035em">{{@title}}</h1>
+<p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 640px">{{@lead}}</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: 1px solid #1C2420; max-width: 720px">
+<div style="padding: 18px 18px 18px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Included</span><span style="font-weight: 700; font-size: 18px">{{@countLabel}}</span></div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Referral</span><span style="font-weight: 700; font-size: 18px">Not needed</span></div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Results</span><span style="font-weight: 700; font-size: 18px">Doctor-reviewed</span></div>
+</div>
+</div>
+
+<aside aria-label="Order this test" style="flex: 1 1 360px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px">
+<div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 48px; letter-spacing: -0.03em" id="pp-price">{{@priceLabel}}</span><span style="color: #5A645E">includes doctor review</span></div>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
+<legend style="font-weight: 700; margin-bottom: 10px">How would you like to be tested?</legend>
+<!--@CENTRE_OPTION-->
+<!--@HOME_OPTION-->
+</fieldset>
+<a id="pp-buy" href="{{@buyUrl}}" rel="nofollow" style="min-height: 56px; border-radius: 999px; background: #17302A; color: #F7F4EF; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">Order this test</a>
+<span style="font-size: 14px; color: #5A645E; text-align: center">Secure checkout · Afterpay available</span>
+</aside>
+</section>
+
+<section style="background: #E8EDE6">
+<div style="max-width: 1320px; margin: 0 auto; padding: 80px 24px; display: flex; flex-wrap: wrap; gap: 48px">
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">What is tested</span>
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.04; letter-spacing: -0.035em">{{@includedHeading}}</h2>
+<p style="margin: 0; color: #4B5650">Each result is reported with its reference range in a doctor-reviewed report.</p>
+</div>
+<ul style="flex: 2 1 560px; min-width: 0; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); border-top: 1px solid #1C2420">
+<!--@MARKERS-->
+</ul>
+</div>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 32px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.04; letter-spacing: -0.035em">How it works</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); border-top: 1px solid #1C2420">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px 24px 24px 0"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">01</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Order online</h3><p style="margin: 0; color: #4B5650">Your request form is issued with your order.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">02</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Get collected</h3><p style="margin: 0; color: #4B5650">Walk in to a partner centre, or a registered nurse comes to you.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">03</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Doctor review</h3><p style="margin: 0; color: #4B5650">An Australian doctor reviews your results.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">04</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Your report</h3><p style="margin: 0; color: #4B5650">Every result and reference range, sent to you by email.</p></div>
+</div>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 88px; display: flex; flex-wrap: wrap; gap: 48px">
+<h2 style="flex: 1 1 320px; margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.04; letter-spacing: -0.035em">Questions</h2>
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; border-top: 1px solid #1C2420">
+<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Do I need a referral?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">No. We issue the pathology request form with your order.</p></details>
+<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">How should I prepare?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">Drink water as normal and wear a top with sleeves that roll up easily. Some tests require fasting. If you are unsure, read our <a href="/prepare" style="text-decoration: underline">preparation guide</a> or contact us before your collection.</p></details>
+<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Is this covered by Medicare?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">This is a private test ordered without a GP referral, so Medicare rebates do not apply.</p></details>
+<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Can I share my results with my GP?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">Yes. Your report is yours to forward to any doctor.</p></details>
+</div>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 96px; display: flex; flex-direction: column; gap: 24px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -0.035em">Related tests</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+<!--@RELATED-->
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<div class="footer-inner">
+<div class="footer-cols">
+<div class="footer-col"><span class="footer-brand">express<em>.</em></span><span>Mobile blood collection and pathology infrastructure across Australia.</span></div>
+<div class="footer-col"><strong>Patients</strong><a href="{{bookingUrl}}">Book a home visit</a><a href="/tests">Blood tests</a><a href="/prepare">Preparing for your visit</a><a href="{{shopUrl}}/pages/collection-centres">Collection centres</a></div>
+<div class="footer-col"><strong>Partners</strong><a href="/partners">Partner with Express</a><a href="/telehealth">Telehealth</a><a href="/mens-health-clinics">Men's health</a><a href="/aged-care">Aged care</a><a href="/partners#integrate">Integration</a><a href="/partners#enquire">Partner enquiries</a></div>
+<div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/careers">Nurse careers</a><a href="/contact">Contact</a><a href="{{shopUrl}}/policies/privacy-policy">Privacy policy</a><a href="{{shopUrl}}/policies/terms-of-service">Terms of service</a></div>
+</div>
+<div class="footer-legal">
+<p>Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
+<p>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span></p>
+</div>
+</div>
+</footer>
+
+
+</div>
+<script src="/assets/site.js" defer></script>
+<script>(function(){var b=document.getElementById("pp-buy"),p=document.getElementById("pp-price");document.querySelectorAll("input[name=pp-mode]").forEach(function(r){r.addEventListener("change",function(){if(r.checked){b.href=r.getAttribute("data-href");p.textContent=r.getAttribute("data-price");}});});})();</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "_readme": "Controls which Shopify products appear on the site. Products are read from the store's public product feed at build time (data/products.snapshot.json is the fallback). Public = tagged 'Shop All' or listed in includeExtra, minus anything in exclude. Builder add-ons = tagged 'hidden' or listed in builderExtra.",
+  "store": "expresspathology.myshopify.com",
+  "includeExtra": [
+    "elite-health-assessment"
+  ],
+  "exclude": [
+    "lighthouse-wbh-panel",
+    "lighthouse-wbh-panel-1",
+    "primal-zone-renewal-panel",
+    "optimal-health-clinic",
+    "lsg-client-referrals",
+    "general-health-check-free",
+    "ultimate-performance-subscription-test",
+    "trial-3-tier-product",
+    "male-hormonal-upgrade",
+    "own-referral-home-visit",
+    "mobile-blood-collection-use-your-doctor-s-request",
+    "home-collection",
+    "home-visit-essential",
+    "build-your-own-test",
+    "testosterone-check",
+    "longevity-deep-dive",
+    "performance-profile",
+    "hormone-insight",
+    "the-complete-panel",
+    "the-essential-panel",
+    "complete-health-screen"
+  ],
+  "builderExtra": [
+    "cortisol"
+  ],
+  "builderBaseHandle": "",
+  "builderHomeVisitHandle": "home-collection",
+  "panelMinPrice": 99,
+  "featured": [
+    "ultimate-performance-screen",
+    "male-hormonal-test",
+    "essential-womens-health-check",
+    "core-health-check"
+  ]
+}

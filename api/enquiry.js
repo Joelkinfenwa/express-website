@@ -1,6 +1,6 @@
-// Vercel serverless function: receives partner and contact form submissions.
-// Delivery: HubSpot Forms (if HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID are set),
-// otherwise email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM).
+// Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
+// Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
+// request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
 const FIELDS = ['kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
@@ -31,16 +31,29 @@ async function toHubSpot(d) {
   if (!r.ok) throw new Error(`HubSpot ${r.status}`);
 }
 
-async function toEmail(d) {
-  const subject = d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? `Home visit request: ${d.suburb || ''} ${d.postcode || ''}`.trim() : `Website enquiry: ${d.topic || 'General'}`;
+const ATTACH_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/heic'];
+function attachment(body) {
+  const a = body && body.attachment;
+  if (!a || !a.content) return null;
+  const type = String(a.contentType || '');
+  if (!ATTACH_TYPES.includes(type)) return { error: 'Please upload a PDF, JPG or PNG' };
+  if (String(a.content).length > 4.2 * 1024 * 1024) return { error: 'File too large' };
+  const name = String(a.fileName || 'request-form').replace(/[^\w.\- ]+/g, '_').slice(0, 100);
+  return { filename: name, content: String(a.content) };
+}
+
+async function toEmail(d, att) {
+  const subject = d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request: ' + [d.suburb, d.postcode].filter(Boolean).join(' ') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((s) => s.trim()), reply_to: d.email, subject, html: `<table>${rows}</table>` })
+    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((s) => s.trim()), reply_to: d.email, subject, html: `<table>${rows}</table>${att ? '<p>Request form attached.</p>' : ''}`, ...(att ? { attachments: [att] } : {}) })
   });
   if (!r.ok) throw new Error(`Resend ${r.status}`);
 }
+
+export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method not allowed' }); }
@@ -50,10 +63,16 @@ export default async function handler(req, res) {
   if (body.company_website) return res.status(200).json({ ok: true }); // honeypot: silently accept bots
   const d = clean(body);
   if (!d.name || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) return res.status(400).json({ error: 'Name and a valid email are required' });
+  const att = attachment(body);
+  if (att && att.error) return res.status(400).json({ error: att.error });
+  const emailReady = process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM;
+  const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
   try {
-    if (process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID) await toHubSpot(d);
-    else if (process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM) await toEmail(d);
-    else throw new Error('No delivery method configured');
+    // Email first: it is the only route that carries an uploaded request form.
+    if (emailReady) await toEmail(d, att);
+    else if (hubspotReady && !att) await toHubSpot(d);
+    else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
+    if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('enquiry delivery failed:', err.message);

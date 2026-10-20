@@ -1,5 +1,5 @@
 {
-  "_readme": "Every value without a default must be filled in before the site will build. Keys starting with _ are notes. Optional: abn, supportHours, shopifyHomeVisitVariantId, gaMeasurementId, metaPixelId (elements marked data-if are hidden when their value is empty).",
+  "_readme": "Every value without a default must be filled in before the site will build. Keys starting with _ are notes. Optional: abn, supportHours, gaMeasurementId, metaPixelId (elements marked data-if are hidden when their value is empty). Tests and prices come from Shopify automatically (see data/catalog.config.json).",
   "siteUrl": "https://expresspathology.com.au",
   "shopUrl": "https://shop.expresspathology.com.au",
   "bookingUrl": "/book",
@@ -12,11 +12,6 @@
   "email": "express@expresspathology.com.au",
   "supportHours": "",
   "abn": "",
-  "shopifyStoreDomain": "",
-  "shopifyStorefrontToken": "",
-  "shopifyApiVersion": "2026-01",
-  "shopifyTestsCollection": "",
-  "shopifyHomeVisitVariantId": "",
   "gaMeasurementId": "",
   "metaPixelId": ""
 }
