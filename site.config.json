@@ -6,6 +6,7 @@
   "nurseApplyUrl": "https://bookings.expresspathology.com.au/admin/nurses/new",
   "metroFee": "$129",
   "regionalFee": "$149",
+  "homeVisitAddOnFee": "$75",
   "cancellationPolicy": "You can reschedule or cancel free of charge up to 24 hours before your appointment. Changes made within 24 hours of the appointment, or a missed visit, may incur the home visit fee.",
   "phone": "02 9545 2940",
   "phoneTel": "+61295452940",
