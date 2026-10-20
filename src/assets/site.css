@@ -2,7 +2,7 @@
    this file holds the base, the shared header and footer, and interactive UI. */
 :root{
   --forest:#17302A; --ink:#1C2420; --ivory:#F7F4EF; --sage:#E8EDE6; --peach:#F2A981;
-  --clay:#A4502E; --muted:#4B5650; --soft:#66706A; --line:#DCE0D8; --line2:#D3D8D0;
+  --clay:#A4502E; --muted:#4B5650; --soft:#5A645E; --line:#DCE0D8; --line2:#D3D8D0;
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}

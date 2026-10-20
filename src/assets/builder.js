@@ -103,7 +103,6 @@
       var on = !!state.picked[t.id];
       grid.appendChild(el('button', {
         type: 'button', class: 'bt-item', 'aria-pressed': String(on),
-        'aria-label': (on ? 'Remove ' : 'Add ') + t.title + ', ' + fmt.format(t.price),
         onclick: function () { toggle(t.id); }
       }, [
         el('span', { class: 'bt-box', 'aria-hidden': 'true' }),
