@@ -1,0 +1,17 @@
+{
+  "_readme": "Nurse base locations. Coverage = every postcode within radiusKm of a base. Edit this list, then run: python3 scripts/coverage.py",
+  "radiusKm": 25,
+  "bases": [
+    ["Penrith", "2749"], ["Carlingford", "2118"], ["Dee Why", "2099"], ["Padstow", "2211"], ["Ryde", "2112"],
+    ["Burraneer", "2230"], ["Greenhills Beach", "2230"], ["North Ryde", "2113"], ["Cobbity", "2570"], ["Frenchs Forest", "2086"],
+    ["Bathurst", "2795"], ["Waverly", "2337"], ["Ocean Shores", "2483"], ["Nords Wharf", "2281"],
+    ["Farrer", "2607"],
+    ["Eltham", "3095"], ["Montrose", "3765"], ["Port Melbourne", "3207"], ["Glenroy", "3046"], ["Frankston", "3199"],
+    ["Armstrong Creek", "3217"], ["Mildura", "3500"], ["Coburg North", "3058"], ["Sunbury", "3429"],
+    ["St Agnes", "5097"],
+    ["Baldivis", "6171"], ["Hocking", "6065"],
+    ["Rochedale South", "4123"], ["Mulambin", "4703"], ["Mudgeeraba", "4213"], ["Ferny Hills", "4055"],
+    ["Curramundi", "4551"], ["Wynnum", "4178"], ["Kippa-Ring", "4021"],
+    ["Nightcliff", "0810"]
+  ]
+}
