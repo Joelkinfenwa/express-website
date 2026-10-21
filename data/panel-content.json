@@ -1,0 +1,153 @@
+{
+  "_readme": "Product page copy by Shopify handle. lead = the sentence under the title. whoFor = up to three 'Suited to' lines. Edit freely; the build picks changes up.",
+  "core-health-check": {
+    "lead": "A foundational check of your liver, kidneys, blood sugar and inflammation, at an entry-level price.",
+    "whoFor": [
+      "Anyone wanting a baseline picture of their general health",
+      "People who have not had a routine blood test in a while",
+      "A starting point before choosing a more detailed panel"
+    ]
+  },
+  "core-hormone-check": {
+    "lead": "Seven key sex and stress hormones in one collection, suited to both men and women.",
+    "whoFor": [
+      "People noticing changes in energy, mood, libido or cycles",
+      "Anyone wanting a baseline of their hormone levels",
+      "Tracking hormone levels over time"
+    ]
+  },
+  "thyroid-antigen": {
+    "lead": "Three thyroid antibody tests that look for an autoimmune cause behind thyroid changes.",
+    "whoFor": [
+      "People with a family history of thyroid conditions",
+      "Anyone whose TSH result has come back outside the reference range",
+      "Those wanting to understand the cause of a known thyroid issue"
+    ]
+  },
+  "thyroid-function-tests-1": {
+    "lead": "TSH, T4, T3 and thyroid antibodies, the standard check of how your thyroid is working.",
+    "whoFor": [
+      "People experiencing tiredness or unexplained weight change",
+      "Anyone with a family history of thyroid conditions",
+      "Monitoring thyroid levels over time"
+    ]
+  },
+  "extensive-thyroid-panel": {
+    "lead": "A complete thyroid picture: hormone levels plus the antibodies that can point to an autoimmune cause.",
+    "whoFor": [
+      "People experiencing tiredness or unexplained weight change",
+      "Anyone with a family history of thyroid conditions",
+      "Those wanting hormones and antibodies checked together"
+    ]
+  },
+  "vitamin-d-b12-test": {
+    "lead": "Vitamin D and B12, two common deficiencies, checked in a single collection.",
+    "whoFor": [
+      "People who spend little time in the sun",
+      "Vegetarians, vegans and anyone eating little animal produce",
+      "Anyone feeling persistently tired or low on energy"
+    ]
+  },
+  "essential-mens-panel": {
+    "lead": "A men's health baseline covering heart, liver, kidney, blood and prostate markers, including PSA.",
+    "whoFor": [
+      "Men wanting an annual health check without a GP visit",
+      "Men who want PSA included in a routine check",
+      "A baseline before a new training or nutrition program"
+    ]
+  },
+  "sti-screen": {
+    "lead": "A discreet screen for chlamydia, gonorrhoea, herpes, syphilis and trichomonas from one collection.",
+    "whoFor": [
+      "After a new sexual partner",
+      "Routine sexual health checks",
+      "Anyone wanting results privately, without a GP visit"
+    ]
+  },
+  "womens-hormonal-package": {
+    "lead": "Female hormones alongside liver, kidney, cholesterol and blood sugar markers in one collection.",
+    "whoFor": [
+      "Women wanting a hormone and general health check together",
+      "Those noticing changes in cycles, energy or mood",
+      "A baseline before or during perimenopause"
+    ]
+  },
+  "extended-general-health-check": {
+    "lead": "A broad general health check that adds thyroid, iron studies and a full blood count to the core markers.",
+    "whoFor": [
+      "Anyone wanting a thorough annual check",
+      "People feeling tired without a clear reason",
+      "Those wanting more than the Core Health Check covers"
+    ]
+  },
+  "optimisation-panel": {
+    "lead": "Testosterone, oestradiol, prolactin and thyroid hormones, alongside a comprehensive metabolic panel.",
+    "whoFor": [
+      "Men tracking testosterone and related hormones",
+      "People on a training or body composition program",
+      "Monitoring hormone levels over time"
+    ]
+  },
+  "male-hormonal-test": {
+    "lead": "A detailed male hormone profile, including free and total testosterone, SHBG, IGF-1, LH and FSH, plus cholesterol and biochemistry.",
+    "whoFor": [
+      "Men noticing changes in energy, libido or recovery",
+      "Men monitoring hormone levels over time",
+      "A baseline before a performance or training program"
+    ]
+  },
+  "essential-womens-health-check": {
+    "lead": "A comprehensive women's check covering thyroid, iron, vitamin D, B12, blood count and core organ markers.",
+    "whoFor": [
+      "Women wanting a thorough annual check",
+      "Anyone feeling tired, run down or low on energy",
+      "Women wanting iron and vitamin levels checked with general health"
+    ]
+  },
+  "ultimate-performance-screen": {
+    "lead": "A full performance profile across hormones, thyroid, metabolism and blood, built for people who train.",
+    "whoFor": [
+      "Athletes and people who train regularly",
+      "Anyone focused on energy, recovery and body composition",
+      "Hormones and metabolic health in a single collection"
+    ]
+  },
+  "vitamin-wellness-panel": {
+    "lead": "Six key vitamins, A, B6, B9, B12, C and D, checked in a single collection.",
+    "whoFor": [
+      "People with restricted or plant-based diets",
+      "Anyone feeling run down or low on energy",
+      "Checking whether supplements are needed"
+    ]
+  },
+  "complete-wellness-panel": {
+    "lead": "Our most complete panel: the full performance profile plus iron studies, vitamin B12 and vitamin D.",
+    "whoFor": [
+      "Anyone wanting the most thorough check we offer",
+      "People who train and want hormones, metabolism and nutrients covered",
+      "A detailed annual baseline to compare year on year"
+    ]
+  },
+  "kidney-function-test": {
+    "lead": "Creatinine, urea, eGFR and electrolytes, showing how well your kidneys filter waste and balance fluids."
+  },
+  "lipid-profile": {
+    "lead": "Cholesterol, triglycerides, HDL and LDL, the core markers of heart health."
+  },
+  "lft-s-liver-function-test": {
+    "lead": "The enzymes and proteins that show how well your liver is working."
+  },
+  "full-blood-count": {
+    "lead": "Red cells, white cells and platelets, a screen for anaemia, infection and other blood conditions."
+  },
+  "general-biochemistry": {
+    "lead": "Uric acid, calcium and phosphate, markers of mineral balance and metabolic health."
+  },
+  "iron-studies": {
+    "lead": "Ferritin, iron and transferrin, showing your iron stores and screening for deficiency or overload."
+  },
+  "elite-health-assessment": {
+    "count": "14+",
+    "includedHeading": "14+ biomarkers in one collection."
+  }
+}

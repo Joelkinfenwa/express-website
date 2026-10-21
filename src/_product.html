@@ -37,19 +37,19 @@
 <a href="/" style="color: #5A645E">Home</a> / <a href="/tests" style="color: #5A645E">Blood tests</a> / <span style="color: #1C2420; font-weight: 600">{{@title}}</span>
 </nav>
 
-<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 72px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
-<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
 <span style="align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #E8EDE6; font-size: 13px; font-weight: 700">{{@kindLabel}} · {{@categoryLabel}}</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 72px); line-height: 1.02; letter-spacing: -0.035em">{{@title}}</h1>
 <p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 640px">{{@lead}}</p>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: 1px solid #1C2420; max-width: 720px">
-<div style="padding: 18px 18px 18px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Included</span><span style="font-weight: 700; font-size: 18px">{{@countLabel}}</span></div>
-<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Referral</span><span style="font-weight: 700; font-size: 18px">Not needed</span></div>
-<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Results</span><span style="font-weight: 700; font-size: 18px">Doctor-reviewed</span></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-top: 1px solid #1C2420; max-width: 760px">
+<!--@FACTS-->
 </div>
+<!--@SUITED-->
+<!--@GLANCE-->
 </div>
 
-<aside aria-label="Order this test" style="flex: 1 1 360px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px">
+<aside id="pp-box" aria-label="Order this test" style="flex: 1 1 360px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px">
 <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 48px; letter-spacing: -0.03em" id="pp-price">{{@priceLabel}}</span><span style="color: #5A645E">includes doctor review</span></div>
 <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
 <legend style="font-weight: 700; margin-bottom: 10px">How would you like to be tested?</legend>
@@ -57,28 +57,37 @@
 <!--@HOME_OPTION-->
 </fieldset>
 <a id="pp-buy" href="{{@buyUrl}}" rel="nofollow" style="min-height: 56px; border-radius: 999px; background: #17302A; color: #F7F4EF; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">Order this test</a>
-<span style="font-size: 14px; color: #5A645E; text-align: center">Secure checkout · Afterpay available</span>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #4B5650">
+<li style="display: flex; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17302A" stroke-width="2.4" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Request form issued with your order, no GP visit</li>
+<li style="display: flex; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17302A" stroke-width="2.4" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Results reviewed by an Australian doctor</li>
+<li style="display: flex; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17302A" stroke-width="2.4" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Secure checkout · Afterpay available</li>
+</ul>
+<!--@UPGRADE-->
 </aside>
 </section>
 
 <section style="background: #E8EDE6">
-<div style="max-width: 1320px; margin: 0 auto; padding: 80px 24px; display: flex; flex-wrap: wrap; gap: 48px">
-<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 14px; max-width: 640px">
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">What is tested</span>
 <h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.04; letter-spacing: -0.035em">{{@includedHeading}}</h2>
-<p style="margin: 0; color: #4B5650">Each result is reported with its reference range in a doctor-reviewed report.</p>
 </div>
-<ul style="flex: 2 1 560px; min-width: 0; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); border-top: 1px solid #1C2420">
+<p style="margin: 0; color: #4B5650; max-width: 420px">Every result comes with its reference range in a doctor-reviewed report.</p>
+</div>
+<div class="pp-groups">
 <!--@MARKERS-->
-</ul>
+</div>
 </div>
 </section>
+
+<!--@PREP-->
 
 <section style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 32px">
 <h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.04; letter-spacing: -0.035em">How it works</h2>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); border-top: 1px solid #1C2420">
-<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px 24px 24px 0"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">01</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Order online</h3><p style="margin: 0; color: #4B5650">Your request form is issued with your order.</p></div>
-<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">02</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Get collected</h3><p style="margin: 0; color: #4B5650">Walk in to a partner centre, or a registered nurse comes to you.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px 24px 24px 0"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">01</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Order online</h3><p style="margin: 0; color: #4B5650">Your pathology request form is issued with your order.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">02</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Get collected</h3><p style="margin: 0; color: #4B5650">Walk in to a partner centre, or add a home visit and a registered nurse comes to you.</p></div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">03</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Doctor review</h3><p style="margin: 0; color: #4B5650">An Australian doctor reviews your results.</p></div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">04</span><h3 style="margin: 0; font-size: 20px; font-weight: 700">Your report</h3><p style="margin: 0; color: #4B5650">Every result and reference range, sent to you by email.</p></div>
 </div>
@@ -87,10 +96,7 @@
 <section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 88px; display: flex; flex-wrap: wrap; gap: 48px">
 <h2 style="flex: 1 1 320px; margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.04; letter-spacing: -0.035em">Questions</h2>
 <div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; border-top: 1px solid #1C2420">
-<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Do I need a referral?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">No. We issue the pathology request form with your order.</p></details>
-<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">How should I prepare?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">Drink water as normal and wear a top with sleeves that roll up easily. Some tests require fasting. If you are unsure, read our <a href="/prepare" style="text-decoration: underline">preparation guide</a> or contact us before your collection.</p></details>
-<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Is this covered by Medicare?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">This is a private test ordered without a GP referral, so Medicare rebates do not apply.</p></details>
-<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">Can I share my results with my GP?<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">Yes. Your report is yours to forward to any doctor.</p></details>
+<!--@FAQ-->
 </div>
 </section>
 
@@ -100,6 +106,11 @@
 <!--@RELATED-->
 </div>
 </section>
+
+<div class="pp-bar" id="pp-bar" aria-hidden="true">
+<span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{@title}}</span><span style="font-size: 14px; color: #4B5650" id="pp-bar-price">{{@priceLabel}}</span></span>
+<a href="{{@buyUrl}}" id="pp-bar-buy" rel="nofollow" tabindex="-1" style="flex: none; min-height: 48px; padding: 0 22px; border-radius: 999px; background: #17302A; color: #F7F4EF; font-weight: 700; display: flex; align-items: center">Order</a>
+</div>
 </main>
 <footer class="site-footer">
 <div class="footer-inner">
@@ -119,6 +130,6 @@
 
 </div>
 <script src="/assets/site.js" defer></script>
-<script>(function(){var b=document.getElementById("pp-buy"),p=document.getElementById("pp-price");document.querySelectorAll("input[name=pp-mode]").forEach(function(r){r.addEventListener("change",function(){if(r.checked){b.href=r.getAttribute("data-href");p.textContent=r.getAttribute("data-price");}});});})();</script>
+<script src="/assets/product.js" defer></script>
 </body>
 </html>

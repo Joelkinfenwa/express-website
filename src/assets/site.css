@@ -107,3 +107,12 @@ button[disabled]{opacity:.6;cursor:progress}
 /* Booking form fields always fit their column */
 #lb-step3 input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), #lb-step3 select{width:100%;min-width:0}
 #lb-step3 div{min-width:0}
+
+/* Product page order bar (mobile) */
+.pp-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#F7F4EF;border-top:1px solid #DCE0D8;box-shadow:0 -8px 24px rgba(23,48,42,.08);transform:translateY(110%);transition:transform .2s}
+.pp-bar.is-on{transform:none}
+@media (max-width:900px){.pp-bar{display:flex}}
+@media (prefers-reduced-motion:reduce){.pp-bar{transition:none}}
+.pp-groups{columns:3 340px;column-gap:20px}
+.pp-group{break-inside:avoid;margin-bottom:20px}
+@media (max-width:900px){#pp-box{position:static!important}}
