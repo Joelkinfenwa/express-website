@@ -63,6 +63,7 @@
         if (typeof v === 'object' && v && 'size' in v) { if (v.size) file = v; return; }
         data[k] = String(v);
       });
+      var pay = form.getAttribute('data-enquiry') === 'booking' && window.ExpressBooking ? window.ExpressBooking.prepare(data) : null;
       button.disabled = true;
       status.removeAttribute('data-state');
       status.textContent = file ? 'Uploading your form…' : 'Sending…';
@@ -76,6 +77,12 @@
           if (!r.ok) throw new Error(String(r.status));
         })
         .then(function () {
+          if (pay) {
+            status.setAttribute('data-state', 'ok');
+            status.textContent = 'Request received. Taking you to secure payment…';
+            location.href = pay;
+            return;
+          }
           form.reset();
           status.setAttribute('data-state', 'ok');
           status.textContent = form.getAttribute('data-enquiry') === 'booking' ? 'Thank you. Your request has been received and our team will contact you to confirm your appointment time.' : 'Thank you. Your message has been sent and our team will be in touch.';
@@ -86,7 +93,7 @@
             ? 'That file is too large to send. Please upload a smaller photo or PDF (under 3 MB), or email it to us.'
             : 'Your message could not be sent. Please try again, or call or email us directly.';
         })
-        .then(function () { button.disabled = false; });
+        .then(function () { if (!pay || status.getAttribute('data-state') === 'error') button.disabled = false; });
     });
   });
 })();

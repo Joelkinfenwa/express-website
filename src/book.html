@@ -108,7 +108,7 @@
 <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Home visit</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 68px); line-height: 1.02; letter-spacing: -0.035em">Request a nurse to your door.</h1>
-<p style="margin: 0; font-size: 19px; color: #4B5650">Upload your doctor's request form and tell us when suits you. Our team will contact you to confirm an exact appointment time with a registered nurse.</p>
+<p style="margin: 0; font-size: 19px; color: #4B5650">Upload your doctor's request form, tell us when suits you, and pay securely online. Our team then confirms an exact appointment time with a registered nurse.</p>
 <div style="display: flex; flex-direction: column; border-top: 1px solid #1C2420">
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 18px 0; border-bottom: 1px solid #DCE0D8"><span style="font-weight: 700">Metro home visit with your request form</span><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px">{{metroFee}}</span></div>
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 18px 0; border-bottom: 1px solid #DCE0D8"><span style="font-weight: 700">Regional home visit with your request form</span><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px">{{regionalFee}}</span></div>
@@ -133,11 +133,10 @@
 <span style="grid-column: 1 / -1; font-size: 14px; color: #5A645E">Please do not include test results or medical history in this form.</span>
 <div class="sr-only" aria-hidden="true"><label>Leave this empty<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></div>
 <p class="form-status" role="status" aria-live="polite"></p>
-<button type="submit" style="grid-column: 1 / -1; min-height: 54px; border: 0; border-radius: 999px; background: #F2A981; color: #1C2420; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer">Request my home visit</button>
+<p id="b-pay-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #4B5650" hidden></p>
+<button type="submit" id="b-submit" style="grid-column: 1 / -1; min-height: 54px; border: 0; border-radius: 999px; background: #F2A981; color: #1C2420; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer">Request my home visit</button>
 </form>
 </section>
-</main>
-
 </main>
 <footer class="site-footer">
 <div class="footer-inner">

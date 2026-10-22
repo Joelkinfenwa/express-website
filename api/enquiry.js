@@ -2,7 +2,7 @@
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -24,7 +24,7 @@ async function toHubSpot(d) {
     { name: 'firstname', value: first || '' },
     { name: 'lastname', value: rest.join(' ') },
     { name: 'company', value: d.organisation || '' },
-    { name: 'message', value: [d.message, d.organisation_type && `Type: ${d.organisation_type}`, d.monthly_volume && `Monthly orders: ${d.monthly_volume}`, d.interest && `Interested in: ${d.interest}`, d.topic && `Topic: ${d.topic}`, d.phone && `Phone: ${d.phone}`, d.suburb && `Suburb: ${d.suburb} ${d.postcode || ''}`, d.preferred_date && `Preferred: ${d.preferred_date} ${d.preferred_time || ''}`, d.has_referral && `Has referral: ${d.has_referral}`, `Form: ${d.kind}`].filter(Boolean).join('\n') }
+    { name: 'message', value: [d.message, d.organisation_type && `Type: ${d.organisation_type}`, d.monthly_volume && `Monthly orders: ${d.monthly_volume}`, d.interest && `Interested in: ${d.interest}`, d.topic && `Topic: ${d.topic}`, d.phone && `Phone: ${d.phone}`, d.suburb && `Suburb: ${d.suburb} ${d.postcode || ''}`, d.preferred_date && `Preferred: ${d.preferred_date} ${d.preferred_time || ''}`, d.has_referral && `Has referral: ${d.has_referral}`, d.reference && `Reference: ${d.reference}`, d.payment && `Payment: ${d.payment}`, `Form: ${d.kind}`].filter(Boolean).join('\n') }
   ];
   const url = `https://api.hsforms.com/submissions/v3/integration/submit/${process.env.HUBSPOT_PORTAL_ID}/${process.env.HUBSPOT_FORM_ID}`;
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields, context: { pageUri: d.page || '' } }) });
@@ -43,7 +43,7 @@ function attachment(body) {
 }
 
 async function toEmail(d, att) {
-  const subject = d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request: ' + [d.suburb, d.postcode].filter(Boolean).join(' ') : `Website enquiry: ${d.topic || 'General'}`;
+  const subject = d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/checkout/i.test(d.payment) ? 'paying online' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

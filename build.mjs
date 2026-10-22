@@ -272,7 +272,9 @@ if (unmapped.size) console.warn('Note: panel markers without a plain-English des
 
 // Coverage for the request form
 const cov = JSON.parse(readFileSync(join(ROOT, 'data/coverage.json'), 'utf8'));
-writeFileSync(join(OUT, 'assets/coverage.json'), JSON.stringify({ metro: cov.metro || [], regional: cov.regional || [], metroFee: config.metroFee, regionalFee: config.regionalFee }));
+writeFileSync(join(OUT, 'assets/coverage.json'), JSON.stringify({ metro: cov.metro || [], regional: cov.regional || [], metroFee: config.metroFee, regionalFee: config.regionalFee, store: catalog.store, ownForm: catalog.ownForm }));
+if (!catalog.ownForm || !catalog.ownForm.metro) console.warn('Note: no Shopify product for home visits with own request form; /book will not take payment.');
+else if (!catalog.ownForm.regional) console.warn('Note: own request form product has no Regional variant; regional /book requests will not go to payment.');
 if (!(cov.metro || []).length) console.warn('Note: data/coverage.json has no postcodes yet; the request form will not show coverage.');
 
 // Builder data for the browser

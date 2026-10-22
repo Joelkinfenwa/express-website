@@ -97,10 +97,21 @@ export async function loadCatalog(root) {
     .sort((a, b) => a.title.localeCompare(b.title));
   const hv = byHandle[cfg.builderHomeVisitHandle];
   const base = byHandle[cfg.builderBaseHandle];
+  // Home visit with the patient's own doctor's request form: metro and (optional) regional variants
+  const own = byHandle[cfg.ownFormHandle];
+  let ownForm = null;
+  if (own) {
+    const vs = own.variants.filter((v) => v.available !== false);
+    const regional = vs.find((v) => /regional/i.test(v.title));
+    const metro = vs.find((v) => /metro/i.test(v.title)) || vs.find((v) => v !== regional);
+    const pick = (v) => (v ? { id: v.id, price: parseFloat(v.price) } : null);
+    ownForm = { metro: pick(metro), regional: pick(regional) };
+  }
   return {
     source, store: cfg.store, featured: cfg.featured,
     tests: pub, addons,
     homeVisit: hv ? { id: hv.variants[0].id, price: parseFloat(hv.variants[0].price) } : null,
+    ownForm,
     base: base ? { id: base.variants[0].id, price: parseFloat(base.variants[0].price), title: base.title } : null
   };
 }
