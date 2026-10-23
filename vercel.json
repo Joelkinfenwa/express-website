@@ -139,6 +139,46 @@
       "source": "/tests/blood-insulin-levels",
       "destination": "/tests?add=fasting-insulin#build",
       "permanent": true
+    },
+    {
+      "source": "/tests/core-hormone-check",
+      "destination": "/tests/male-hormonal-test",
+      "permanent": true
+    },
+    {
+      "source": "/tests/thyroid-antigen",
+      "destination": "/tests/extensive-thyroid-panel",
+      "permanent": true
+    },
+    {
+      "source": "/tests/thyroid-function-tests-1",
+      "destination": "/tests/extensive-thyroid-panel",
+      "permanent": true
+    },
+    {
+      "source": "/tests/vitamin-d-b12-test",
+      "destination": "/tests?add=vitamin-d,vitamin-b12#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/extended-general-health-check",
+      "destination": "/tests/core-health-check",
+      "permanent": true
+    },
+    {
+      "source": "/tests/optimisation-panel",
+      "destination": "/tests/male-hormonal-test",
+      "permanent": true
+    },
+    {
+      "source": "/tests/vitamin-wellness-panel",
+      "destination": "/tests?add=vitamin-d,vitamin-b12#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/elite-health-assessment",
+      "destination": "/tests/complete-wellness-panel",
+      "permanent": true
     }
   ],
   "headers": [

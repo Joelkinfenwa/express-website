@@ -109,11 +109,11 @@ const fragments = {
   CATEGORY_BUTTONS: catButtons,
   ALL_TESTS: sorted.map(row).join('\n'),
   BUILDER_FEE: catalog.base ? `A ${money(catalog.base.price)} build-your-own fee applies to each order.` : '',
-  QUIZ_DATA: JSON.stringify(Object.fromEntries(catalog.tests.map((t) => [t.handle, {
-    title: t.title, price: t.price, url: `/tests/${t.handle}`, kind: t.kind,
-    count: t.handle === 'elite-health-assessment' ? '14+' : String(displayNames(t).length),
-    includes: summary(t, 4), homeOnly: !t.centreVariant
-  }]))).replace(/</g, '\\u003c')
+  QUIZ_DATA: JSON.stringify({
+    tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant }])),
+    addons: Object.fromEntries(catalog.addons.map((a) => [a.title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), { title: a.title.trim(), price: a.price }])),
+    base: catalog.base ? catalog.base.price : 0
+  }).replace(/</g, '\\u003c')
 };
 // Topic links for the tests page
 {

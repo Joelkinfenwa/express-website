@@ -16,9 +16,8 @@
       ],
       "tests": [
         "male-hormonal-test",
-        "core-hormone-check",
-        "optimisation-panel",
-        "ultimate-performance-screen"
+        "ultimate-performance-screen",
+        "complete-wellness-panel"
       ],
       "whoFor": [
         "Men noticing changes in energy, libido, mood or recovery",
@@ -64,7 +63,6 @@
       ],
       "tests": [
         "womens-hormonal-package",
-        "core-hormone-check",
         "essential-womens-health-check",
         "complete-wellness-panel"
       ],
@@ -110,9 +108,8 @@
       ],
       "tests": [
         "extensive-thyroid-panel",
-        "thyroid-antigen",
-        "thyroid-function-tests-1",
-        "extended-general-health-check"
+        "essential-womens-health-check",
+        "complete-wellness-panel"
       ],
       "whoFor": [
         "People experiencing tiredness or unexplained weight change",
@@ -199,8 +196,6 @@
         "vitc"
       ],
       "tests": [
-        "vitamin-d-b12-test",
-        "vitamin-wellness-panel",
         "essential-womens-health-check",
         "complete-wellness-panel"
       ],
@@ -248,9 +243,9 @@
       ],
       "tests": [
         "core-health-check",
-        "extended-general-health-check",
         "essential-mens-panel",
-        "essential-womens-health-check"
+        "essential-womens-health-check",
+        "complete-wellness-panel"
       ],
       "whoFor": [
         "Anyone wanting an annual check without a GP visit",
@@ -260,7 +255,7 @@
       "faq": [
         [
           "Which health check should I choose?",
-          "The Core Health Check covers the essentials. Core Health Plus adds thyroid, iron and a full blood count. Our men's and women's checks add markers specific to each. Our test finder can help you choose."
+          "The Core Health Check covers the essentials. Our men's and women's checks add markers specific to each, and the Complete Wellness Panel is our most thorough. Our test finder can help you choose."
         ],
         [
           "Do I need to fast?",
@@ -291,10 +286,10 @@
         "insulin"
       ],
       "tests": [
-        "extended-general-health-check",
-        "womens-hormonal-package",
         "essential-mens-panel",
-        "ultimate-performance-screen"
+        "womens-hormonal-package",
+        "ultimate-performance-screen",
+        "complete-wellness-panel"
       ],
       "whoFor": [
         "Anyone with a family history of heart disease or diabetes",

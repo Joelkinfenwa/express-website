@@ -5,7 +5,8 @@
   var stepEl = document.getElementById('tf-step'), back = document.getElementById('tf-back'), resEl = document.getElementById('tf-result');
   var dataEl = document.getElementById('tf-data');
   if (!box || !dataEl) return;
-  var T = {}; try { T = JSON.parse(dataEl.textContent); } catch (e) { return; }
+  var D = {}; try { D = JSON.parse(dataEl.textContent); } catch (e) { return; }
+  var T = D.tests || {}, ADD = D.addons || {}, BASE = D.base || 0;
   var homeFee = box.getAttribute('data-home-fee') || '';
 
   var Q = [
@@ -30,21 +31,38 @@
   var A = {}, step = 0;
 
   // [primary, alternative, alternative] by goal, sex and depth
+  // Picks by goal, sex and depth. 'b:' entries are Build Your Own suggestions (builder test slugs).
+  var VIT = 'b:vitamin-d,vitamin-b12,iron-studies', SEX = 'b:hiv,hep-b-antigen,hep-c-antibody', THY = 'b:tsh-t3-and-t4';
   var MAP = {
     general: {
-      male: { essential: ['core-health-check', 'essential-mens-panel', 'extended-general-health-check'], comprehensive: ['essential-mens-panel', 'extended-general-health-check', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'essential-mens-panel', 'elite-health-assessment'] },
-      female: { essential: ['core-health-check', 'extended-general-health-check', 'essential-womens-health-check'], comprehensive: ['essential-womens-health-check', 'extended-general-health-check', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'essential-womens-health-check', 'elite-health-assessment'] } },
+      male: { essential: ['core-health-check', 'essential-mens-panel', 'complete-wellness-panel'], comprehensive: ['essential-mens-panel', 'complete-wellness-panel', 'core-health-check'], complete: ['complete-wellness-panel', 'essential-mens-panel', 'ultimate-performance-screen'] },
+      female: { essential: ['core-health-check', 'essential-womens-health-check', 'complete-wellness-panel'], comprehensive: ['essential-womens-health-check', 'complete-wellness-panel', 'core-health-check'], complete: ['complete-wellness-panel', 'essential-womens-health-check', 'ultimate-performance-screen'] } },
     hormones: {
-      male: { essential: ['core-hormone-check', 'male-hormonal-test', 'optimisation-panel'], comprehensive: ['male-hormonal-test', 'optimisation-panel', 'ultimate-performance-screen'], complete: ['ultimate-performance-screen', 'complete-wellness-panel', 'male-hormonal-test'] },
-      female: { essential: ['core-hormone-check', 'womens-hormonal-package', 'essential-womens-health-check'], comprehensive: ['womens-hormonal-package', 'core-hormone-check', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'womens-hormonal-package', 'ultimate-performance-screen'] } },
+      male: { essential: ['male-hormonal-test', 'ultimate-performance-screen'], comprehensive: ['male-hormonal-test', 'ultimate-performance-screen', 'complete-wellness-panel'], complete: ['ultimate-performance-screen', 'complete-wellness-panel', 'male-hormonal-test'] },
+      female: { essential: ['womens-hormonal-package', 'essential-womens-health-check'], comprehensive: ['womens-hormonal-package', 'essential-womens-health-check', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'womens-hormonal-package', 'ultimate-performance-screen'] } },
     performance: {
-      male: { essential: ['optimisation-panel', 'male-hormonal-test', 'ultimate-performance-screen'], comprehensive: ['ultimate-performance-screen', 'male-hormonal-test', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'ultimate-performance-screen', 'elite-health-assessment'] },
-      female: { essential: ['core-hormone-check', 'ultimate-performance-screen', 'vitamin-d-b12-test'], comprehensive: ['ultimate-performance-screen', 'womens-hormonal-package', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'ultimate-performance-screen', 'elite-health-assessment'] } },
-    thyroid: { any: { essential: ['extensive-thyroid-panel', 'thyroid-antigen', 'extended-general-health-check'], comprehensive: ['extensive-thyroid-panel', 'extended-general-health-check', 'thyroid-antigen'], complete: ['extensive-thyroid-panel', 'complete-wellness-panel', 'thyroid-antigen'] } },
-    vitamins: { any: { essential: ['vitamin-d-b12-test', 'iron-studies', 'vitamin-wellness-panel'], comprehensive: ['vitamin-wellness-panel', 'iron-studies', 'vitamin-d-b12-test'], complete: ['complete-wellness-panel', 'vitamin-wellness-panel', 'iron-studies'] } },
-    sexual: { any: { essential: ['sti-screen', 'hiv', 'hep-c-antibody'], comprehensive: ['sti-screen', 'hiv', 'hep-b-antigen'], complete: ['sti-screen', 'hiv', 'hep-c-antibody'] } },
-    longevity: { any: { essential: ['extended-general-health-check', 'complete-wellness-panel', 'elite-health-assessment'], comprehensive: ['complete-wellness-panel', 'elite-health-assessment', 'extended-general-health-check'], complete: ['elite-health-assessment', 'complete-wellness-panel', 'ultimate-performance-screen'] } }
+      male: { essential: ['male-hormonal-test', 'ultimate-performance-screen'], comprehensive: ['ultimate-performance-screen', 'male-hormonal-test', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'ultimate-performance-screen'] },
+      female: { essential: ['womens-hormonal-package', 'ultimate-performance-screen'], comprehensive: ['ultimate-performance-screen', 'womens-hormonal-package', 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'ultimate-performance-screen'] } },
+    thyroid: {
+      male: { essential: ['extensive-thyroid-panel', THY], comprehensive: ['extensive-thyroid-panel', 'complete-wellness-panel'], complete: ['extensive-thyroid-panel', 'complete-wellness-panel'] },
+      female: { essential: ['extensive-thyroid-panel', THY], comprehensive: ['extensive-thyroid-panel', 'essential-womens-health-check'], complete: ['extensive-thyroid-panel', 'complete-wellness-panel', 'essential-womens-health-check'] } },
+    vitamins: {
+      male: { essential: [VIT, 'complete-wellness-panel'], comprehensive: [VIT, 'complete-wellness-panel'], complete: ['complete-wellness-panel', VIT] },
+      female: { essential: [VIT, 'essential-womens-health-check'], comprehensive: ['essential-womens-health-check', VIT, 'complete-wellness-panel'], complete: ['complete-wellness-panel', 'essential-womens-health-check', VIT] } },
+    sexual: { any: { essential: ['sti-screen', SEX], comprehensive: ['sti-screen', SEX], complete: ['sti-screen', SEX] } },
+    longevity: { any: { essential: ['complete-wellness-panel', 'ultimate-performance-screen'], comprehensive: ['complete-wellness-panel', 'ultimate-performance-screen'], complete: ['complete-wellness-panel', 'ultimate-performance-screen'] } }
   };
+  // Resolve a 'b:' pick into a builder suggestion
+  function builderPick(p) {
+    var items = p.slice(2).split(',').map(function (s) { return ADD[s] ? { slug: s, t: ADD[s] } : null; }).filter(Boolean);
+    if (!items.length) return null;
+    var names = items.map(function (x) { return x.t.title; });
+    var sum = items.reduce(function (a, x) { return a + x.t.price; }, 0) + BASE;
+    return { builder: true, title: 'Build your own: ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]), price: sum,
+      url: '/tests?add=' + items.map(function (x) { return x.slug; }).join(',') + (A.where === 'home' ? '&collect=home' : '') + '#build',
+      count: String(items.length), includes: 'Individual tests in one collection, including the $' + BASE + ' build-your-own fee' };
+  }
+  function info(h) { return h.indexOf('b:') === 0 ? builderPick(h) : T[h]; }
   var WHY = {
     general: 'A broad baseline of how your body is working, so you know where you stand.',
     hormones: 'The hormones most linked to energy, mood, libido and cycles, measured together so they can be read in context.',
@@ -57,9 +75,9 @@
 
   function picks() {
     var g = MAP[A.goal] || MAP.general, s = g[A.sex] || g.any, list = (s && s[A.depth]) || [];
-    if (A.goal === 'general' && A.sex === 'male' && A.age === '45plus' && A.depth === 'essential') list = ['essential-mens-panel', 'core-health-check', 'extended-general-health-check'];
+    if (A.goal === 'general' && A.sex === 'male' && A.age === '45plus' && A.depth === 'essential') list = ['essential-mens-panel', 'core-health-check', 'complete-wellness-panel'];
     var seen = {};
-    return list.filter(function (h) { if (!T[h] || seen[h]) return false; seen[h] = 1; return true; });
+    return list.filter(function (h) { if (!info(h) || seen[h]) return false; seen[h] = 1; return true; });
   }
 
   function el(tag, attrs, kids) {
@@ -100,8 +118,8 @@
   });
 
   function card(h, primary) {
-    var t = T[h];
-    var priceLine = '$' + t.price + (A.where === 'home' && homeFee ? ' + ' + homeFee + ' home visit' : '');
+    var t = info(h);
+    var priceLine = (t.builder ? '$' : '$') + t.price + (A.where === 'home' && homeFee ? ' + ' + homeFee + ' home visit' : '');
     if (t.homeOnly) priceLine = '$' + t.price + ' including home visit';
     return el('div', { style: 'display: flex; flex-direction: column; gap: 12px; padding: ' + (primary ? '32px' : '24px') + '; border-radius: 28px; ' + (primary ? 'background: #17302A; color: #F7F4EF' : 'background: #FFFFFF; border: 1px solid #DCE0D8') }, [
       el('span', { text: primary ? 'Our recommendation' : 'Also consider', style: 'font-size: 13px; font-weight: 700; color: ' + (primary ? '#F2A981' : '#A4502E') }),
@@ -110,7 +128,7 @@
       el('span', { text: (t.count === '1' ? '1 test' : t.count + ' tests') + ' · ' + t.includes, style: 'color: ' + (primary ? '#C5D1CA' : '#4B5650') + '; font-size: 15px' }),
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-top: 6px' }, [
         el('span', { text: priceLine, style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: " + (primary ? '30px' : '22px') }),
-        el('a', { href: t.url + (A.where === 'home' ? '?collect=home' : ''), class: 'btn', text: primary ? 'View and order' : 'View test', style: primary ? 'background: #F2A981; color: #1C2420' : 'border: 1px solid #1C2420' })
+        el('a', { href: t.builder ? t.url : t.url + (A.where === 'home' ? '?collect=home' : ''), class: 'btn', text: t.builder ? 'Build this test' : primary ? 'View and order' : 'View test', style: primary ? 'background: #F2A981; color: #1C2420' : 'border: 1px solid #1C2420' })
       ])
     ]);
   }
@@ -143,9 +161,9 @@
       var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Sending…';
       fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         kind: 'quiz', page: location.pathname, name: form.name.value, email: form.email.value,
-        topic: 'Test finder: ' + T[p[0]].title,
-        message: 'Recommended: ' + p.map(function (h) { return T[h].title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A),
-        recommendation: p.join(',')
+        topic: 'Test finder: ' + info(p[0]).title,
+        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A),
+        recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
       }) }).then(function (r) { if (!r.ok) throw new Error(); status.setAttribute('data-state', 'ok'); status.textContent = 'Sent. Check your inbox shortly.'; form.reset(); })
         .catch(function () { status.setAttribute('data-state', 'error'); status.textContent = 'That did not send. Please try again.'; btn.disabled = false; });
     });
