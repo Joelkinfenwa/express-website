@@ -1,0 +1,118 @@
+{
+  "_readme": "Answer pages under /guides. Each opens with a direct answer (what search engines and AI assistants quote), then detail, FAQs and links. Keep every fact consistent with prices and policies on the site.",
+  "guides": [
+    {
+      "slug": "mobile-blood-test-cost",
+      "title": "How much does a mobile blood test cost in Australia?",
+      "metaTitle": "Mobile Blood Test Cost in Australia (2026 Prices)",
+      "description": "What a home blood test costs in Australia: home visits from $129 with your doctor's request form, private blood tests from $99, and a $75 nurse visit add-on.",
+      "answer": "With Express Pathology, a registered nurse home visit costs $129 in metro areas and $149 in regional areas when you have a request form from your doctor. Private blood tests that need no referral start at $99, collected free at a partner centre or at home for an extra $75.",
+      "sections": [
+        ["What you pay for", "<p>A mobile blood test has two parts: the home visit, and the tests themselves.</p><ul><li><strong>Home visit with your doctor's request form:</strong> $129 metro, $149 regional. You pay the visit fee upfront when you book. How the tests on your form are billed is set by the laboratory.</li><li><strong>Private blood test, no referral:</strong> panels from $99. Add a nurse home visit for $75, or visit one of 2,000+ partner collection centres at no extra cost.</li><li><strong>Build your own test:</strong> a $45 base fee plus each test you choose, with single tests from $35. For example, a PSA test is $80 and a vitamin D test is $110.</li></ul>"],
+        ["Example prices", "<table><thead><tr><th>Option</th><th>Price</th></tr></thead><tbody><tr><td>Home visit with your doctor's form (metro)</td><td>$129</td></tr><tr><td>Home visit with your doctor's form (regional)</td><td>$149</td></tr><tr><td>Core Health Check at a partner centre</td><td>$99</td></tr><tr><td>Core Health Check with a nurse at home</td><td>$174</td></tr><tr><td>Ultimate Performance Screen at a partner centre</td><td>$319</td></tr><tr><td>Ultimate Performance Screen with a nurse at home</td><td>$394</td></tr></tbody></table>"],
+        ["What affects the price", "<ul><li><strong>Where you live:</strong> regional home visits cost more than metro visits because of travel.</li><li><strong>Which tests you need:</strong> a single test costs less than a full panel.</li><li><strong>Referral or private:</strong> tests on a doctor's request form may be eligible for Medicare through the laboratory. Private tests ordered without a referral are not covered by Medicare.</li></ul>"],
+        ["No hidden fees", "<p>Every price is shown before you pay. You pay online at checkout, and your confirmation email lists exactly what you paid for.</p>"]
+      ],
+      "faq": [
+        ["Is a home blood test more expensive than going to a collection centre?", "Yes, you pay for the nurse's visit. With Express Pathology, a home visit is $129 metro or $149 regional with your doctor's form, or $75 added to a private test. Visiting a partner collection centre with a private test costs nothing extra."],
+        ["Does Medicare cover the home visit fee?", "No. The home visit fee is a private service fee and is not claimed through Medicare."],
+        ["Do I need a referral?", "Not for private tests. You can order a panel or build your own test online without seeing a GP. If you already have a request form from your doctor, book a home visit and the nurse collects the tests on your form."],
+        ["Can I cancel?", "You can reschedule or cancel free of charge up to 24 hours before your appointment. Changes within 24 hours, or a missed visit, may incur the home visit fee."]
+      ],
+      "links": [["Book a home visit", "/book"], ["See all blood tests", "/tests"], ["Check your area", "/mobile-blood-collection"]]
+    },
+    {
+      "slug": "does-medicare-cover-home-blood-collection",
+      "title": "Does Medicare cover home blood collection?",
+      "metaTitle": "Does Medicare Cover Home Blood Collection? | Explained",
+      "description": "Medicare and home blood tests explained: what Medicare can cover, why home visit fees are private, and how private tests without a referral are billed.",
+      "answer": "Medicare does not cover the fee for a nurse to visit your home. The tests on a doctor's request form may still be eligible for Medicare, billed by the laboratory under its own policy. Private tests ordered without a referral are not covered by Medicare.",
+      "sections": [
+        ["The home visit fee", "<p>A home visit is a private service. With Express Pathology it costs $129 in metro areas and $149 in regional areas when you have your doctor's request form, and you pay it upfront when you book.</p>"],
+        ["Tests on your doctor's request form", "<p>When your doctor gives you a request form, the laboratory that processes your sample decides how each test is billed. Tests that meet Medicare criteria are often bulk billed. Tests that are not on the Medicare schedule, or that do not meet its criteria, may be charged privately by the laboratory. If you are unsure, ask your doctor or the laboratory before your visit.</p>"],
+        ["Private tests without a referral", "<p>When you order a blood test online without a GP referral, the test is private, so Medicare rebates do not apply. You pay one upfront price, shown before checkout, and there are no surprise bills from the laboratory.</p>"],
+        ["Private health insurance", "<p>Coverage for private pathology and home collection varies between funds and policies. Check with your insurer before you book if you plan to claim.</p>"]
+      ],
+      "faq": [
+        ["Is a home blood test bulk billed?", "The home visit fee is not bulk billed. Tests on your doctor's request form may be bulk billed by the laboratory if they meet Medicare criteria."],
+        ["Why would I pay for a test I could get bulk billed?", "Some people prefer not to wait for a GP appointment, want tests their GP has not ordered, or want a nurse to come to them. Private tests give you control over what is tested and when."],
+        ["Do I get an invoice from the laboratory for private tests?", "No. Private tests ordered through Express Pathology are paid upfront, and the laboratory is billed by Express Pathology."]
+      ],
+      "links": [["Private blood tests", "/tests"], ["Blood test without a referral", "/blood-tests/without-referral"], ["Book a home visit", "/book"]]
+    },
+    {
+      "slug": "home-blood-collection-vs-collection-centre",
+      "title": "Home blood collection or a collection centre: which is right for you?",
+      "metaTitle": "Home Blood Collection vs Collection Centre | Which to Choose",
+      "description": "Compare a nurse home visit with a pathology collection centre: cost, convenience, waiting times and who each option suits best.",
+      "answer": "A collection centre is the lowest-cost option and suits anyone who can travel. A home visit costs more but a registered nurse comes to your home or workplace, which suits busy schedules, people with limited mobility, children, and anyone who would rather avoid a waiting room.",
+      "sections": [
+        ["Side by side", "<table><thead><tr><th></th><th>Home visit</th><th>Collection centre</th></tr></thead><tbody><tr><td>Where</td><td>Your home or workplace</td><td>2,000+ partner centres</td></tr><tr><td>Cost with a private test</td><td>Test price plus $75</td><td>Test price only</td></tr><tr><td>Cost with your doctor's form</td><td>$129 metro, $149 regional visit fee</td><td>Billed by the laboratory</td></tr><tr><td>Waiting room</td><td>None</td><td>Depends on the centre</td></tr><tr><td>Availability</td><td>In our service areas</td><td>Every state and territory</td></tr></tbody></table>"],
+        ["When a home visit makes sense", "<ul><li>You cannot easily leave home, or you care for someone who cannot.</li><li>You need a fasting test and would rather not travel hungry.</li><li>Your schedule makes centre opening hours difficult.</li><li>You want several people in one household collected at once.</li></ul>"],
+        ["When a collection centre makes sense", "<ul><li>You live outside our home visit areas.</li><li>You want the lowest total price.</li><li>There is a centre close to home or work.</li></ul>"]
+      ],
+      "faq": [
+        ["Are the results the same?", "Yes. Samples collected at home go to the same NATA-accredited laboratories, and results are reviewed by an Australian doctor."],
+        ["Do you cover my area for home visits?", "Enter your postcode on our areas page to check. We cover Sydney, Melbourne, Brisbane, Perth, Adelaide, Canberra, Darwin and a growing list of regional centres."],
+        ["Can I switch from a centre to a home visit?", "Yes. Contact us before your collection and we will arrange a home visit for the $75 add-on."]
+      ],
+      "links": [["Check your area", "/mobile-blood-collection"], ["Find a collection centre", "/collection-centres"], ["See all blood tests", "/tests"]]
+    },
+    {
+      "slug": "what-to-expect-at-a-home-blood-test",
+      "title": "What to expect at a home blood test",
+      "metaTitle": "What to Expect at a Home Blood Test | Step by Step",
+      "description": "How a home blood collection works, from booking to results: confirming your time, preparing, the nurse's visit, and getting your results.",
+      "answer": "You book online, our team confirms a time, and a registered nurse comes to your home or workplace. The nurse checks your ID, collects your sample in a few minutes, labels it in front of you and takes it to an accredited laboratory. Your results are reviewed by a doctor and we let you know when they are ready.",
+      "sections": [
+        ["1. Book and confirm", "<p>Choose your test, or upload your doctor's request form, and pay online. Our team then contacts you to confirm the exact time of your visit.</p>"],
+        ["2. Prepare", "<p>Drink water as normal unless your doctor says otherwise. If your test requires fasting, such as fasting insulin, have nothing but water for 8 to 12 hours beforehand. Have photo ID ready, wear sleeves that roll up easily, and set up a chair at a table with good light. See our <a href=\"/prepare\">preparation guide</a> for detail.</p>"],
+        ["3. The visit", "<p>Your nurse confirms your name and date of birth, checks your request form, and answers any questions. The collection itself only takes a few minutes, and your samples are labelled in front of you.</p>"],
+        ["4. Results", "<p>Your samples go to a NATA-accredited partner laboratory. Results are reviewed by an Australian doctor, and we let you know when they are ready. Always discuss your results with your doctor.</p>"]
+      ],
+      "faq": [
+        ["How long does a home visit take?", "Most visits are short. The collection itself only takes a few minutes, plus time for your nurse to check your details and answer questions."],
+        ["Who will come to my home?", "A registered nurse. Your nurse will confirm your identity before collecting."],
+        ["Can I have my blood taken at work?", "Yes. A nurse can visit your workplace in our service areas, at the same price as a home visit."],
+        ["What if I need to reschedule?", "You can reschedule or cancel free of charge up to 24 hours before your appointment."]
+      ],
+      "links": [["Book a home visit", "/book"], ["How to prepare", "/prepare"], ["Check your area", "/mobile-blood-collection"]]
+    },
+    {
+      "slug": "home-visit-with-your-doctors-request-form",
+      "title": "How to get a home blood test with your doctor's request form",
+      "metaTitle": "Home Blood Test With Your Doctor's Referral | How It Works",
+      "description": "Already have a pathology request form from your GP or specialist? Book a registered nurse to collect it at home or work, from $129.",
+      "answer": "If your GP or specialist has given you a pathology request form, you can book a registered nurse to collect it at your home or workplace. With Express Pathology the home visit costs $129 in metro areas or $149 in regional areas, paid upfront, and you upload your form when you book.",
+      "sections": [
+        ["How it works", "<ol><li>Check that we cover your postcode.</li><li>Book online and upload a photo or scan of your request form.</li><li>Pay the home visit fee at checkout.</li><li>Our team contacts you to confirm a time.</li><li>A registered nurse collects your sample and takes it to the laboratory.</li></ol>"],
+        ["What your doctor's form covers", "<p>Your form lists the tests your doctor wants. The laboratory processes and bills those tests under its own policy, and many are eligible for Medicare. The home visit fee is separate and is not claimed through Medicare.</p>"],
+        ["What to have ready", "<ul><li>Your original request form, or the copy you uploaded.</li><li>Photo ID.</li><li>Any fasting or timing instructions from your doctor.</li></ul>"]
+      ],
+      "faq": [
+        ["Do you accept forms from any doctor?", "We collect on standard pathology request forms from Australian doctors. If you are unsure about your form, contact us before booking."],
+        ["Where do my results go?", "Results from your doctor's request form go to the doctor who requested them, as with any pathology collection."],
+        ["Can you visit an elderly parent?", "Yes. We regularly visit people at home who find it hard to get to a collection centre. You can book on their behalf."]
+      ],
+      "links": [["Book a home visit", "/book"], ["Check your area", "/mobile-blood-collection"], ["What to expect", "/guides/what-to-expect-at-a-home-blood-test"]]
+    },
+    {
+      "slug": "home-blood-tests-for-elderly-and-less-mobile",
+      "title": "Home blood tests for elderly parents and people with limited mobility",
+      "metaTitle": "Home Blood Tests for Elderly & Less Mobile Patients",
+      "description": "Arrange a registered nurse to collect blood tests at home for an elderly parent or anyone who finds it hard to travel. Book on their behalf.",
+      "answer": "If an elderly parent or someone you care for finds it hard to get to a collection centre, you can book a registered nurse to collect their blood test at home. Upload their doctor's request form when you book, or order a private test, and our team will confirm a time that suits them.",
+      "sections": [
+        ["Booking for someone else", "<p>You can book and pay on their behalf. Enter their name, date of birth and address as the patient, and your own phone number if you would like us to arrange the visit with you.</p>"],
+        ["Making the visit easy", "<ul><li>The nurse comes to their home, so there is no travel and no waiting room.</li><li>They can stay seated in a comfortable chair.</li><li>Have their photo ID and request form ready for the nurse.</li></ul>"],
+        ["Aged care facilities", "<p>We also work with residential aged care and home care providers. Facilities can <a href=\"/aged-care\">talk to us about regular collection</a> for residents.</p>"]
+      ],
+      "faq": [
+        ["How much does it cost?", "A home visit with a doctor's request form is $129 in metro areas and $149 in regional areas. Private tests start at $99, plus $75 for the home visit."],
+        ["Can I be there during the visit?", "Yes. You are welcome to be present, and the nurse will explain each step."],
+        ["Do you visit nursing homes?", "Yes. We work with aged care facilities, and families can also book visits for a resident."]
+      ],
+      "links": [["Book a home visit", "/book"], ["Aged care partners", "/aged-care"], ["Check your area", "/mobile-blood-collection"]]
+    }
+  ]
+}
