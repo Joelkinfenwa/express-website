@@ -1,17 +1,247 @@
 {
-  "_readme": "Nurse base locations. Coverage = every postcode within radiusKm of a base. Edit this list, then run: python3 scripts/coverage.py",
-  "radiusKm": 25,
-  "bases": [
-    ["Penrith", "2749"], ["Carlingford", "2118"], ["Dee Why", "2099"], ["Padstow", "2211"], ["Ryde", "2112"],
-    ["Burraneer", "2230"], ["Greenhills Beach", "2230"], ["North Ryde", "2113"], ["Cobbity", "2570"], ["Frenchs Forest", "2086"],
-    ["Bathurst", "2795"], ["Waverly", "2337"], ["Ocean Shores", "2483"], ["Nords Wharf", "2281"],
-    ["Farrer", "2607"],
-    ["Eltham", "3095"], ["Montrose", "3765"], ["Port Melbourne", "3207"], ["Glenroy", "3046"], ["Frankston", "3199"],
-    ["Armstrong Creek", "3217"], ["Mildura", "3500"], ["Coburg North", "3058"], ["Sunbury", "3429"],
-    ["St Agnes", "5097"],
-    ["Baldivis", "6171"], ["Hocking", "6065"],
-    ["Rochedale South", "4123"], ["Mulambin", "4703"], ["Mudgeeraba", "4213"], ["Ferny Hills", "4055"],
-    ["Curramundi", "4551"], ["Wynnum", "4178"], ["Kippa-Ring", "4021"],
-    ["Nightcliff", "0810"]
+ "_readme": "Nurse base locations (internal, never shown on the site) and the public area each belongs to. Coverage = every postcode within radiusKm of a base. Edit, then run: python3 scripts/coverage.py",
+ "radiusKm": 25,
+ "bases": [
+  [
+   "Penrith",
+   "2749",
+   "sydney"
+  ],
+  [
+   "Carlingford",
+   "2118",
+   "sydney"
+  ],
+  [
+   "Dee Why",
+   "2099",
+   "sydney"
+  ],
+  [
+   "Padstow",
+   "2211",
+   "sydney"
+  ],
+  [
+   "Ryde",
+   "2112",
+   "sydney"
+  ],
+  [
+   "Burraneer",
+   "2230",
+   "sydney"
+  ],
+  [
+   "Greenhills Beach",
+   "2230",
+   "sydney"
+  ],
+  [
+   "North Ryde",
+   "2113",
+   "sydney"
+  ],
+  [
+   "Cobbity",
+   "2570",
+   "sydney"
+  ],
+  [
+   "Frenchs Forest",
+   "2086",
+   "sydney"
+  ],
+  [
+   "Bathurst",
+   "2795",
+   "bathurst"
+  ],
+  [
+   "Waverly",
+   "2337",
+   "upper-hunter"
+  ],
+  [
+   "Ocean Shores",
+   "2483",
+   "northern-rivers"
+  ],
+  [
+   "Nords Wharf",
+   "2281",
+   "newcastle-lake-macquarie"
+  ],
+  [
+   "Farrer",
+   "2607",
+   "canberra"
+  ],
+  [
+   "Eltham",
+   "3095",
+   "melbourne"
+  ],
+  [
+   "Montrose",
+   "3765",
+   "melbourne"
+  ],
+  [
+   "Port Melbourne",
+   "3207",
+   "melbourne"
+  ],
+  [
+   "Glenroy",
+   "3046",
+   "melbourne"
+  ],
+  [
+   "Frankston",
+   "3199",
+   "melbourne"
+  ],
+  [
+   "Armstrong Creek",
+   "3217",
+   "geelong"
+  ],
+  [
+   "Mildura",
+   "3500",
+   "mildura"
+  ],
+  [
+   "Coburg North",
+   "3058",
+   "melbourne"
+  ],
+  [
+   "Sunbury",
+   "3429",
+   "melbourne"
+  ],
+  [
+   "St Agnes",
+   "5097",
+   "adelaide"
+  ],
+  [
+   "Baldivis",
+   "6171",
+   "perth"
+  ],
+  [
+   "Hocking",
+   "6065",
+   "perth"
+  ],
+  [
+   "Rochedale South",
+   "4123",
+   "brisbane"
+  ],
+  [
+   "Mulambin",
+   "4703",
+   "capricorn-coast"
+  ],
+  [
+   "Mudgeeraba",
+   "4213",
+   "gold-coast"
+  ],
+  [
+   "Ferny Hills",
+   "4055",
+   "brisbane"
+  ],
+  [
+   "Curramundi",
+   "4551",
+   "sunshine-coast"
+  ],
+  [
+   "Wynnum",
+   "4178",
+   "brisbane"
+  ],
+  [
+   "Kippa-Ring",
+   "4021",
+   "brisbane"
+  ],
+  [
+   "Nightcliff",
+   "0810",
+   "darwin"
   ]
+ ],
+ "areas": {
+  "sydney": [
+   "Sydney",
+   "NSW"
+  ],
+  "newcastle-lake-macquarie": [
+   "Newcastle and Lake Macquarie",
+   "NSW"
+  ],
+  "bathurst": [
+   "Bathurst and the Central West",
+   "NSW"
+  ],
+  "upper-hunter": [
+   "Scone and the Upper Hunter",
+   "NSW"
+  ],
+  "northern-rivers": [
+   "the Northern Rivers",
+   "NSW"
+  ],
+  "canberra": [
+   "Canberra",
+   "ACT"
+  ],
+  "melbourne": [
+   "Melbourne",
+   "VIC"
+  ],
+  "geelong": [
+   "Geelong",
+   "VIC"
+  ],
+  "mildura": [
+   "Mildura",
+   "VIC"
+  ],
+  "brisbane": [
+   "Brisbane",
+   "QLD"
+  ],
+  "gold-coast": [
+   "the Gold Coast",
+   "QLD"
+  ],
+  "sunshine-coast": [
+   "the Sunshine Coast",
+   "QLD"
+  ],
+  "capricorn-coast": [
+   "Yeppoon and the Capricorn Coast",
+   "QLD"
+  ],
+  "adelaide": [
+   "Adelaide",
+   "SA"
+  ],
+  "perth": [
+   "Perth",
+   "WA"
+  ],
+  "darwin": [
+   "Darwin",
+   "NT"
+  ]
+ }
 }

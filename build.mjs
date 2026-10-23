@@ -270,6 +270,113 @@ ${prep.map(([h, p], i) => `<li style="display: flex; gap: 20px; padding: 20px 0;
 }
 if (unmapped.size) console.warn('Note: panel markers without a plain-English description (add to data/markers.json):\n  ' + [...unmapped].join('\n  '));
 
+// ---------- Area pages (local search) ----------
+{
+  const shell = readFileSync(join(SRC, '_page.html'), 'utf8');
+  const AREAS = JSON.parse(readFileSync(join(ROOT, 'data/areas.json'), 'utf8')).areas.filter((a) => a.suburbs.length);
+  mkdirSync(join(OUT, 'mobile-blood-collection'), { recursive: true });
+  const fromPrice = Math.min(...catalog.tests.map((t) => t.price));
+  const H2 = "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.04; letter-spacing: -0.035em";
+  const EYEBROW = 'font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E';
+  const inName = (a) => a.name; // names already carry "the" where needed
+  const plain = (a) => a.name.replace(/^the /, '');
+  const feeLine = (a) => a.metro.length && a.regional.length ? `${config.metroFee} metro, ${config.regionalFee} regional` : a.metro.length ? config.metroFee : config.regionalFee;
+  const render = (vals, body) => finalize(shell.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace('<!--@BODY-->', body), 'x.html');
+  const postcodeForm = (label) => `<form action="${config.bookingUrl}" method="get" style="display: flex; flex-wrap: wrap; gap: 10px; max-width: 520px"><label for="pc-check" class="sr-only">Postcode</label><input id="pc-check" name="postcode" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="Enter your postcode" style="flex: 1 1 200px; min-height: 54px; border: 1px solid #D3D8D0; border-radius: 999px; padding: 0 22px; font: inherit; background: #FFFFFF; color: #1C2420"><button type="submit" style="flex: none; min-height: 54px; padding: 0 26px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; cursor: pointer">${label}</button></form>`;
+  const faqItem = (q, a) => `<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">${q}<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">${a}</p></details>`;
+  const crumbs = (items) => `<nav aria-label="Breadcrumb" style="max-width: 1320px; margin: 0 auto; padding: 8px 24px 20px; font-size: 14px; color: #5A645E">${items.map(([n, h], i) => (h ? `<a href="${h}" style="color: #5A645E">${esc(n)}</a>` : `<span style="color: #1C2420; font-weight: 600">${esc(n)}</span>`)).join(' / ')}</nav>`;
+  const areaCard = (a) => `<a href="/mobile-blood-collection/${a.slug}" style="display: flex; flex-direction: column; gap: 8px; padding: 24px; border-radius: 24px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-size: 13px; font-weight: 700; color: #5A645E">${a.state}</span><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -0.02em">${esc(plain(a).replace(/^./, (c) => c.toUpperCase()))}</span><span style="color: #4B5650; font-size: 15px">${a.suburbs.length} suburbs · ${feeLine(a)}</span></a>`;
+  const featuredCards = featured.slice(0, 3).map((t) => card(t)).join('\n');
+
+  for (const a of AREAS) {
+    const Name = plain(a).replace(/^./, (c) => c.toUpperCase());
+    const path = `/mobile-blood-collection/${a.slug}`;
+    const examples = [...new Set(a.suburbs.map((s) => s[0]))];
+    const pick = examples.filter((_, i) => i % Math.max(1, Math.floor(examples.length / 6)) === 0).slice(0, 6);
+    const faq = [
+      [`Do you cover my suburb in ${plain(a)}?`, `We cover ${a.suburbs.length} suburbs across ${inName(a)}, including ${pick.slice(0, 4).join(', ')} and more. Enter your postcode on our <a href="${config.bookingUrl}" style="text-decoration: underline">booking page</a> to confirm straight away.`],
+      [`How much is a home blood test in ${plain(a)}?`, `With your own doctor's request form, a home visit is ${feeLine(a)}. If you order a private test from us, adding a home visit costs ${config.homeVisitAddOnFee}.`],
+      ['Can the nurse come to my workplace?', 'Yes. A registered nurse can collect at your home or your workplace, whichever suits you.'],
+      ['Do I need a referral?', `Not for our private tests. We issue the request form with your order. If your doctor has already given you a request form, upload it when you book.`]
+    ];
+    const suburbList = a.suburbs.map(([n, pc]) => `<li style="break-inside: avoid; padding: 6px 0; border-bottom: 1px solid #E3E6E0; display: flex; justify-content: space-between; gap: 8px"><span>${esc(n)}</span><span style="color: #5A645E; font-size: 14px">${pc}</span></li>`).join('');
+    const body = `${crumbs([['Home', '/'], ['Areas we cover', '/mobile-blood-collection'], [Name]])}
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 26px">
+<span style="${EYEBROW}">Home blood collection · ${a.state}</span>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 6vw, 84px); line-height: 1.0; letter-spacing: -0.04em; max-width: 1000px">Mobile blood collection in ${esc(inName(a))}.</h1>
+<p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 720px">A registered nurse collects your blood test at home or at work, across ${a.suburbs.length} suburbs in ${esc(inName(a))}. Use your doctor's request form, or order a private test online with no referral.</p>
+${postcodeForm('Check my postcode')}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); border-top: 1px solid #1C2420; max-width: 900px">
+<div style="padding: 18px 18px 18px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Suburbs covered</span><span style="font-weight: 700; font-size: 20px">${a.suburbs.length}</span></div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Home visit with your form</span><span style="font-weight: 700; font-size: 20px">${feeLine(a)}</span></div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Private tests</span><span style="font-weight: 700; font-size: 20px">From ${money(fromPrice)}</span></div>
+</div>
+</section>
+
+<section style="background: #E8EDE6"><div style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 14px"><span style="${EYEBROW}">Two ways to book</span><h2 style="${H2}">However you need your test.</h2></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px">
+<div style="background: #FFFFFF; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 14px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">I have a request form</span><h3 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em">Book a nurse to your door</h3><p style="margin: 0; color: #4B5650">Upload your doctor's pathology request form and choose a time that suits. The home visit fee is ${feeLine(a)}.</p><a href="${config.bookingUrl}" class="btn btn-dark" style="align-self: flex-start; margin-top: auto">Book a home visit</a></div>
+<div style="background: #17302A; color: #F7F4EF; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 14px"><span style="font-size: 13px; font-weight: 700; color: #F2A981">No referral needed</span><h3 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em">Order a private blood test</h3><p style="margin: 0; color: #C5D1CA">Choose from our panels or build your own. Your request form is issued with your order, and a home visit can be added for ${config.homeVisitAddOnFee}.</p><a href="/tests" class="btn" style="align-self: flex-start; margin-top: auto; background: #F2A981; color: #1C2420">Browse blood tests</a></div>
+</div>
+</div></section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 88px 24px 0; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px"><h2 style="${H2}">Popular tests in ${esc(inName(a))}.</h2><a href="/tests" style="font-weight: 700; text-decoration: underline">See all tests</a></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">${featuredCards}</div>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 88px 24px 0; display: flex; flex-direction: column; gap: 20px">
+<h2 style="${H2}">Suburbs we cover in ${esc(inName(a))}.</h2>
+<p style="margin: 0; color: #4B5650; max-width: 720px">Home visits are available across these suburbs. If yours is not listed, send a request anyway and our team will check.</p>
+<details style="border-top: 1px solid #1C2420; padding-top: 16px"><summary style="font-weight: 700; cursor: pointer; min-height: 44px; display: flex; align-items: center">Show all ${a.suburbs.length} suburbs</summary><ul style="margin: 16px 0 0; padding: 0; list-style: none; columns: 4 220px; column-gap: 32px">${suburbList}</ul></details>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-wrap: wrap; gap: 48px">
+<h2 style="flex: 1 1 320px; margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.04; letter-spacing: -0.035em">Questions</h2>
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; border-top: 1px solid #1C2420">${faq.map(([q, x]) => faqItem(q, x)).join('\n')}</div>
+</section>
+
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 96px; display: flex; flex-direction: column; gap: 24px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3vw, 36px); letter-spacing: -0.035em">Other areas we cover</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px">${AREAS.filter((x) => x !== a).map(areaCard).join('\n')}</div>
+</section>`;
+    const url = siteUrl + path;
+    const jsonld = JSON.stringify([
+      { '@context': 'https://schema.org', '@type': 'Service', name: `Mobile blood collection in ${plain(a)}`, serviceType: 'Mobile pathology collection', url,
+        provider: { '@type': 'Organization', name: 'Express Pathology', url: siteUrl + '/', telephone: config.phone },
+        areaServed: { '@type': 'Place', name: `${Name}, ${a.state}, Australia` } },
+      { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Areas we cover', item: siteUrl + '/mobile-blood-collection' },
+        { '@type': 'ListItem', position: 3, name: Name, item: url }] },
+      { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(([q, x]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: x.replace(/<[^>]+>/g, '') } })) }
+    ]).replace(/</g, '\\u003c');
+    const vals = { pageTitle: esc(`Mobile Blood Collection ${Name} | Home Blood Tests | Express Pathology`), path, jsonld,
+      metaDescription: esc(`Mobile blood collection in ${inName(a)}. A registered nurse comes to your home or work across ${a.suburbs.length} suburbs. ${feeLine(a)} with your request form, or order a private test with no referral.`) };
+    writeFileSync(join(OUT, `mobile-blood-collection/${a.slug}.html`), render(vals, body));
+    pages.push(path);
+  }
+
+  // Index of all areas
+  const byState = ['NSW', 'ACT', 'VIC', 'QLD', 'SA', 'WA', 'NT'].map((st) => [st, AREAS.filter((a) => a.state === st)]).filter(([, l]) => l.length);
+  const total = AREAS.reduce((n, a) => n + a.suburbs.length, 0);
+  const body = `${crumbs([['Home', '/'], ['Areas we cover']])}
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 64px; display: flex; flex-direction: column; gap: 26px">
+<span style="${EYEBROW}">Areas we cover</span>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 6vw, 84px); line-height: 1.0; letter-spacing: -0.04em; max-width: 1000px">A nurse at your door, in ${total.toLocaleString('en-AU')}+ suburbs.</h1>
+<p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 720px">Mobile blood collection across Australia's major cities and a growing list of regional centres. Enter your postcode to check your address.</p>
+${postcodeForm('Check my postcode')}
+</section>
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 96px; display: flex; flex-direction: column; gap: 40px">
+${byState.map(([st, l]) => `<div style="display: flex; flex-direction: column; gap: 16px"><h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em; border-top: 1px solid #1C2420; padding-top: 18px">${{ NSW: 'New South Wales', ACT: 'Australian Capital Territory', VIC: 'Victoria', QLD: 'Queensland', SA: 'South Australia', WA: 'Western Australia', NT: 'Northern Territory' }[st]}</h2><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px">${l.map(areaCard).join('\n')}</div></div>`).join('\n')}
+</section>`;
+  const jsonld = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Service', name: 'Mobile blood collection', serviceType: 'Mobile pathology collection', url: siteUrl + '/mobile-blood-collection', provider: { '@type': 'Organization', name: 'Express Pathology', url: siteUrl + '/' }, areaServed: AREAS.map((a) => ({ '@type': 'Place', name: `${plain(a).replace(/^./, (c) => c.toUpperCase())}, ${a.state}` })) }).replace(/</g, '\\u003c');
+  writeFileSync(join(OUT, 'mobile-blood-collection.html'), render({ pageTitle: 'Mobile Blood Collection Areas | Express Pathology', path: '/mobile-blood-collection', jsonld,
+    metaDescription: `Mobile blood collection at home or work across ${total.toLocaleString('en-AU')}+ suburbs in Sydney, Melbourne, Brisbane, Perth, Adelaide, Canberra and regional Australia.` }, body));
+  pages.push('/mobile-blood-collection');
+}
+
 // Coverage for the request form
 const cov = JSON.parse(readFileSync(join(ROOT, 'data/coverage.json'), 'utf8'));
 writeFileSync(join(OUT, 'assets/coverage.json'), JSON.stringify({ metro: cov.metro || [], regional: cov.regional || [], metroFee: config.metroFee, regionalFee: config.regionalFee, store: catalog.store, ownForm: catalog.ownForm }));

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{@pageTitle}}</title>
+<meta name="description" content="{{@metaDescription}}">
+<link rel="canonical" href="{{siteUrl}}{{@path}}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{@pageTitle}}">
+<meta property="og:description" content="{{@metaDescription}}">
+<meta property="og:image" content="{{siteUrl}}/assets/img/og.jpg">
+<meta property="og:url" content="{{siteUrl}}{{@path}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17302A">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{{@jsonld}}</script>
+<!--analytics-->
+</head>
+<body>
+<div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55">
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<nav aria-label="Main" class="nav">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<div class="nav-links" id="nav-links"><a href="/#how">At-home collection</a><a href="/tests">Blood tests</a><a href="/partners">Partners</a><a href="/about">About</a><a href="/prepare">Help</a></div>
+<div class="nav-actions"><a href="{{shopUrl}}/account" class="quiet">Sign in</a><a href="{{bookingUrl}}" class="btn btn-dark">Book a nurse</a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div>
+</nav>
+</header>
+<main id="main">
+<!--@BODY-->
+</main>
+<footer class="site-footer">
+<div class="footer-inner">
+<div class="footer-cols">
+<div class="footer-col"><span class="footer-brand">express<em>.</em></span><span>Mobile blood collection and pathology infrastructure across Australia.</span></div>
+<div class="footer-col"><strong>Patients</strong><a href="{{bookingUrl}}">Book a home visit</a><a href="/mobile-blood-collection">Areas we cover</a><a href="/tests">Blood tests</a><a href="/prepare">Preparing for your visit</a><a href="{{shopUrl}}/pages/collection-centres">Collection centres</a></div>
+<div class="footer-col"><strong>Partners</strong><a href="/partners">Partner with Express</a><a href="/telehealth">Telehealth</a><a href="/mens-health-clinics">Men's health</a><a href="/aged-care">Aged care</a><a href="/partners#integrate">Integration</a><a href="/partners#enquire">Partner enquiries</a></div>
+<div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/careers">Nurse careers</a><a href="/contact">Contact</a><a href="{{shopUrl}}/policies/privacy-policy">Privacy policy</a><a href="{{shopUrl}}/policies/terms-of-service">Terms of service</a></div>
+</div>
+<div class="footer-legal">
+<p>Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
+<p>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span></p>
+</div>
+</div>
+</footer>
+
+
+</div>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
