@@ -14,14 +14,14 @@
   "supportHours": "",
   "abn": "",
   "gaMeasurementId": "",
-  "googleAdsId": "",
+  "googleAdsId": "AW-18052842808",
   "googleAdsLabels": {
-    "purchase": "",
-    "homeVisitRequest": "",
-    "phoneCall": "",
-    "partnerEnquiry": "",
-    "beginCheckout": "",
-    "testFinderLead": ""
+    "purchase": "rWZ6CLPD5JccELiKoqBD",
+    "homeVisitRequest": "O4PGCPGS3aYdELiKoqBD",
+    "phoneCall": "WmgWCPSS3aYdELiKoqBD",
+    "partnerEnquiry": "dgQKCPeS3aYdELiKoqBD",
+    "beginCheckout": "ofrnCPqS3aYdELiKoqBD",
+    "testFinderLead": "FV1xCP2S3aYdELiKoqBD"
   },
   "metaPixelId": ""
 }
