@@ -85,7 +85,8 @@ export default async function handler(req, res) {
   if (d.kind === 'referral') {
     // Partner referral (invoiced monthly): PARTNER_CODES = "Lifestrands (LSG)=code1;Other partner=code2"
     const codes = String(process.env.PARTNER_CODES || '').split(';').map((x) => x.split('=')).filter((x) => x.length === 2).map(([n, c]) => [n.trim(), c.trim()]);
-    const match = codes.find(([, c]) => c && c === d.partner_code);
+    const norm = (x) => String(x || '').replace(/\s+/g, '').toUpperCase();
+    const match = codes.find(([, c]) => c && norm(c) === norm(d.partner_code));
     if (!match) return res.status(403).json({ error: 'That partner access code is not recognised.' });
     if (!att) return res.status(400).json({ error: 'Please attach the referral form.' });
     d.partner = match[0];
