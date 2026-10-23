@@ -1,0 +1,355 @@
+{
+  "_readme": "Search landing pages at /blood-tests/<slug>. markers = keys from data/markers.json. tests = Shopify handles. Edit copy freely.",
+  "topics": [
+    {
+      "slug": "testosterone",
+      "title": "Testosterone Blood Test, No Referral Needed",
+      "h1": "Testosterone blood test, no referral needed.",
+      "intro": "Check your free and total testosterone alongside the hormones that control it. Order online, then visit a partner collection centre or have a registered nurse come to you.",
+      "markers": [
+        "testosterone",
+        "shbg",
+        "lh",
+        "fsh",
+        "oestradiol",
+        "prolactin"
+      ],
+      "tests": [
+        "male-hormonal-test",
+        "core-hormone-check",
+        "optimisation-panel",
+        "ultimate-performance-screen"
+      ],
+      "whoFor": [
+        "Men noticing changes in energy, libido, mood or recovery",
+        "Anyone tracking testosterone over time",
+        "Women wanting testosterone checked as part of a hormone panel"
+      ],
+      "faq": [
+        [
+          "When is the best time to test testosterone?",
+          "Testosterone is highest in the morning, so we recommend a morning collection. Testing at a similar time each time makes results easier to compare."
+        ],
+        [
+          "What is the difference between free and total testosterone?",
+          "Total testosterone is all the testosterone in your blood. Free testosterone is the small portion not bound to proteins such as SHBG, which is available for the body to use. Several of our panels report both."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Testosterone"
+    },
+    {
+      "slug": "female-hormones",
+      "title": "Female Hormone Blood Test, No Referral Needed",
+      "h1": "Female hormone blood test, no referral needed.",
+      "intro": "Oestradiol, progesterone, LH, FSH and more, measured together so they can be read in context. Collected at a partner centre or at home.",
+      "markers": [
+        "oestradiol",
+        "progesterone",
+        "lh",
+        "fsh",
+        "testosterone",
+        "shbg",
+        "prolactin",
+        "cortisol"
+      ],
+      "tests": [
+        "womens-hormonal-package",
+        "core-hormone-check",
+        "essential-womens-health-check",
+        "complete-wellness-panel"
+      ],
+      "whoFor": [
+        "Women noticing changes in cycles, energy, mood or skin",
+        "Before or during perimenopause",
+        "Anyone wanting a hormone baseline to track over time"
+      ],
+      "faq": [
+        [
+          "When in my cycle should I test?",
+          "Some hormones change across the menstrual cycle, so the best day depends on what you want to understand. If your doctor has asked for a particular cycle day, book your collection for that day."
+        ],
+        [
+          "Can I test if I am on hormonal contraception?",
+          "Yes. Hormonal contraception affects several of these results, so mention it to the doctor reviewing your results or your own GP."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Female hormones"
+    },
+    {
+      "slug": "thyroid",
+      "title": "Thyroid Blood Test, No Referral Needed",
+      "h1": "Thyroid blood test, no referral needed.",
+      "intro": "TSH, T4 and T3 show how well your thyroid is working, and thyroid antibodies can point to an autoimmune cause. Order online and get collected at a centre or at home.",
+      "markers": [
+        "tsh",
+        "t4",
+        "t3",
+        "tpo",
+        "tgab",
+        "trab"
+      ],
+      "tests": [
+        "extensive-thyroid-panel",
+        "thyroid-antigen",
+        "thyroid-function-tests-1",
+        "extended-general-health-check"
+      ],
+      "whoFor": [
+        "People experiencing tiredness or unexplained weight change",
+        "Anyone with a family history of thyroid conditions",
+        "Monitoring thyroid levels over time"
+      ],
+      "faq": [
+        [
+          "What is the difference between thyroid function and thyroid antibodies?",
+          "Thyroid function tests (TSH, T4 and T3) show how much thyroid hormone you are making. Thyroid antibody tests look for an autoimmune cause behind a thyroid change. Our Extensive Thyroid Panel includes both."
+        ],
+        [
+          "Do I need to fast?",
+          "Fasting is not usually needed for thyroid tests. If your doctor has given you instructions, follow those."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Thyroid"
+    },
+    {
+      "slug": "sti",
+      "title": "STI Test Without a GP Visit",
+      "h1": "STI testing, without a GP visit.",
+      "intro": "A discreet screen for chlamydia, gonorrhoea, herpes, syphilis and trichomonas, plus individual HIV and hepatitis tests. Order online and get collected privately.",
+      "markers": [
+        "ctng",
+        "hsv",
+        "syphilis",
+        "trich",
+        "hiv",
+        "hepb",
+        "hepc"
+      ],
+      "tests": [
+        "sti-screen",
+        "hiv",
+        "hep-b-antigen",
+        "hep-c-antibody"
+      ],
+      "whoFor": [
+        "After a new sexual partner",
+        "Routine sexual health checks",
+        "Anyone wanting results privately"
+      ],
+      "faq": [
+        [
+          "Is it confidential?",
+          "Yes. Your results are sent to you, and you decide whether to share them with anyone else."
+        ],
+        [
+          "What samples are needed?",
+          "The STI Screen uses a blood sample and a urine sample, both collected at the same appointment."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "STI testing"
+    },
+    {
+      "slug": "vitamins-and-iron",
+      "title": "Vitamin D, B12 and Iron Blood Tests",
+      "h1": "Vitamin and iron blood tests.",
+      "intro": "Vitamin D, vitamin B12 and iron studies, alone or as part of a wider vitamin panel. Find out whether diet or supplements need attention.",
+      "markers": [
+        "vitd",
+        "b12",
+        "iron",
+        "b9",
+        "b6",
+        "vita",
+        "vitc"
+      ],
+      "tests": [
+        "vitamin-d-test",
+        "vitamin-d-b12-test",
+        "iron-studies",
+        "vitamin-wellness-panel"
+      ],
+      "whoFor": [
+        "People who spend little time in the sun",
+        "Vegetarians, vegans and anyone with a restricted diet",
+        "Anyone feeling persistently tired or low on energy"
+      ],
+      "faq": [
+        [
+          "Should I stop supplements before testing?",
+          "If you want to see your levels with your supplements, keep taking them as usual. If your doctor has advised otherwise, follow their instructions."
+        ],
+        [
+          "What do iron studies show?",
+          "Iron studies measure ferritin (your iron stores), iron and transferrin. Together they show whether your iron is low, normal or high."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Vitamins and iron"
+    },
+    {
+      "slug": "health-check",
+      "title": "Full Health Check Blood Test, No Referral Needed",
+      "h1": "A full health check blood test.",
+      "intro": "Liver, kidney, blood count, cholesterol, blood sugar and more in one collection. Choose the level of detail that suits you.",
+      "markers": [
+        "liver",
+        "kidney",
+        "fbc",
+        "lipids",
+        "glucose",
+        "crp",
+        "iron",
+        "tsh"
+      ],
+      "tests": [
+        "core-health-check",
+        "extended-general-health-check",
+        "essential-mens-panel",
+        "essential-womens-health-check"
+      ],
+      "whoFor": [
+        "Anyone wanting an annual check without a GP visit",
+        "People who have not had a blood test in a while",
+        "A baseline before a new training or nutrition program"
+      ],
+      "faq": [
+        [
+          "Which health check should I choose?",
+          "The Core Health Check covers the essentials. Core Health Plus adds thyroid, iron and a full blood count. Our men's and women's checks add markers specific to each. Our test finder can help you choose."
+        ],
+        [
+          "Do I need to fast?",
+          "Follow any preparation shown on the test you order. If you are unsure, our preparation guide has more detail."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Full health check"
+    },
+    {
+      "slug": "cholesterol-and-blood-sugar",
+      "title": "Cholesterol and Blood Sugar Tests",
+      "h1": "Cholesterol and blood sugar tests.",
+      "intro": "Your lipid profile, HbA1c and fasting insulin are the core markers of heart and metabolic health. Test them alone or as part of a wider panel.",
+      "markers": [
+        "lipids",
+        "hba1c",
+        "glucose",
+        "insulin"
+      ],
+      "tests": [
+        "lipid-profile",
+        "hba1c",
+        "blood-insulin-levels",
+        "extended-general-health-check"
+      ],
+      "whoFor": [
+        "Anyone with a family history of heart disease or diabetes",
+        "People making changes to diet or exercise",
+        "Tracking results over time"
+      ],
+      "faq": [
+        [
+          "Do I need to fast?",
+          "Fasting insulin requires fasting for 8 to 12 hours. For other tests, follow the preparation shown on the test you order."
+        ],
+        [
+          "What does HbA1c show?",
+          "HbA1c reflects your average blood sugar over the past two to three months, rather than a single moment."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "Cholesterol and blood sugar"
+    },
+    {
+      "slug": "psa",
+      "title": "PSA Blood Test, No Referral Needed",
+      "h1": "PSA blood test, no referral needed.",
+      "intro": "Prostate-specific antigen, on its own or as part of our Essential Men's Panel. Order online and get collected at a centre or at home.",
+      "markers": [
+        "psa"
+      ],
+      "tests": [
+        "psa-prostate-specific-antigen-test",
+        "essential-mens-panel"
+      ],
+      "whoFor": [
+        "Men who have discussed PSA testing with their doctor",
+        "Men wanting PSA included in a routine check",
+        "Tracking PSA over time"
+      ],
+      "faq": [
+        [
+          "Should I have a PSA test?",
+          "Whether PSA testing is right for you depends on your age, family history and preferences. It is worth discussing with your doctor."
+        ],
+        [
+          "Is there anything to avoid before the test?",
+          "Some activities can temporarily raise PSA. If your doctor has given you instructions, follow those."
+        ],
+        [
+          "Do I need a referral?",
+          "No. We issue the pathology request form with your order."
+        ]
+      ],
+      "label": "PSA"
+    },
+    {
+      "slug": "without-referral",
+      "title": "Blood Test Without a Referral in Australia",
+      "h1": "Blood tests without a referral.",
+      "intro": "Order a private blood test online, with the request form issued with your order. Visit one of 2,000+ partner collection centres, or have a registered nurse come to you.",
+      "markers": [],
+      "tests": [
+        "core-health-check",
+        "male-hormonal-test",
+        "essential-womens-health-check",
+        "extensive-thyroid-panel"
+      ],
+      "whoFor": [
+        "Anyone who wants a test without booking a GP appointment",
+        "People who want a specific test their GP has not ordered",
+        "Testing more often than a GP would usually order"
+      ],
+      "faq": [
+        [
+          "How can I get a blood test without a referral?",
+          "Order a private test from us. We issue the pathology request form with your order, so there is no GP visit needed."
+        ],
+        [
+          "Is a private blood test covered by Medicare?",
+          "No. Tests ordered without a GP referral are private, so Medicare rebates do not apply. The price you see is the price you pay."
+        ],
+        [
+          "Who reviews my results?",
+          "Your results are reviewed by an Australian doctor and sent to you with every reference range."
+        ]
+      ],
+      "label": "No referral needed"
+    }
+  ]
+}
