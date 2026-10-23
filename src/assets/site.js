@@ -93,10 +93,10 @@
           form.reset();
           status.setAttribute('data-state', 'ok');
           if (form.getAttribute('data-enquiry') === 'referral') {
-            var keep = { partner_code: data.partner_code, name: data.name, email: data.email };
+            var keep = { partner_code: data.partner_code, company: data.company };
             form.reset(); Object.keys(keep).forEach(function (k) { form.elements[k].value = keep[k]; });
             status.setAttribute('data-state', 'ok');
-            status.textContent = 'Referral received. A confirmation has been emailed to you. You can submit another below.';
+            status.textContent = 'Referral received. Our team will contact the patient to arrange the home visit. You can submit another below.';
             return;
           }
           status.textContent = form.getAttribute('data-enquiry') === 'booking' ? 'Thank you. Your request has been received and our team will contact you to confirm your appointment time.' : 'Thank you. Your message has been sent and our team will be in touch.';

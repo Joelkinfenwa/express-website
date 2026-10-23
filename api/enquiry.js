@@ -3,7 +3,7 @@ import TESTS from '../lib/test-index.mjs';
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -44,12 +44,12 @@ function attachment(body) {
 }
 
 async function toEmail(d, att) {
-  const subject = d.kind === 'referral' ? `Partner referral (${d.partner}, invoice monthly): ${d.patient_name || 'Patient'}${d.suburb ? ' ' + d.suburb : ''} (${d.collection || 'collection'})` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/checkout/i.test(d.payment) ? 'paying online' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
+  const subject = d.kind === 'referral' ? `Partner referral (${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/checkout/i.test(d.payment) ? 'paying online' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((s) => s.trim()), reply_to: d.email, subject, html: `<table>${rows}</table>${att ? '<p>Request form attached.</p>' : ''}`, ...(att ? { attachments: [att] } : {}) })
+    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((s) => s.trim()), ...(d.email ? { reply_to: d.email } : {}), subject, html: `<table>${rows}</table>${att ? '<p>Request form attached.</p>' : ''}`, ...(att ? { attachments: [att] } : {}) })
   });
   if (!r.ok) throw new Error(`Resend ${r.status}`);
 }
@@ -79,7 +79,6 @@ export default async function handler(req, res) {
   body = body || {};
   if (body.company_website) return res.status(200).json({ ok: true }); // honeypot: silently accept bots
   const d = clean(body);
-  if (!d.name || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) return res.status(400).json({ error: 'Name and a valid email are required' });
   const att = attachment(body);
   if (att && att.error) return res.status(400).json({ error: att.error });
   if (d.kind === 'referral') {
@@ -88,19 +87,20 @@ export default async function handler(req, res) {
     const norm = (x) => String(x || '').replace(/\s+/g, '').toUpperCase();
     const match = codes.find(([, c]) => c && norm(c) === norm(d.partner_code));
     if (!match) return res.status(403).json({ error: 'That partner access code is not recognised.' });
+    if (!d.patient_name) return res.status(400).json({ error: 'Please enter the patient\'s full name.' });
     if (!att) return res.status(400).json({ error: 'Please attach the referral form.' });
+    d.collection = 'Home visit';
+    d.name = d.company || match[0];
     d.partner = match[0];
     delete d.partner_code;
   }
+  if (d.kind !== 'referral' && (!d.name || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))) return res.status(400).json({ error: 'Name and a valid email are required' });
   const emailReady = process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM;
   const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
   try {
     // Email first: it is the only route that carries an uploaded request form.
     if (emailReady) {
       await toEmail(d, att);
-      if (d.kind === 'referral') await fetch('https://api.resend.com/emails', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-        body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: `Referral received: ${d.patient_name || 'patient'}`,
-          html: `<p>Thank you. Express Pathology has received your referral for <strong>${escapeHtml(d.patient_name || 'your client')}</strong> (${escapeHtml(d.collection || '')}). Our team will contact the patient to arrange collection. This referral will be included on ${escapeHtml(d.partner)}'s monthly invoice.</p><p>Questions? Reply to this email or call 02 9545 2940.</p>` }) }).catch(() => {});
       if (d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '')).catch((e) => console.error('quiz email failed:', e.message));
     } else if (hubspotReady && !att) await toHubSpot(d);
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
