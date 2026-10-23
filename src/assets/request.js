@@ -11,7 +11,7 @@
 
   function area(pc) { return !data ? null : data.metro[pc] ? 'metro' : data.regional[pc] ? 'regional' : null; }
   function referral() { var r = form.querySelector('input[name="has_referral"]:checked'); return r ? r.value : ''; }
-  function variantFor(a) { return data && data.ownForm && a ? data.ownForm[a] : null; }
+  function variantFor(a) { return data && a ? true : null; }
 
   function update() {
     var pc = input.value.replace(/\D/g, '');
@@ -36,14 +36,13 @@
   window.ExpressBooking = {
     prepare: function (d) {
       var a = area(String(d.postcode || '').replace(/\D/g, ''));
-      var v = d.has_referral === 'Yes' ? variantFor(a) : null;
+      var v = d.has_referral === 'Yes' && a ? true : null;
       d.reference = 'EP-' + Date.now().toString(36).slice(-4).toUpperCase() + Math.random().toString(36).slice(2, 4).toUpperCase();
       if (!v) { d.payment = 'Not taken online, team to arrange'; return null; }
-      d.payment = 'Sent to Shopify checkout, ' + (a === 'metro' ? 'metro ' + data.metroFee : 'regional ' + data.regionalFee) + '. Match the order by reference.';
-      var attrs = { 'Booking reference': d.reference, 'Collection method': 'Nurse home visit (own request form)', 'Patient name': d.name, 'Suburb': d.suburb, 'Postcode': d.postcode, 'Preferred date': d.preferred_date, 'Preferred time': d.preferred_time };
-      var q = ['checkout[email]=' + encodeURIComponent(d.email || '')];
-      Object.keys(attrs).forEach(function (k) { if (attrs[k]) q.push('attributes[' + encodeURIComponent(k) + ']=' + encodeURIComponent(attrs[k])); });
-      return 'https://' + data.store + '/cart/' + v.id + ':1?' + q.join('&');
+      d.payment = 'Sent to online payment (Stripe), ' + (a === 'metro' ? 'metro ' + data.metroFee : 'regional ' + data.regionalFee) + '. A separate paid-order email with the same reference confirms payment.';
+      var parts = String(d.name || '').trim().split(/\s+/);
+      return { checkout: { type: 'own-form', reference: d.reference, preferredDate: d.preferred_date, preferredTime: d.preferred_time, notes: d.message,
+        patient: { firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || parts[0] || '', email: d.email, phone: d.phone, suburb: d.suburb, postcode: d.postcode } } };
     }
   };
 

@@ -80,8 +80,15 @@
           if (pay) {
             status.setAttribute('data-state', 'ok');
             status.textContent = 'Request received. Taking you to secure payment…';
-            location.href = pay;
-            return;
+            if (typeof pay === 'string') { location.href = pay; return; }
+            return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pay.checkout) })
+              .then(function (r) { return r.json(); })
+              .then(function (j) {
+                if (j && j.url) { location.href = j.url; return; }
+                status.setAttribute('data-state', 'error');
+                status.textContent = 'Your request has been received, but online payment could not start. Our team will contact you to arrange payment.';
+                pay = null;
+              });
           }
           form.reset();
           status.setAttribute('data-state', 'ok');

@@ -123,3 +123,22 @@ button[disabled]{opacity:.6;cursor:progress}
 .tf-opt[aria-pressed="true"]{border-color:#17302A;background:#E8EDE6}
 .tf-opt small{display:block;font-weight:400;font-size:14px;color:#4B5650}
 .tf-link{border:0;background:none;padding:8px 0;font:inherit;font-weight:700;color:#1C2420;text-decoration:underline;cursor:pointer;min-height:44px}
+
+/* Long-form policy text */
+.prose{font-size:17px;color:#2E3833}
+.prose h2{font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:26px;letter-spacing:-.02em;margin:36px 0 10px;color:#1C2420}
+.prose h3,.prose h4{font-size:19px;margin:24px 0 8px;color:#1C2420}
+.prose p,.prose li{margin:0 0 12px}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}
+.prose a{text-decoration:underline}
+.prose hr{border:0;border-top:1px solid #DCE0D8;margin:28px 0}
+.prose table{border-collapse:collapse;width:100%;margin:0 0 16px;font-size:15px}
+.prose td,.prose th{border:1px solid #DCE0D8;padding:8px;text-align:left;vertical-align:top}
+
+/* Checkout */
+.co-opt{display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:18px;border:1px solid #D3D8D0;cursor:pointer;background:#FFFFFF}
+.co-opt input{width:20px;height:20px;accent-color:#17302A;flex:none}
+.co-opt span{display:flex;flex-direction:column}
+.co-opt small{font-size:14px;color:#4B5650}
+.co-opt:has(input:checked){border-color:#17302A;background:#F7F4EF}
+@media (max-width:900px){aside[aria-label="Order summary"]{position:static!important;order:-1}}

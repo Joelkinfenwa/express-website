@@ -132,16 +132,12 @@
   function checkout() {
     var ids = Object.keys(state.picked);
     if (!ids.length || state.busy) return;
-    state.busy = true; status(''); renderSummary();
-    var lines = ids.map(function (id) { return id + ':1'; });
-    if (cat.base) lines.unshift(cat.base.id + ':1');
-    var home = state.mode === 'home';
-    if (home && cat.homeVisit) lines.push(cat.homeVisit.id + ':1');
-    var q = '?attributes[Collection method]=' + encodeURIComponent(home ? 'Nurse home visit' : 'Walk-in collection centre') + '&attributes[Source]=' + encodeURIComponent('Build your own test');
+    var slugs = state.tests.filter(function (x) { return state.picked[x.id]; }).map(function (x) { return x.slug; });
     if (window.gtag) window.gtag('event', 'begin_checkout', { value: totalValue(), currency: 'AUD' });
     if (window.fbq) window.fbq('track', 'InitiateCheckout', { value: totalValue(), currency: 'AUD' });
-    window.location.href = 'https://' + cat.store + '/cart/' + lines.join(',') + q;
+    window.location.href = '/checkout?add=' + slugs.join(',') + (state.mode === 'home' ? '&home=1' : '');
   }
+
 
   function totalValue() {
     var sub = state.tests.filter(function (t) { return state.picked[t.id]; }).reduce(function (a, t) { return a + t.price; }, 0);
@@ -168,7 +164,7 @@
   var cat = {};
   fetch('/assets/catalog.json').then(function (r) { if (!r.ok) throw new Error(); return r.json(); }).then(function (c) {
     cat = c;
-    state.tests = (c.addons || []).map(function (a) { return { id: String(a.id), title: a.title, price: a.price, cat: LABELS[a.cat] ? a.cat : categorise({ title: a.title, tags: [] }) }; });
+    state.tests = (c.addons || []).map(function (a) { return { id: String(a.id), slug: a.slug, title: a.title, price: a.price, cat: LABELS[a.cat] ? a.cat : categorise({ title: a.title, tags: [] }) }; });
     homeVisitPrice = c.homeVisit ? c.homeVisit.price : null;
     if (homeVisitPrice != null) $('bt-home-note').textContent = '+ ' + fmt.format(homeVisitPrice);
     if (!state.tests.length) { fallback(); return; }

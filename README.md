@@ -96,3 +96,21 @@ Every build reads the store's public product feed (`expresspathology.myshopify.c
 
 - **Email delivery:** set `RESEND_API_KEY`, `ENQUIRY_TO` (for example express@expresspathology.com.au) and `ENQUIRY_FROM` (an address on a domain verified in Resend) in Vercel.
 - **Postcode check:** add postcodes to `data/coverage.json` (`metro` and `regional` lists). The form then shows whether home visits are available, and the metro or regional fee.
+
+## Checkout (Stripe)
+
+Checkout runs on Stripe. Prices are calculated on the server from `lib/price-index.mjs`, which the build generates from the catalogue and coverage data; the browser never sets a price.
+
+- `/checkout` collects patient details, then `api/checkout.js` creates a Stripe Checkout Session.
+- `api/stripe-webhook.js` emails the paid order to the team and a confirmation to the patient.
+
+Vercel environment variables:
+
+| Variable | Purpose |
+|---|---|
+| `STRIPE_SECRET_KEY` | Stripe secret key (live or test) |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret of the webhook endpoint below |
+| `RESEND_API_KEY`, `ENQUIRY_TO`, `ENQUIRY_FROM` | Order and enquiry emails |
+| `SITE_URL` | Optional. Fallback origin for Stripe return links |
+
+Stripe webhook: endpoint `https://expresspathology.com.au/api/stripe-webhook`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`.

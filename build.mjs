@@ -62,7 +62,6 @@ function finalize(html, rel) {
 const catalog = await loadCatalog(ROOT);
 console.log(`Catalogue: ${catalog.tests.length} tests, ${catalog.addons.length} builder add-ons (source: ${catalog.source})`);
 const money = (n) => '$' + (Number.isInteger(n) ? n : n.toFixed(2));
-const cartUrl = (variant) => `https://${catalog.store}/cart/${variant}:1`;
 const primaryCat = (t) => t.cats[0] || 'general';
 const MK = JSON.parse(readFileSync(join(ROOT, 'data/markers.json'), 'utf8'));
 // Clean marker names for cards and lists (falls back to the Shopify text)
@@ -171,7 +170,7 @@ function walk(dir) {
     if (statSync(p).isDirectory()) { mkdirSync(dest, { recursive: true }); walk(p); continue; }
     if (extname(name) !== '.html') { copyFileSync(p, dest); continue; }
     writeFileSync(dest, finalize(fillFragments(readFileSync(p, 'utf8')), rel));
-    if (name !== '404.html') pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
+    if (!['404.html', 'checkout.html', 'order-confirmed.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
   }
 }
 
@@ -187,7 +186,6 @@ const COPY = JSON.parse(readFileSync(join(ROOT, 'data/panel-content.json'), 'utf
 const GROUP_LABEL = Object.fromEntries(MK.groups);
 const GROUP_ORDER = MK.groups.map((g) => g[0]);
 const tick = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17302A" stroke-width="2.4" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>';
-const multiCart = (ids, attrs) => `https://${catalog.store}/cart/${ids.map((i) => i + ':1').join(',')}` + (attrs ? '?' + Object.entries(attrs).map(([k, v]) => `attributes[${encodeURIComponent(k)}]=${encodeURIComponent(v)}`).join('&') : '');
 
 // Resolve Shopify marker text to the marker library: [{ key, name, about, group }]
 function resolveMarkers(t) {
@@ -225,16 +223,16 @@ for (const t of catalog.tests) {
   // unless Shopify already has a home variant at exactly that price.
   const hv = catalog.homeVisit;
   let home = null;
-  if (t.centreVariant && t.homeVariant && hv && Math.abs(t.homePrice - t.price - hv.price) < 0.01) home = { href: cartUrl(t.homeVariant), price: t.homePrice, extra: hv.price };
-  else if (t.centreVariant && hv) home = { href: multiCart([t.centreVariant, hv.id], { 'Collection method': 'Nurse home visit' }), price: t.price + hv.price, extra: hv.price };
-  else if (!t.centreVariant && t.homeVariant) home = { href: cartUrl(t.homeVariant), price: t.homePrice, extra: 0 };
+  // Checkout runs on Stripe via /checkout; home visit = the panel plus the home visit fee
+  const coHref = (h) => `/checkout?panel=${encodeURIComponent(t.handle)}${h ? '&home=1' : ''}`;
+  if (t.centreVariant && hv) home = { href: coHref(true), price: t.price + hv.price, extra: hv.price };
   const opt = (value, checked, href, price, label, sub, right) => `<label style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 18px; border: 1px solid #D3D8D0; cursor: pointer"><span style="display: flex; gap: 12px; align-items: center"><input type="radio" name="pp-mode" value="${value}"${checked ? ' checked' : ''} data-href="${href}" data-price="${money(price)}" style="width: 20px; height: 20px; accent-color: #17302A"><span style="display: flex; flex-direction: column"><span style="font-weight: 700">${label}</span><span style="font-size: 14px; color: #4B5650">${sub}</span></span></span><span style="font-weight: 700">${right}</span></label>`;
-  const centreOption = t.centreVariant ? opt('centre', true, cartUrl(t.centreVariant), t.price, 'Walk-in centre', '2,000+ partner centres', 'Included')
+  const centreOption = t.centreVariant ? opt('centre', true, coHref(false), t.price, 'Walk-in centre', '2,000+ partner centres', 'Included')
     : '<p style="margin: 0; font-size: 14px; color: #4B5650">This test is currently available with a home visit only.</p>';
   const homeOption = home ? opt('home', !t.centreVariant, home.href, home.price, 'Nurse at home', 'Home or workplace visit', home.extra ? '+' + money(home.extra) : 'Included')
     : '<p style="margin: 0; font-size: 14px; color: #4B5650">Need a home visit for this test? <a href="/book" style="text-decoration: underline">Request a nurse</a>.</p>';
   const startPrice = t.centreVariant ? t.price : home ? home.price : t.price;
-  const startHref = t.centreVariant ? cartUrl(t.centreVariant) : home ? home.href : cartUrl(t.homeVariant);
+  const startHref = t.centreVariant ? coHref(false) : home ? home.href : '/contact';
 
   // Preparation
   const morningHormones = ['testosterone', 'cortisol'].filter((k) => keys.has(k)).map((k) => MK.markers[k].name.toLowerCase());
@@ -428,6 +426,22 @@ ${byState.map(([st, l]) => `<div style="display: flex; flex-direction: column; g
   pages.push('/mobile-blood-collection');
 }
 
+// Price index for Stripe checkout (server-side source of truth; committed; regenerated each build)
+{
+  const slugA = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const fee = (v) => Number(String(v).replace(/[^0-9.]/g, ''));
+  const cov = JSON.parse(readFileSync(join(ROOT, 'data/coverage.json'), 'utf8'));
+  const idx = {
+    panels: Object.fromEntries(catalog.tests.filter((t) => t.centreVariant).map((t) => [t.handle, { title: t.title, price: t.price }])),
+    addons: Object.fromEntries(catalog.addons.map((a) => [slugA(a.title), { title: a.title.trim(), price: a.price }])),
+    builderFee: catalog.base ? catalog.base.price : 0,
+    homeVisit: catalog.homeVisit ? catalog.homeVisit.price : null,
+    ownForm: { metro: fee(config.metroFee), regional: fee(config.regionalFee) },
+    metro: cov.metro || [], regional: cov.regional || []
+  };
+  writeFileSync(join(ROOT, 'lib/price-index.mjs'), '// Generated by build.mjs from the catalogue and coverage. Do not edit.\nexport default ' + JSON.stringify(idx) + ';\n');
+}
+
 // Test index for serverless functions (committed; regenerated each build)
 writeFileSync(join(ROOT, 'lib/test-index.mjs'), '// Generated by build.mjs. Known public tests for server-side validation.\nexport default ' + JSON.stringify(Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price }])), null, 1) + ';\n');
 
@@ -509,15 +523,49 @@ ${markersHtml ? `<div style="flex: 3 1 520px; min-width: 0; display: flex; flex-
   }
 }
 
+// ---------- Policy and info pages (moved off Shopify) ----------
+{
+  const shell = readFileSync(join(SRC, '_page.html'), 'utf8');
+  const H1 = "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(38px, 5vw, 64px); line-height: 1.02; letter-spacing: -0.035em";
+  const render = (path, title, desc, body) => {
+    const vals = { pageTitle: esc(`${title} | Express Pathology`), path, metaDescription: esc(desc), jsonld: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: title, url: siteUrl + path }) };
+    writeFileSync(join(OUT, path.slice(1) + '.html'), finalize(shell.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace('<!--@BODY-->', body), 'x.html'));
+    pages.push(path);
+  };
+  for (const [slug, title, desc] of [
+    ['privacy-policy', 'Privacy policy', 'How Express Pathology collects, uses and protects your personal information.'],
+    ['terms-of-service', 'Terms and conditions', 'The terms on which Express Pathology provides pathology collection and related services.'],
+    ['refund-policy', 'Refund policy', 'Express Pathology refund and cancellation conditions.']
+  ]) {
+    const html = readFileSync(join(ROOT, 'data/policies', slug + '.html'), 'utf8');
+    render('/' + slug, title, desc, `<section style="max-width: 820px; margin: 0 auto; padding: 32px 24px 96px; display: flex; flex-direction: column; gap: 24px">
+<h1 style="${H1}">${esc(title)}</h1>
+<div class="prose">${html}</div>
+</section>`);
+  }
+  const states = [['NSW', 'https://www.4cyte.com.au/Locations', '4Cyte Pathology'], ['VIC', 'https://www.4cyte.com.au/Locations', '4Cyte Pathology'], ['QLD', 'https://www.4cyte.com.au/Locations', '4Cyte Pathology'], ['ACT', 'https://www.4cyte.com.au/Locations', '4Cyte Pathology'], ['SA', 'https://www.clinicallabs.com.au/location', 'Australian Clinical Labs'], ['WA', 'https://www.clinicallabs.com.au/location', 'Australian Clinical Labs'], ['NT', 'https://www.clinicallabs.com.au/location', 'Australian Clinical Labs']];
+  render('/collection-centres', 'Collection centres', 'Find a NATA-accredited partner pathology collection centre near you in any Australian state or territory.', `<section style="max-width: 1100px; margin: 0 auto; padding: 32px 24px 96px; display: flex; flex-direction: column; gap: 28px">
+<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Walk-in collection</span>
+<h1 style="${H1}">Find a collection centre near you.</h1>
+<p style="margin: 0; font-size: 19px; color: #4B5650; max-width: 720px">We partner with NATA-accredited pathology laboratories to provide collection centres across every Australian state and territory. Choose your state to find your nearest centre, and bring the request form issued with your order.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px">${states.map(([s, u, lab]) => `<a href="${u}" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 6px; padding: 24px; border-radius: 24px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 28px">${s}</span><span style="color: #4B5650">${lab} locations →</span></a>`).join('\n')}</div>
+<p style="margin: 0; color: #4B5650">Prefer not to travel? <a href="/mobile-blood-collection" style="text-decoration: underline">A registered nurse can come to you</a>.</p>
+</section>`);
+}
+
 // Coverage for the request form
 const cov = JSON.parse(readFileSync(join(ROOT, 'data/coverage.json'), 'utf8'));
 writeFileSync(join(OUT, 'assets/coverage.json'), JSON.stringify({ metro: cov.metro || [], regional: cov.regional || [], metroFee: config.metroFee, regionalFee: config.regionalFee, store: catalog.store, ownForm: catalog.ownForm }));
-if (!catalog.ownForm || !catalog.ownForm.metro) console.warn('Note: no Shopify product for home visits with own request form; /book will not take payment.');
-else if (!catalog.ownForm.regional) console.warn('Note: own request form product has no Regional variant; regional /book requests will not go to payment.');
 if (!(cov.metro || []).length) console.warn('Note: data/coverage.json has no postcodes yet; the request form will not show coverage.');
 
 // Builder data for the browser
-writeFileSync(join(OUT, 'assets/catalog.json'), JSON.stringify({ store: catalog.store, addons: catalog.addons, homeVisit: catalog.homeVisit, base: catalog.base }));
+{
+  const slugB = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  writeFileSync(join(OUT, 'assets/catalog.json'), JSON.stringify({
+    addons: catalog.addons.map((a) => ({ ...a, slug: slugB(a.title) })), homeVisit: catalog.homeVisit, base: catalog.base,
+    panels: Object.fromEntries(catalog.tests.filter((t) => t.centreVariant).map((t) => [t.handle, { title: t.title, price: t.price, count: displayNames(t).length }]))
+  }));
+}
 
 if (problems.length) {
   console.error('\nBuild stopped. These would have gone live:\n  - ' + problems.join('\n  - ') + '\n');
@@ -526,5 +574,5 @@ if (problems.length) {
 
 const site = config.siteUrl.replace(/\/$/, '');
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc></url>`).join('\n')}\n</urlset>\n`);
-writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${site}/sitemap.xml\n`);
+writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nSitemap: ${site}/sitemap.xml\n`);
 console.log(`Built ${pages.length} pages into dist/`);
