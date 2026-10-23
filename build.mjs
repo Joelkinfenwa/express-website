@@ -34,11 +34,11 @@ function analytics() {
   const ga = config.gaMeasurementId, ads = config.googleAdsId;
   if (ga || ads) {
     const labels = Object.fromEntries(Object.entries(config.googleAdsLabels || {}).filter(([, v]) => v));
-    const map = { purchase: 'purchase', home_visit_request: 'homeVisitRequest', phone_call: 'phoneCall', partner_enquiry: 'partnerEnquiry' };
+    const map = { purchase: 'purchase', home_visit_request: 'homeVisitRequest', phone_call: 'phoneCall', partner_enquiry: 'partnerEnquiry', begin_checkout: 'beginCheckout', test_finder_lead: 'testFinderLead' };
     const sendTo = ads ? Object.fromEntries(Object.entries(map).filter(([, k]) => labels[k]).map(([ev, k]) => [ev, `${ads}/${labels[k]}`])) : {};
     out += `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga || ads)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());${ga ? `gtag('config','${esc(ga)}');` : ''}${ads ? `gtag('config','${esc(ads)}');` : ''}
-window.epTrack=function(ev,p){p=p||{};gtag('event',ev,p);var t=${JSON.stringify(sendTo)}[ev];if(t){var c={send_to:t};if(p.value!=null){c.value=p.value;c.currency=p.currency||'AUD';}if(p.transaction_id)c.transaction_id=p.transaction_id;gtag('event','conversion',c);}};
+window.epTrack=function(ev,p){p=p||{};if(p.user_data){gtag('set','user_data',p.user_data);delete p.user_data;}gtag('event',ev,p);var t=${JSON.stringify(sendTo)}[ev];if(t){var c={send_to:t};if(p.value!=null){c.value=p.value;c.currency=p.currency||'AUD';}if(p.transaction_id)c.transaction_id=p.transaction_id;gtag('event','conversion',c);}};
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="tel:"]');if(a)window.epTrack('phone_call',{page:location.pathname});});</script>
 `;
   }

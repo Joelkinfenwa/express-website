@@ -1,5 +1,6 @@
 // Returns the paid value of a Checkout Session for conversion tracking on /order-confirmed.
-// Exposes only the total, currency and an order identifier; no personal details.
+// Exposes only the total, currency, an order identifier and a one-way hash of the email.
+import crypto from 'node:crypto';
 import { stripe } from '../lib/stripe.js';
 
 export default async function handler(req, res) {
@@ -11,6 +12,8 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       paid, value: (s.amount_total || 0) / 100, currency: String(s.currency || 'aud').toUpperCase(),
+      // Enhanced conversions: SHA-256 of the normalised email only, never the email itself
+      email_sha256: (() => { const e = String((s.customer_details && s.customer_details.email) || s.customer_email || '').trim().toLowerCase(); return e ? crypto.createHash('sha256').update(e).digest('hex') : ''; })(),
       transaction_id: (s.metadata && s.metadata.reference) || s.id,
       items: String((s.metadata && s.metadata.items) || '').split('; ').filter(Boolean).map((n) => ({ item_name: n }))
     });

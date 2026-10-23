@@ -71,7 +71,7 @@
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
     var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes') };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
-    if (window.gtag) window.gtag('event', 'add_payment_info', { currency: 'AUD' });
+    if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
     fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {

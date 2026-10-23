@@ -19,7 +19,9 @@
     "purchase": "",
     "homeVisitRequest": "",
     "phoneCall": "",
-    "partnerEnquiry": ""
+    "partnerEnquiry": "",
+    "beginCheckout": "",
+    "testFinderLead": ""
   },
   "metaPixelId": ""
 }

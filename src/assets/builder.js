@@ -133,7 +133,7 @@
     var ids = Object.keys(state.picked);
     if (!ids.length || state.busy) return;
     var slugs = state.tests.filter(function (x) { return state.picked[x.id]; }).map(function (x) { return x.slug; });
-    if (window.gtag) window.gtag('event', 'begin_checkout', { value: totalValue(), currency: 'AUD' });
+    if (window.gtag) window.gtag('event', 'add_to_cart', { value: totalValue(), currency: 'AUD' });
     if (window.fbq) window.fbq('track', 'InitiateCheckout', { value: totalValue(), currency: 'AUD' });
     window.location.href = '/checkout?add=' + slugs.join(',') + (state.mode === 'home' ? '&home=1' : '');
   }

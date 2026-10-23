@@ -164,7 +164,7 @@
         topic: 'Test finder: ' + info(p[0]).title,
         message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
-      }) }).then(function (r) { if (!r.ok) throw new Error(); status.setAttribute('data-state', 'ok'); status.textContent = 'Sent. Check your inbox shortly.'; form.reset(); })
+      }) }).then(function (r) { if (!r.ok) throw new Error(); status.setAttribute('data-state', 'ok'); status.textContent = 'Sent. Check your inbox shortly.'; form.reset(); if (window.epTrack) window.epTrack('test_finder_lead', { recommendation: p[0] }); })
         .catch(function () { status.setAttribute('data-state', 'error'); status.textContent = 'That did not send. Please try again.'; btn.disabled = false; });
     });
     resEl.appendChild(form);
