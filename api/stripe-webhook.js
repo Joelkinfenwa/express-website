@@ -6,6 +6,7 @@ import { verifySignature } from '../lib/stripe.js';
 import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
 import { patientEmail } from '../lib/patient-email.js';
+import { orderNumber } from '../lib/order-number.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -39,7 +40,7 @@ export async function requestForm(s) {
   const order = orderFromSession(s, PRICES);
   if (!order.items.length) throw new Error('no tests found for ' + m.reference);
   const bytes = await requestFormPdf(order);
-  return { filename: `Pathology request form ${m.reference}.pdf`, content: Buffer.from(bytes).toString('base64') };
+  return { filename: `Pathology request form ${String(m.reference).replace('#', 'order ')}.pdf`, content: Buffer.from(bytes).toString('base64') };
 }
 
 export function emails(s, form = null, formError = '') {
@@ -48,7 +49,7 @@ export function emails(s, form = null, formError = '') {
   const total = money(s.amount_total || 0);
   const items = String(m.items || '').split('; ').filter(Boolean);
   const rows = [
-    ['Reference', m.reference], ['Order', items.join(', ')], ['Total paid', total], ['Collection', m.collection],
+    ['Order', m.reference], ['Checkout reference', m.checkout_ref !== m.reference ? m.checkout_ref : ''], ['Items', items.join(', ')], ['Total paid', total], ['Collection', m.collection],
     ['Name', name], ['Date of birth', m.dob], ['Sex', m.sex], ['Email', s.customer_details && s.customer_details.email || s.customer_email],
     ['Phone', m.phone], ['Address', [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ')],
     ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Stripe session', s.id]
@@ -60,7 +61,7 @@ export function emails(s, form = null, formError = '') {
     reply_to: s.customer_details && s.customer_details.email || s.customer_email,
     ...(form ? { attachments: [form] } : {}),
     subject: `New paid order ${m.reference}: ${items[0] || 'Order'}${items.length > 1 ? ` + ${items.length - 1} more` : ''} (${m.collection})`,
-    html: `<p><strong>New paid order.</strong> ${m.order_type === 'own-form' ? 'Patient has their own request form (sent separately with the same reference). Book the nurse.' : (form ? `Pathology request form attached${toPatient ? ' (also emailed to the patient)' : '. Send it to the patient'}` : `Request form could not be generated${formError ? ' (' + esc(formError) + ')' : ''}. Issue it manually`) + (/^Home/.test(m.collection) ? ' and book the nurse.' : '.')}</p><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join('')}</table>`
+    html: `<p><strong>New paid order.</strong> ${m.order_type === 'own-form' ? 'Patient has their own request form (sent separately with the checkout reference below). Book the nurse.' : (form ? `Pathology request form attached${toPatient ? ' (also emailed to the patient)' : '. Send it to the patient'}` : `Request form could not be generated${formError ? ' (' + esc(formError) + ')' : ''}. Issue it manually`) + (/^Home/.test(m.collection) ? ' and book the nurse.' : '.')}</p><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join('')}</table>`
   };
   const pe = patientEmail(s, PRICES, { attached: toPatient });
   const patient = {
@@ -84,6 +85,10 @@ export default async function handler(req, res) {
   if (!relevant) return res.status(200).json({ received: true, ignored: event.type });
   if (!process.env.RESEND_API_KEY || !process.env.ENQUIRY_FROM || !process.env.ENQUIRY_TO) { console.error('order email not configured'); return res.status(500).json({ error: 'Email not configured' }); }
   try {
+    // Sequential order number replaces the checkout reference everywhere the customer or lab sees it
+    const m = s.metadata = { ...(s.metadata || {}) };
+    m.checkout_ref = m.reference;
+    try { m.reference = '#' + await orderNumber(s); } catch (e) { console.error('order number failed:', e.message); }
     let form = null, formError = '';
     try { form = await requestForm(s); } catch (e) { formError = e.message; console.error('request form failed:', e.message); }
     const { team, patient } = emails(s, form, formError);
