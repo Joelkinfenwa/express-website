@@ -109,7 +109,7 @@ export async function loadCatalog(root) {
     ownForm = { metro: pick(metro), regional: pick(regional) };
   }
   return {
-    source, store: cfg.store, featured: cfg.featured,
+    source, store: cfg.store, featured: cfg.featured, flagship: cfg.flagship,
     tests: pub, addons,
     homeVisit: hv ? { id: hv.variants[0].id, price: parseFloat(hv.variants[0].price) } : null,
     ownForm,

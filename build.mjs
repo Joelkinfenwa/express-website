@@ -89,7 +89,7 @@ function card(t, dark = false) {
   const c = dark ? 'background: #17302A; color: #F7F4EF' : 'background: #FFFFFF; border: 1px solid #DCE0D8';
   const sub = dark ? '#C5D1CA' : '#4B5650';
   return `<a href="/tests/${t.handle}" style="display: flex; flex-direction: column; gap: 12px; padding: 30px; border-radius: 28px; ${c}; min-height: 250px; box-sizing: border-box">
-<span style="font-size: 13px; font-weight: 700; color: ${dark ? '#F2A981' : '#5A645E'}">${esc(CATEGORY_LABELS[primaryCat(t)])}</span>
+<span style="font-size: 13px; font-weight: 700; color: ${dark ? '#F2A981' : '#5A645E'}">${t.handle === catalog.flagship ? 'Our flagship · ' : ''}${esc(CATEGORY_LABELS[primaryCat(t)])}</span>
 <span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">${esc(t.title)}</span>
 <span style="color: ${sub}">${esc(t.blurb || 'Includes ' + summary(t))}</span>
 <span style="margin-top: auto; display: flex; justify-content: space-between; align-items: baseline"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 30px">${money(t.price)}</span><span style="font-weight: 700">View test →</span></span>
@@ -103,11 +103,39 @@ const featured = catalog.featured.map((h) => catalog.tests.find((t) => t.handle 
 const usedCats = CATEGORY_ORDER.filter((c) => catalog.tests.some((t) => t.cats.includes(c)));
 const catButtons = ['<button type="button" class="bt-cat" aria-pressed="true" data-cat="all">All panels</button>']
   .concat(usedCats.map((c) => `<button type="button" class="bt-cat" aria-pressed="false" data-cat="${c}">${esc(CATEGORY_LABELS[c])}</button>`)).join('\n');
-const sorted = [...catalog.tests.filter((t) => t.kind === 'panel'), ...catalog.tests.filter((t) => t.kind === 'single')];
+const sorted = [...catalog.tests.filter((t) => t.handle === catalog.flagship), ...catalog.tests.filter((t) => t.handle !== catalog.flagship)];
+// Home page: flagship feature plus three featured panels
+function homeTests() {
+  const flag = catalog.tests.find((t) => t.handle === catalog.flagship);
+  const copy = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'data/panel-content.json'), 'utf8')); } catch { return {}; } })();
+  const others = featured.filter((t) => t !== flag).slice(0, 3);
+  const grid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">${others.map((t) => card(t)).join('\n')}</div>`;
+  if (!flag) return grid;
+  const groups = {};
+  for (const raw of flag.markers) for (const a of MK.aliases[raw] || []) { const k = typeof a === 'string' ? a : a.key; const g = MK.markers[k].group; (groups[g] = groups[g] || new Set()).add(k); }
+  const GL = Object.fromEntries(MK.groups);
+  const chips = MK.groups.filter(([g]) => groups[g]).map(([g]) => `<span style="padding: 8px 14px; border-radius: 999px; border: 1px solid #3A5A50; font-size: 14px; font-weight: 600">${esc(GL[g])} <span style="color: #F2A981">${groups[g].size}</span></span>`).join('');
+  const n = displayNames(flag).length;
+  return `<div style="background: #17302A; color: #F7F4EF; border-radius: 32px; padding: clamp(28px, 4vw, 48px); display: flex; flex-wrap: wrap; gap: 32px 48px; align-items: flex-end">
+<div style="flex: 3 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #F2A981">Our flagship panel</span>
+<span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 4.6vw, 60px); line-height: 1; letter-spacing: -0.04em">${esc(flag.title)}</span>
+<p style="margin: 0; color: #C5D1CA; font-size: 18px; max-width: 620px">${esc((copy[flag.handle] || {}).lead || 'Includes ' + summary(flag))}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">${chips}</div>
+</div>
+<div style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<span style="color: #C5D1CA">${n} tests in one collection</span>
+<span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 48px; letter-spacing: -0.03em; line-height: 1">${money(flag.price)}</span>
+<a href="/tests/${flag.handle}" class="btn" style="background: #F2A981; color: #1C2420; justify-content: center">View the panel</a>
+</div>
+</div>
+${grid}`;
+}
 const fragments = {
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
   CATEGORY_BUTTONS: catButtons,
   ALL_TESTS: sorted.map(row).join('\n'),
+  HOME_TESTS: homeTests(),
   BUILDER_FEE: catalog.base ? `A ${money(catalog.base.price)} build-your-own fee applies to each order.` : '',
   QUIZ_DATA: JSON.stringify({
     tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant }])),
@@ -264,7 +292,7 @@ ${prep.map(([h, p], i) => `<li style="display: flex; gap: 20px; padding: 20px 0;
   ]).replace(/</g, '\\u003c');
 
   const vals = {
-    title: esc(t.title), handle: t.handle, kindLabel: t.kind === 'panel' ? 'Panel' : 'Single test', categoryLabel: esc(catLabel), lead: esc(lead),
+    title: esc(t.title), handle: t.handle, kindLabel: t.handle === catalog.flagship ? 'Our flagship panel' : 'Panel', categoryLabel: esc(catLabel), lead: esc(lead),
     metaDescription: esc(`${t.title}: ${lead} ${money(startPrice)}, no referral needed, collected at a partner centre or at home.`.slice(0, 300)),
     priceLabel: money(startPrice), buyUrl: startHref,
     includedHeading: copy.includedHeading || (count === '1' ? 'What this test measures.' : `${count} tests in one collection.`), jsonld
