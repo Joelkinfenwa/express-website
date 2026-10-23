@@ -9,6 +9,7 @@
     buy.href = href; price.textContent = p;
     if (barBuy) { barBuy.href = href; barPrice.textContent = p; }
   }
+  if (/[?&]collect=home\b/.test(location.search)) { var h = document.querySelector('input[name=pp-mode][value=home]'); if (h) h.checked = true; }
   Array.prototype.forEach.call(document.querySelectorAll('input[name=pp-mode]'), function (r) {
     r.addEventListener('change', function () { if (r.checked) select(r); });
     if (r.checked) select(r);

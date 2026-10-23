@@ -1,8 +1,9 @@
+import TESTS from '../lib/test-index.mjs';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -53,6 +54,22 @@ async function toEmail(d, att) {
   if (!r.ok) throw new Error(`Resend ${r.status}`);
 }
 
+// Test finder: send the patient their recommendation
+async function toPatient(d, origin) {
+  const recs = String(d.recommendation || '').split(',').map((h) => h.trim()).filter((h) => TESTS[h]).slice(0, 3)
+    .map((h) => [TESTS[h].title, `/tests/${h}`, '$' + TESTS[h].price]);
+  if (!recs.length) return;
+  const first = escapeHtml((d.name || '').split(' ')[0]);
+  const row = ([title, path, price], i) => `<tr><td style="padding:18px 20px;border-top:1px solid #DCE0D8"><div style="font-size:12px;font-weight:700;color:#A4502E;text-transform:uppercase;letter-spacing:.06em">${i === 0 ? 'Our recommendation' : 'Also consider'}</div><div style="font-size:20px;font-weight:700;margin:4px 0">${escapeHtml(title)}</div><div style="color:#4B5650">${escapeHtml(price)} · no referral needed</div><a href="${origin}${path}" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:999px;background:${i === 0 ? '#17302A' : '#FFFFFF'};color:${i === 0 ? '#F7F4EF' : '#1C2420'};border:1px solid #17302A;text-decoration:none;font-weight:700">View test</a></td></tr>`;
+  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate;overflow:hidden"><tr><td style="padding:28px 20px 8px"><div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div><h1 style="font-size:26px;margin:20px 0 8px">Hi ${first || 'there'}, here is your recommended blood test</h1><p style="color:#4B5650;margin:0 0 12px">Based on your answers to our test finder. Collect at one of 2,000+ partner centres, or add a home visit and a registered nurse comes to you.</p></td></tr>${recs.map(row).join('')}<tr><td style="padding:20px;border-top:1px solid #DCE0D8;font-size:13px;color:#5A645E">This suggestion is based on your answers and is not medical advice. If you have symptoms or a health concern, please speak with your doctor. Reply to this email if you have any questions.</td></tr></table></div>`;
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: `Your recommended blood test: ${recs[0][0]}`, html })
+  });
+  if (!r.ok) throw new Error(`Resend patient ${r.status}`);
+}
+
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
 export default async function handler(req, res) {
@@ -70,6 +87,7 @@ export default async function handler(req, res) {
   try {
     // Email first: it is the only route that carries an uploaded request form.
     if (emailReady) await toEmail(d, att);
+    if (emailReady && d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, ''));
     else if (hubspotReady && !att) await toHubSpot(d);
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot

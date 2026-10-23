@@ -116,3 +116,10 @@ button[disabled]{opacity:.6;cursor:progress}
 .pp-groups{columns:3 340px;column-gap:20px}
 .pp-group{break-inside:avoid;margin-bottom:20px}
 @media (max-width:900px){#pp-box{position:static!important}}
+
+/* Test finder */
+.tf-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:60px;padding:14px 20px;border:1px solid #D3D8D0;border-radius:18px;background:#FFFFFF;color:#1C2420;font:inherit;font-weight:600;font-size:17px;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.tf-opt:hover{border-color:#17302A;background:#F7F4EF}
+.tf-opt[aria-pressed="true"]{border-color:#17302A;background:#E8EDE6}
+.tf-opt small{display:block;font-weight:400;font-size:14px;color:#4B5650}
+.tf-link{border:0;background:none;padding:8px 0;font:inherit;font-weight:700;color:#1C2420;text-decoration:underline;cursor:pointer;min-height:44px}
