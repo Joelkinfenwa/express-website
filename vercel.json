@@ -69,6 +69,76 @@
       "source": "/home",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/tests/vitamin-d-test",
+      "destination": "/tests?add=vitamin-d#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/hba1c",
+      "destination": "/tests?add=hba1c#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/hep-b-antigen",
+      "destination": "/tests?add=hep-b-antigen#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/hep-c-antibody",
+      "destination": "/tests?add=hep-c-antibody#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/hiv",
+      "destination": "/tests?add=hiv#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/kidney-function-test",
+      "destination": "/tests?add=kidney-function#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/lipid-profile",
+      "destination": "/tests?add=lipid-profile#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/lft-s-liver-function-test",
+      "destination": "/tests?add=liver-function#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/full-blood-count",
+      "destination": "/tests?add=full-blood-count-and-esr#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/general-biochemistry",
+      "destination": "/tests?add=general-biochemistry#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/iron-studies",
+      "destination": "/tests?add=iron-studies#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/psa-prostate-specific-antigen-test",
+      "destination": "/tests?add=psa#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/cortisol-test",
+      "destination": "/tests?add=cortisol#build",
+      "permanent": true
+    },
+    {
+      "source": "/tests/blood-insulin-levels",
+      "destination": "/tests?add=fasting-insulin#build",
+      "permanent": true
     }
   ],
   "headers": [

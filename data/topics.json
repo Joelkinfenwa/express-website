@@ -39,7 +39,13 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Testosterone"
+      "label": "Testosterone",
+      "builder": [
+        "Free & Total Testosterone",
+        "SHBG",
+        "LH & FSH",
+        "Oestradiol (E2)"
+      ]
     },
     {
       "slug": "female-hormones",
@@ -81,7 +87,13 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Female hormones"
+      "label": "Female hormones",
+      "builder": [
+        "Oestradiol (E2)",
+        "Progesterone",
+        "LH & FSH",
+        "Free & Total Testosterone"
+      ]
     },
     {
       "slug": "thyroid",
@@ -121,13 +133,19 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Thyroid"
+      "label": "Thyroid",
+      "builder": [
+        "TSH, T3 & T4",
+        "TPO Antibodies",
+        "Thyroglobulin Antibodies",
+        "Reverse T3"
+      ]
     },
     {
       "slug": "sti",
       "title": "STI Test Without a GP Visit",
       "h1": "STI testing, without a GP visit.",
-      "intro": "A discreet screen for chlamydia, gonorrhoea, herpes, syphilis and trichomonas, plus individual HIV and hepatitis tests. Order online and get collected privately.",
+      "intro": "A discreet screen for chlamydia, gonorrhoea, herpes, syphilis and trichomonas, with HIV and hepatitis tests available to add. Order online and get collected privately.",
       "markers": [
         "ctng",
         "hsv",
@@ -138,10 +156,7 @@
         "hepc"
       ],
       "tests": [
-        "sti-screen",
-        "hiv",
-        "hep-b-antigen",
-        "hep-c-antibody"
+        "sti-screen"
       ],
       "whoFor": [
         "After a new sexual partner",
@@ -162,13 +177,18 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "STI testing"
+      "label": "STI testing",
+      "builder": [
+        "HIV",
+        "Hep B antigen",
+        "Hep C antibody"
+      ]
     },
     {
       "slug": "vitamins-and-iron",
       "title": "Vitamin D, B12 and Iron Blood Tests",
       "h1": "Vitamin and iron blood tests.",
-      "intro": "Vitamin D, vitamin B12 and iron studies, alone or as part of a wider vitamin panel. Find out whether diet or supplements need attention.",
+      "intro": "Vitamin D, vitamin B12 and iron, in a panel or chosen individually in Build Your Own. Find out whether diet or supplements need attention.",
       "markers": [
         "vitd",
         "b12",
@@ -179,10 +199,10 @@
         "vitc"
       ],
       "tests": [
-        "vitamin-d-test",
         "vitamin-d-b12-test",
-        "iron-studies",
-        "vitamin-wellness-panel"
+        "vitamin-wellness-panel",
+        "essential-womens-health-check",
+        "complete-wellness-panel"
       ],
       "whoFor": [
         "People who spend little time in the sun",
@@ -203,7 +223,13 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Vitamins and iron"
+      "label": "Vitamins and iron",
+      "builder": [
+        "Vitamin D",
+        "Iron Studies",
+        "Vitamin B12",
+        "Vitamin B9 (Folate)"
+      ]
     },
     {
       "slug": "health-check",
@@ -245,13 +271,19 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Full health check"
+      "label": "Full health check",
+      "builder": [
+        "Full Blood Count & ESR",
+        "Liver Function",
+        "Kidney Function",
+        "Lipid Profile"
+      ]
     },
     {
       "slug": "cholesterol-and-blood-sugar",
       "title": "Cholesterol and Blood Sugar Tests",
       "h1": "Cholesterol and blood sugar tests.",
-      "intro": "Your lipid profile, HbA1c and fasting insulin are the core markers of heart and metabolic health. Test them alone or as part of a wider panel.",
+      "intro": "Your lipid profile, HbA1c and fasting insulin are core markers of heart and metabolic health. Get them in a health panel, or choose them individually in Build Your Own.",
       "markers": [
         "lipids",
         "hba1c",
@@ -259,10 +291,10 @@
         "insulin"
       ],
       "tests": [
-        "lipid-profile",
-        "hba1c",
-        "blood-insulin-levels",
-        "extended-general-health-check"
+        "extended-general-health-check",
+        "womens-hormonal-package",
+        "essential-mens-panel",
+        "ultimate-performance-screen"
       ],
       "whoFor": [
         "Anyone with a family history of heart disease or diabetes",
@@ -283,18 +315,24 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "Cholesterol and blood sugar"
+      "label": "Cholesterol and blood sugar",
+      "builder": [
+        "Lipid Profile",
+        "HBA1C",
+        "Fasting Insulin",
+        "Apo B",
+        "Lp (a)"
+      ]
     },
     {
       "slug": "psa",
       "title": "PSA Blood Test, No Referral Needed",
       "h1": "PSA blood test, no referral needed.",
-      "intro": "Prostate-specific antigen, on its own or as part of our Essential Men's Panel. Order online and get collected at a centre or at home.",
+      "intro": "Prostate-specific antigen, as part of our Essential Men's Panel or added to your own test in Build Your Own. Collected at a centre or at home.",
       "markers": [
         "psa"
       ],
       "tests": [
-        "psa-prostate-specific-antigen-test",
         "essential-mens-panel"
       ],
       "whoFor": [
@@ -316,7 +354,10 @@
           "No. We issue the pathology request form with your order."
         ]
       ],
-      "label": "PSA"
+      "label": "PSA",
+      "builder": [
+        "PSA"
+      ]
     },
     {
       "slug": "without-referral",
@@ -349,7 +390,13 @@
           "Your results are reviewed by an Australian doctor and sent to you with every reference range."
         ]
       ],
-      "label": "No referral needed"
+      "label": "No referral needed",
+      "builder": [
+        "Vitamin D",
+        "Iron Studies",
+        "HBA1C",
+        "Lipid Profile"
+      ]
     }
   ]
 }

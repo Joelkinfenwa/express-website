@@ -172,6 +172,13 @@
     homeVisitPrice = c.homeVisit ? c.homeVisit.price : null;
     if (homeVisitPrice != null) $('bt-home-note').textContent = '+ ' + fmt.format(homeVisitPrice);
     if (!state.tests.length) { fallback(); return; }
+    // Deep links: /tests?add=vitamin-d,iron-studies&collect=home#build
+    var params = new URLSearchParams(location.search);
+    var slug = function (x) { return String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); };
+    (params.get('add') || '').split(',').map(slug).filter(Boolean).forEach(function (w) {
+      state.tests.forEach(function (t) { if (slug(t.title) === w) state.picked[t.id] = true; });
+    });
+    if (params.get('collect') === 'home') state.mode = 'home';
     render();
   }).catch(fallback);
 })();

@@ -1,6 +1,113 @@
 {
   "_readme": "Corrections to Shopify product content for the website. Keys are product handles. Supported fields: title, markers (list), categories (list), blurb.",
-  "hep-b-antigen": { "markers": ["Hepatitis B antigen"] },
-  "hba1c": { "markers": ["HbA1c"] },
-  "elite-health-assessment": { "markers": ["Advanced longevity panel of 14+ biomarkers"], "categories": ["longevity", "general"] }
+  "hep-b-antigen": {
+    "markers": [
+      "Hepatitis B antigen"
+    ]
+  },
+  "hba1c": {
+    "markers": [
+      "HbA1c"
+    ]
+  },
+  "elite-health-assessment": {
+    "markers": [
+      "Advanced longevity panel of 14+ biomarkers"
+    ],
+    "categories": [
+      "longevity",
+      "general"
+    ]
+  },
+  "core-health-check": {
+    "categories": [
+      "general",
+      "heart"
+    ]
+  },
+  "thyroid-function-tests-1": {
+    "categories": [
+      "thyroid"
+    ]
+  },
+  "extended-general-health-check": {
+    "categories": [
+      "general",
+      "thyroid",
+      "vitamins",
+      "heart"
+    ]
+  },
+  "ultimate-performance-screen": {
+    "categories": [
+      "hormones",
+      "mens",
+      "womens",
+      "thyroid",
+      "heart"
+    ]
+  },
+  "complete-wellness-panel": {
+    "categories": [
+      "general",
+      "hormones",
+      "mens",
+      "womens",
+      "thyroid",
+      "vitamins",
+      "heart"
+    ]
+  },
+  "core-hormone-check": {
+    "categories": [
+      "hormones",
+      "mens",
+      "womens"
+    ]
+  },
+  "essential-mens-panel": {
+    "categories": [
+      "mens",
+      "general",
+      "heart"
+    ]
+  },
+  "essential-womens-health-check": {
+    "categories": [
+      "womens",
+      "general",
+      "thyroid",
+      "vitamins"
+    ]
+  },
+  "womens-hormonal-package": {
+    "categories": [
+      "womens",
+      "hormones",
+      "heart"
+    ]
+  },
+  "male-hormonal-test": {
+    "categories": [
+      "mens",
+      "hormones"
+    ]
+  },
+  "optimisation-panel": {
+    "categories": [
+      "mens",
+      "hormones",
+      "thyroid"
+    ]
+  },
+  "extensive-thyroid-panel": {
+    "categories": [
+      "thyroid"
+    ]
+  },
+  "thyroid-antigen": {
+    "categories": [
+      "thyroid"
+    ]
+  }
 }

@@ -17,7 +17,7 @@
       r.hidden = !(okCat && okQ);
       if (!r.hidden) shown++;
     });
-    count.textContent = shown === 1 ? 'Showing 1 test' : 'Showing ' + shown + ' tests';
+    count.textContent = shown === 1 ? 'Showing 1 panel' : 'Showing ' + shown + ' panels';
     empty.hidden = shown > 0;
   }
   buttons.forEach(function (b) {

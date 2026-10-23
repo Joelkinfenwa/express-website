@@ -90,8 +90,9 @@ export async function loadCatalog(root) {
     };
   };
 
+  // Only panels are sold directly; single tests are available through Build Your Own
   const pub = products.filter((p) => (p.tags.includes('Shop All') || cfg.includeExtra.includes(p.handle)) && !exclude.has(p.handle))
-    .map(toTest).filter(Boolean).sort((a, b) => a.price - b.price || a.title.localeCompare(b.title));
+    .map(toTest).filter(Boolean).filter((t) => t.kind === 'panel').sort((a, b) => a.price - b.price || a.title.localeCompare(b.title));
   const addons = products.filter((p) => (p.tags.includes('hidden') || cfg.builderExtra.includes(p.handle)) && !exclude.has(p.handle) && !pub.find((x) => x.handle === p.handle))
     .map((p) => { const v = p.variants[0]; const items = markers(p.body_html); return { id: v.id, title: p.title.trim(), price: parseFloat(v.price), cat: categories(p, items)[0] }; })
     .sort((a, b) => a.title.localeCompare(b.title));

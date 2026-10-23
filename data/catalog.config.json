@@ -28,7 +28,10 @@
     "complete-health-screen"
   ],
   "builderExtra": [
-    "cortisol"
+    "cortisol",
+    "hep-b-antigen",
+    "hep-c-antibody",
+    "hiv"
   ],
   "builderBaseHandle": "build-your-own-test",
   "builderHomeVisitHandle": "home-collection",
@@ -39,5 +42,6 @@
     "essential-womens-health-check",
     "core-health-check"
   ],
-  "ownFormHandle": "mobile-blood-collection-use-your-doctor-s-request"
+  "ownFormHandle": "mobile-blood-collection-use-your-doctor-s-request",
+  "_singles": "Single tests are not sold on their own. They are only available inside Build Your Own (hidden products plus builderExtra)."
 }

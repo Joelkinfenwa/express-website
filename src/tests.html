@@ -39,7 +39,7 @@
 <div style="flex: 1 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Private blood tests · No referral needed</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(42px, 5.8vw, 80px); line-height: 1.02; letter-spacing: -0.035em">Order the blood test you want. We collect it.</h1>
-<p style="margin: 0; font-size: 19px; color: #4B5650; max-width: 640px">Choose a panel or a single test, or build your own. Visit any of 2,000+ partner collection centres, or have a registered nurse come to your home or workplace. Every result is reviewed by an Australian doctor.</p>
+<p style="margin: 0; font-size: 19px; color: #4B5650; max-width: 640px">Choose one of our panels, or build your own from individual tests. Visit any of 2,000+ partner collection centres, or have a registered nurse come to your home or workplace. Every result is reviewed by an Australian doctor.</p>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 10px">
 <a href="#all-tests" class="btn btn-dark" style="min-height: 52px; padding: 0 24px">Browse all tests</a>
@@ -74,11 +74,11 @@
 <div style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 28px">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px">
 <div style="display: flex; flex-direction: column; gap: 10px; max-width: 680px">
-<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">All tests</span>
-<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 4.4vw, 56px); line-height: 1.02; letter-spacing: -0.035em">Find the right test.</h2>
+<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">All panels</span>
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 4.4vw, 56px); line-height: 1.02; letter-spacing: -0.035em">Find the right panel.</h2>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px; flex: 0 1 340px; min-width: 0">
-<label for="cat-search" style="font-size: 14px; font-weight: 700">Search by test or marker</label>
+<label for="cat-search" style="font-size: 14px; font-weight: 700">Search panels by test or marker</label>
 <input id="cat-search" type="search" placeholder="e.g. testosterone, iron, thyroid" autocomplete="off" style="min-height: 52px; border: 1px solid #D3D8D0; border-radius: 999px; padding: 0 20px; font: inherit; background: #F7F4EF; color: #1C2420">
 </div>
 </div>
@@ -86,10 +86,10 @@
 <!--@CATEGORY_BUTTONS-->
 </div>
 <p id="cat-count" role="status" aria-live="polite" style="margin: 0; font-size: 15px; color: #4B5650"></p>
-<div style="display: flex; flex-direction: column; border-top: 1px solid #1C2420" id="cat-list">
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 20px" id="cat-list">
 <!--@ALL_TESTS-->
 </div>
-<p id="cat-empty" hidden style="margin: 0; padding: 24px; border-radius: 18px; background: #F7F4EF; color: #4B5650">No tests match that search. Try a different name, or <a href="#build" style="text-decoration: underline">build your own test</a>.</p>
+<p id="cat-empty" hidden style="margin: 0; padding: 24px; border-radius: 18px; background: #F7F4EF; color: #4B5650">No panel matches that search. You can add individual tests in <a href="#build" style="text-decoration: underline">Build your own</a>.</p>
 </div>
 </section>
 
@@ -100,7 +100,7 @@
 <div style="display: flex; flex-direction: column; gap: 12px; max-width: 720px">
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Build your own test</span>
 <h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 4.4vw, 60px); line-height: 1.02; letter-spacing: -0.035em">Choose exactly what you want tested.</h2>
-<p style="margin: 0; color: #4B5650; font-size: 18px">Select individual tests and we combine them into one collection and one doctor-reviewed report.</p>
+<p style="margin: 0; color: #4B5650; font-size: 18px">Need only one or two tests, or a mix no panel covers? Select individual tests and we combine them into one collection and one doctor-reviewed report. <!--@BUILDER_FEE--></p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px; flex: 0 1 360px; min-width: 0">
 <label for="bt-search" style="font-size: 14px; font-weight: 700">Search tests</label>
