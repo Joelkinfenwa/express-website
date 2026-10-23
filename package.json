@@ -8,5 +8,13 @@
     "build": "node build.mjs",
     "preview": "node build.mjs && npx --yes serve dist -l 4173"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
+  }
 }

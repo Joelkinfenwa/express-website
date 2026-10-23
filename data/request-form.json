@@ -1,0 +1,19 @@
+{
+  "_readme": "Tests printed on the pathology request form. 'panels' are keyed by product handle and list the lab test lines exactly as the lab should read them (taken from the <data> lines in Shopify, with typos fixed). 'addons' renames a Build Your Own test where the lab wording differs from the website title; any add-on not listed prints its title. 'fasting' lists words that tick the fasting box. The build fails if a panel on sale has no lines here.",
+  "panels": {
+    "core-health-check": ["Liver Function", "Kidney Function", "Electrolytes", "Glucose", "CRP"],
+    "extensive-thyroid-panel": ["TSH, T3 & T4", "Thyroid antibodies", "Thyroglobulin", "TSH Receptor antibodies"],
+    "essential-mens-panel": ["Liver Function", "Kidney Function", "General Biochemistry", "Lipid Profile", "PSA", "Full Blood Count / ESR", "CRP"],
+    "sti-screen": ["Chlamydia & Gonorrhoea PCR Urine", "Herpes Simplex Serology", "Syphilis Serology", "Trichomonas Vaginalis"],
+    "womens-hormonal-package": ["Liver Function", "Kidney Function", "General Biochemistry", "Lipid Profile", "Glucose", "Progesterone", "Oestradiol (E2)", "Total Testosterone"],
+    "male-hormonal-test": ["MBA", "HDL", "LDL", "Free & Total Testosterone", "SHBG", "IGF-1", "LH & FSH", "Oestradiol (E2)", "Prolactin", "Progesterone"],
+    "essential-womens-health-check": ["Liver Function", "Kidney Function", "Lipid Profile", "General Biochemistry", "Glucose", "Iron Studies", "Full Blood Count", "ESR", "Thyroid - TSH, T3 & T4", "Vitamin D", "Vitamin B12"],
+    "ultimate-performance-screen": ["MBA HDL LDL", "Thyroid - TSH, T3 + T4", "Cortisol", "Free & Total Testosterone", "SHBG", "LH & FSH", "Oestradiol", "Prolactin", "Progesterone", "HbA1c", "Fasting Insulin", "Growth Hormone", "IGF-1", "DHEAS", "FBC/ESR"],
+    "complete-wellness-panel": ["MBA HDL LDL", "Thyroid - TSH, T3 + T4", "Cortisol", "Free & Total Testosterone", "SHBG", "LH & FSH", "Oestradiol", "Prolactin", "Progesterone", "HbA1c", "Fasting Insulin", "Growth Hormone", "IGF-1", "DHEAS", "FBC/ESR", "Iron Studies", "Vitamin B12", "Vitamin D"]
+  },
+  "addons": {
+    "HBA1C": "HbA1c",
+    "Lp (a)": "Lipoprotein (a)"
+  },
+  "fasting": ["insulin", "homa"]
+}

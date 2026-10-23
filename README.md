@@ -118,3 +118,12 @@ Stripe webhook: endpoint `https://expresspathology.com.au/api/stripe-webhook`, e
 ## Partner referrals (monthly invoicing)
 
 `/partner-referral` lets invoiced partners upload a referral form with notes, no payment. It is unlisted and protected by an access code. Set `PARTNER_CODES` in Vercel as `Partner name=code`, separated by semicolons, for example `Lifestrands (LSG)=a-long-random-code`.
+
+## Pathology request forms
+
+Every paid panel or Build Your Own order gets a PDF request form, generated in `api/stripe-webhook.js` by `lib/request-form.js` (a port of the Order Printer Pro "Universal Commercial Request Form v13": same sections, lab codes and wording). It is attached to the team's paid-order email. Own-form home visits and partner referrals get no form.
+
+- Lab test lines per panel live in `data/request-form.json`. The build fails if a panel on sale has none. Build Your Own tests print their title, or the rename in `addons`.
+- The fasting box is ticked when a line contains a word in `fasting` (fasting insulin, HOMA IR), matching the website's preparation advice.
+- Logos and the QR code (to /collection-centres) are in `data/form/` and embedded at build into `lib/form-assets.mjs`.
+- Set `FORM_TO_PATIENT=1` in Vercel to also attach the form to the patient's confirmation email.

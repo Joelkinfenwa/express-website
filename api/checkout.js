@@ -78,6 +78,17 @@ export default async function handler(req, res) {
     address: p.address, suburb: p.suburb, state: p.state, postcode: p.postcode,
     preferred_date: str(body.preferredDate, 10), preferred_time: str(body.preferredTime, 40), notes: str(body.notes, 480)
   };
+  // What to print on the pathology request form (Stripe metadata values are limited to 500 characters)
+  if (type === 'panel') metadata.panel = str(body.panel, 80);
+  if (type === 'builder') {
+    const slugs = Object.keys(PRICES.addons).filter((s) => items.some((i) => i.name === PRICES.addons[s].title));
+    let chunk = '', n = 1;
+    for (const s of slugs) {
+      if ((chunk + ',' + s).length > 480) { metadata[n === 1 ? 'tests' : `tests_${n}`] = chunk; chunk = ''; n++; }
+      chunk = chunk ? chunk + ',' + s : s;
+    }
+    if (chunk) metadata[n === 1 ? 'tests' : `tests_${n}`] = chunk;
+  }
 
   try {
     const session = await stripe('POST', '/checkout/sessions', {
