@@ -1,7 +1,7 @@
 // Build: copies src/ to dist/, fills {{tokens}} from site.config.json, adds
 // analytics, sitemap and robots, and refuses to build if any required value is
 // missing or any placeholder text would reach the live site.
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
 import { loadCatalog, CATEGORY_LABELS, CATEGORY_ORDER } from './scripts/catalog.mjs';
 
@@ -130,6 +130,17 @@ function homeTests() {
 </div>
 </div>
 ${grid}`;
+}
+// Hero photos (data/hero-images.json). Returns '' when the photo does not exist yet.
+const HERO = JSON.parse(readFileSync(join(ROOT, 'data/hero-images.json'), 'utf8'));
+function heroPhoto(name, alt, style, { fallback = false, eager = true } = {}) {
+  let dir = 'heroes';
+  if (!name || !existsSync(join(SRC, 'assets/img/heroes', name + '.webp'))) {
+    if (!fallback) return '';
+    [name, alt] = HERO.fallback; dir = '';
+  }
+  const base = '/assets/img/' + (dir ? dir + '/' : '') + name;
+  return `<img src="${base}-1200.webp" srcset="${base}-1200.webp 1200w, ${base}.webp 2400w" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(alt)}" width="1200" height="675"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} style="display: block; width: 100%; height: 100%; object-fit: cover; ${style || ''}">`;
 }
 const fragments = {
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
@@ -297,7 +308,9 @@ ${prep.map(([h, p], i) => `<li style="display: flex; gap: 20px; padding: 20px 0;
     priceLabel: money(startPrice), buyUrl: startHref,
     includedHeading: copy.includedHeading || (count === '1' ? 'What this test measures.' : `${count} tests in one collection.`), jsonld
   };
-  const slots = { FACTS: facts, SUITED: suited, GLANCE: glance, CENTRE_OPTION: centreOption, HOME_OPTION: homeOption, UPGRADE: upgrade, MARKERS: markersHtml, PREP: prepHtml, FAQ: faqHtml, RELATED: related.map((x) => card(x)).join('\n') };
+  const photoName = (HERO.products || {})[t.handle];
+  const photo = heroPhoto(photoName, `${t.title} home blood collection`, '', { eager: false });
+  const slots = { PHOTO: photo ? `<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px"><div style="aspect-ratio: 21 / 9; min-height: 240px; border-radius: 28px; overflow: hidden; background: #E8EDE6">${photo}</div></section>` : '', FACTS: facts, SUITED: suited, GLANCE: glance, CENTRE_OPTION: centreOption, HOME_OPTION: homeOption, UPGRADE: upgrade, MARKERS: markersHtml, PREP: prepHtml, FAQ: faqHtml, RELATED: related.map((x) => card(x)).join('\n') };
   const html = tpl.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace(/<!--@([A-Z_]+)-->/g, (m, k) => (k in slots ? slots[k] : m));
   const rel = `tests/${t.handle}.html`;
   writeFileSync(join(OUT, rel), finalize(html, rel));
@@ -336,9 +349,10 @@ if (unmapped.size) console.warn('Note: panel markers without a plain-English des
     ];
     const suburbList = a.suburbs.map(([n, pc]) => `<li style="break-inside: avoid; padding: 6px 0; border-bottom: 1px solid #E3E6E0; display: flex; justify-content: space-between; gap: 8px"><span>${esc(n)}</span><span style="color: #5A645E; font-size: 14px">${pc}</span></li>`).join('');
     const body = `${crumbs([['Home', '/'], ['Areas we cover', '/mobile-blood-collection'], [Name]])}
-<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 26px">
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px 56px">
+<div style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 26px">
 <span style="${EYEBROW}">Home blood collection · ${a.state}</span>
-<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 6vw, 84px); line-height: 1.0; letter-spacing: -0.04em; max-width: 1000px">Mobile blood collection in ${esc(inName(a))}.</h1>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 5.2vw, 76px); line-height: 1.0; letter-spacing: -0.04em; max-width: 1000px">Mobile blood collection in ${esc(inName(a))}.</h1>
 <p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 720px">A registered nurse collects your blood test at home or at work, across ${a.suburbs.length} suburbs in ${esc(inName(a))}. Use your doctor's request form, or order a private test online with no referral.</p>
 ${postcodeForm('Check my postcode')}
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); border-top: 1px solid #1C2420; max-width: 900px">
@@ -346,6 +360,8 @@ ${postcodeForm('Check my postcode')}
 <div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Home visit with your form</span><span style="font-weight: 700; font-size: 20px">${feeLine(a)}</span></div>
 <div style="padding: 18px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #5A645E; font-weight: 600">Private tests</span><span style="font-weight: 700; font-size: 20px">From ${money(fromPrice)}</span></div>
 </div>
+</div>
+<div style="flex: 1 1 400px; min-width: 0; aspect-ratio: 4 / 5; max-height: 560px; border-radius: 28px; overflow: hidden; background: #E8EDE6">${heroPhoto(HERO.areas[0], HERO.areas[1], 'object-position: 72% center', { fallback: true })}</div>
 </section>
 
 <section style="background: #E8EDE6"><div style="max-width: 1320px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 32px">
@@ -446,12 +462,15 @@ writeFileSync(join(ROOT, 'lib/test-index.mjs'), '// Generated by build.mjs. Know
     const from = Math.min(...tests.map((t) => t.price));
     const markersHtml = tp.markers.map((k) => MK.markers[k]).filter(Boolean).map((m) => `<li style="display: flex; gap: 10px; padding: 14px 0; border-top: 1px solid #DCE0D8">${tickT}<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 700">${esc(m.name)}</span><span style="color: #4B5650; font-size: 15px">${esc(m.about)}</span></span></li>`).join('');
     const body = `<nav aria-label="Breadcrumb" style="max-width: 1320px; margin: 0 auto; padding: 8px 24px 20px; font-size: 14px; color: #5A645E"><a href="/" style="color: #5A645E">Home</a> / <a href="/tests" style="color: #5A645E">Blood tests</a> / <span style="color: #1C2420; font-weight: 600">${esc(shortName(tp).replace(/^./, (c) => c.toUpperCase()))}</span></nav>
-<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 72px; display: flex; flex-direction: column; gap: 24px">
+<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 72px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px 56px">
+<div style="flex: 1 1 540px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
 <span style="${EYEBROW}">Private blood tests · From ${money(from)}</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(40px, 6vw, 80px); line-height: 1.0; letter-spacing: -0.04em; max-width: 1000px">${esc(tp.h1)}</h1>
 <p style="margin: 0; font-size: 20px; color: #4B5650; max-width: 720px">${esc(tp.intro)}</p>
 <div style="display: flex; flex-wrap: wrap; gap: 10px"><a href="#tests" class="btn btn-dark" style="min-height: 52px; padding: 0 24px">See the tests</a><a href="/test-finder" class="btn" style="min-height: 52px; padding: 0 24px; border: 1px solid #1C2420">Help me choose</a></div>
 <ul style="margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 10px 28px; color: #4B5650">${['No referral needed', 'Results reviewed by a doctor', '2,000+ collection centres', `Home visit +${config.homeVisitAddOnFee}`].map((x) => `<li style="display: flex; gap: 8px">${tickT}${x}</li>`).join('')}</ul>
+</div>
+${(() => { const h = (HERO.topics || {})[tp.slug] || []; const img = heroPhoto(h[0], h[1]); return img ? `<div style="flex: 1 1 440px; min-width: 0; aspect-ratio: 4 / 3; border-radius: 28px; overflow: hidden; background: #E8EDE6">${img}</div>` : ''; })()}
 </section>
 
 <section id="tests" style="background: #E8EDE6"><div style="max-width: 1320px; margin: 0 auto; padding: 80px 24px; display: flex; flex-direction: column; gap: 28px">

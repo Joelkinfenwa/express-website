@@ -1,0 +1,27 @@
+{
+  "_readme": "Hero photos by page. Put <name>.webp (2400px wide) and <name>-1200.webp in src/assets/img/heroes/. A page shows its photo only once the file exists; 'fallback' pages use the main hero until then.",
+  "topics": {
+    "testosterone": ["men-hormones", "A man having his blood collected at home by a registered nurse"],
+    "female-hormones": ["women-hormones", "A woman preparing for a home blood collection with a registered nurse"],
+    "thyroid": ["thyroid", "A nurse labelling a blood collection tube at a patient's home"],
+    "sti": ["discreet-kit", "A nurse's gloved hands arranging labelled blood collection tubes"],
+    "vitamins-and-iron": ["vitamins", "A woman relaxing after a home blood collection"],
+    "health-check": ["health-check", "A man and a nurse talking after a home blood collection"],
+    "cholesterol-and-blood-sugar": ["metabolic", "A nurse finishing a home blood collection at a dining table"],
+    "psa": ["mens-50s", "An older man on his veranda with a registered nurse"],
+    "without-referral": ["order-online", "A woman ordering a blood test on her phone at home"]
+  },
+  "products": {
+    "ultimate-performance-screen": "performance",
+    "complete-wellness-panel": "performance",
+    "male-hormonal-test": "men-hormones",
+    "essential-mens-panel": "health-check",
+    "womens-hormonal-package": "women-hormones",
+    "essential-womens-health-check": "vitamins",
+    "extensive-thyroid-panel": "thyroid",
+    "sti-screen": "discreet-kit",
+    "core-health-check": "health-check"
+  },
+  "areas": ["area-nurse", "A registered nurse walking to a patient's home with her kit bag"],
+  "fallback": ["hero", "A registered nurse arriving at a patient's home"]
+}
