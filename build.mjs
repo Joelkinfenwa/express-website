@@ -140,7 +140,7 @@ function heroPhoto(name, alt, style, { fallback = false, eager = true } = {}) {
     [name, alt] = HERO.fallback; dir = '';
   }
   const base = '/assets/img/' + (dir ? dir + '/' : '') + name;
-  return `<img src="${base}-1200.webp" srcset="${base}-1200.webp 1200w, ${base}.webp 2400w" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(alt)}" width="1200" height="675"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} style="display: block; width: 100%; height: 100%; object-fit: cover; ${style || ''}">`;
+  return `<img src="${base}-1200.webp" srcset="${base}-1200.webp ${dir ? 800 : 1200}w, ${base}.webp ${dir ? 1600 : 2400}w" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(alt)}" width="1200" height="675"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} style="display: block; width: 100%; height: 100%; object-fit: cover; ${style || ''}">`;
 }
 const fragments = {
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
@@ -309,7 +309,7 @@ ${prep.map(([h, p], i) => `<li style="display: flex; gap: 20px; padding: 20px 0;
     includedHeading: copy.includedHeading || (count === '1' ? 'What this test measures.' : `${count} tests in one collection.`), jsonld
   };
   const photoName = (HERO.products || {})[t.handle];
-  const photo = heroPhoto(photoName, `${t.title} home blood collection`, '', { eager: false });
+  const photo = heroPhoto(photoName, `${t.title} home blood collection`, 'object-position: center 25%', { eager: false });
   const slots = { PHOTO: photo ? `<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px"><div style="aspect-ratio: 21 / 9; min-height: 240px; border-radius: 28px; overflow: hidden; background: #E8EDE6">${photo}</div></section>` : '', FACTS: facts, SUITED: suited, GLANCE: glance, CENTRE_OPTION: centreOption, HOME_OPTION: homeOption, UPGRADE: upgrade, MARKERS: markersHtml, PREP: prepHtml, FAQ: faqHtml, RELATED: related.map((x) => card(x)).join('\n') };
   const html = tpl.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace(/<!--@([A-Z_]+)-->/g, (m, k) => (k in slots ? slots[k] : m));
   const rel = `tests/${t.handle}.html`;
