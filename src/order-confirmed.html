@@ -44,7 +44,10 @@
 </ol>
 <div style="display: flex; flex-wrap: wrap; gap: 10px"><a href="/prepare" class="btn btn-dark">How to prepare</a><a href="/" class="btn" style="border: 1px solid #1C2420">Back to home</a></div>
 </section>
-<script>(function(){var r=new URLSearchParams(location.search).get('ref');if(window.gtag)window.gtag('event','purchase',{transaction_id:r||undefined,currency:'AUD'});if(window.fbq)window.fbq('track','Purchase',{currency:'AUD'});})();</script>
+<script>(function(){var q=new URLSearchParams(location.search),sid=q.get('session_id');if(!sid||!/^cs_(live|test)_\w+$/.test(sid))return;var k='ep-conv-'+sid;try{if(localStorage.getItem(k))return;}catch(e){}
+fetch('/api/order-status?session_id='+encodeURIComponent(sid)).then(function(r){return r.ok?r.json():null}).then(function(o){if(!o||!o.paid)return;
+if(window.epTrack)window.epTrack('purchase',{value:o.value,currency:o.currency,transaction_id:o.transaction_id,items:o.items});
+if(window.fbq)window.fbq('track','Purchase',{value:o.value,currency:o.currency});try{localStorage.setItem(k,'1')}catch(e){}}).catch(function(){});})();</script>
 </main>
 <footer class="site-footer">
 <div class="footer-inner">

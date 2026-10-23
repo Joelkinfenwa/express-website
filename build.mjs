@@ -9,7 +9,7 @@ const ROOT = new URL('.', import.meta.url).pathname;
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
 const config = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));
-const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyStoreDomain', 'shopifyStorefrontToken', 'shopifyTestsCollection', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'metaPixelId']);
+const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyStoreDomain', 'shopifyStorefrontToken', 'shopifyTestsCollection', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'googleAdsId', 'googleAdsLabels', 'metaPixelId']);
 
 // Environment variables override the file (useful in Vercel: SITE_<KEY>).
 for (const k of Object.keys(config)) {
@@ -29,9 +29,18 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 function analytics() {
   let out = '';
-  if (config.gaMeasurementId) {
-    const id = esc(config.gaMeasurementId);
-    out += `<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');</script>\n`;
+  // Google tag (GA4 and/or Google Ads). window.epTrack(event, params) sends a GA4 event and, when a
+  // Google Ads conversion label is configured for that event, the matching Ads conversion.
+  const ga = config.gaMeasurementId, ads = config.googleAdsId;
+  if (ga || ads) {
+    const labels = Object.fromEntries(Object.entries(config.googleAdsLabels || {}).filter(([, v]) => v));
+    const map = { purchase: 'purchase', home_visit_request: 'homeVisitRequest', phone_call: 'phoneCall', partner_enquiry: 'partnerEnquiry' };
+    const sendTo = ads ? Object.fromEntries(Object.entries(map).filter(([, k]) => labels[k]).map(([ev, k]) => [ev, `${ads}/${labels[k]}`])) : {};
+    out += `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga || ads)}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());${ga ? `gtag('config','${esc(ga)}');` : ''}${ads ? `gtag('config','${esc(ads)}');` : ''}
+window.epTrack=function(ev,p){p=p||{};gtag('event',ev,p);var t=${JSON.stringify(sendTo)}[ev];if(t){var c={send_to:t};if(p.value!=null){c.value=p.value;c.currency=p.currency||'AUD';}if(p.transaction_id)c.transaction_id=p.transaction_id;gtag('event','conversion',c);}};
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="tel:"]');if(a)window.epTrack('phone_call',{page:location.pathname});});</script>
+`;
   }
   if (config.metaPixelId) {
     const id = esc(config.metaPixelId);

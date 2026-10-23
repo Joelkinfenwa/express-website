@@ -77,6 +77,10 @@
           if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { var e = new Error(String(r.status)); e.server = r.status === 403 || r.status === 400 ? j.error : null; throw e; });
         })
         .then(function () {
+          var kind = form.getAttribute('data-enquiry');
+          if (window.epTrack && kind === 'booking') window.epTrack('home_visit_request', { has_referral: data.has_referral || '' });
+          if (window.epTrack && kind === 'partner') window.epTrack('partner_enquiry', {});
+          if (window.epTrack && kind === 'contact') window.epTrack('contact_enquiry', {});
           if (pay) {
             status.setAttribute('data-state', 'ok');
             status.textContent = 'Request received. Taking you to secure payment…';
