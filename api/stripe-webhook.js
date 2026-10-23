@@ -5,6 +5,7 @@
 import { verifySignature } from '../lib/stripe.js';
 import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
+import { patientEmail } from '../lib/patient-email.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -29,12 +30,6 @@ async function send(payload) {
     body: JSON.stringify(payload)
   });
   if (!r.ok) throw new Error(`Resend ${r.status}`);
-}
-
-function nextSteps(m, attached) {
-  if (m.order_type === 'own-form') return ['Our team will contact you to confirm your appointment time with a registered nurse.', 'Have your doctor\'s request form and photo ID ready for the visit.'];
-  if (/^Home/.test(m.collection)) return [attached ? 'Your pathology request form is attached for your records. Your nurse will bring a copy.' : 'We will email your pathology request form.', 'Our team will contact you to confirm a time for your registered nurse to visit.', 'Check how to prepare: https://expresspathology.com.au/prepare'];
-  return [attached ? 'Your pathology request form is attached. Print it and bring it with photo ID.' : 'We will email your pathology request form.', 'Take it to any partner collection centre: https://expresspathology.com.au/collection-centres', 'Check how to prepare: https://expresspathology.com.au/prepare'];
 }
 
 // The pathology request form for panel and Build Your Own orders (not for own-form home visits).
@@ -67,14 +62,13 @@ export function emails(s, form = null, formError = '') {
     subject: `New paid order ${m.reference}: ${items[0] || 'Order'}${items.length > 1 ? ` + ${items.length - 1} more` : ''} (${m.collection})`,
     html: `<p><strong>New paid order.</strong> ${m.order_type === 'own-form' ? 'Patient has their own request form (sent separately with the same reference). Book the nurse.' : (form ? `Pathology request form attached${toPatient ? ' (also emailed to the patient)' : '. Send it to the patient'}` : `Request form could not be generated${formError ? ' (' + esc(formError) + ')' : ''}. Issue it manually`) + (/^Home/.test(m.collection) ? ' and book the nurse.' : '.')}</p><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join('')}</table>`
   };
-  const steps = nextSteps(m, toPatient);
+  const pe = patientEmail(s, PRICES, { attached: toPatient });
   const patient = {
     from: process.env.ENQUIRY_FROM,
     to: [s.customer_details && s.customer_details.email || s.customer_email],
     reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim(),
     ...(toPatient ? { attachments: [form] } : {}),
-    subject: `Your Express Pathology order ${m.reference}`,
-    html: `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate"><tr><td style="padding:28px 24px 8px"><div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div><h1 style="font-size:24px;margin:20px 0 6px">Thank you, ${esc(m.first_name || 'there')}. Your order is confirmed.</h1><p style="color:#4B5650;margin:0">Reference <strong>${esc(m.reference)}</strong></p></td></tr><tr><td style="padding:16px 24px"><table width="100%" style="border-top:1px solid #DCE0D8">${items.map((i) => `<tr><td style="padding:10px 0;border-bottom:1px solid #DCE0D8">${esc(i)}</td></tr>`).join('')}<tr><td style="padding:12px 0;font-weight:700">Total paid: ${esc(total)}</td></tr></table></td></tr><tr><td style="padding:8px 24px 16px"><h2 style="font-size:18px;margin:0 0 8px">What happens next</h2><ol style="margin:0;padding-left:20px;color:#2E3833">${steps.map((x) => `<li style="margin-bottom:8px">${esc(x)}</li>`).join('')}</ol></td></tr><tr><td style="padding:16px 24px 28px;border-top:1px solid #DCE0D8;font-size:13px;color:#5A645E">Questions? Reply to this email or call 02 9545 2940. Results are reviewed by an Australian doctor and are not a diagnosis. Always speak with your doctor about your health.</td></tr></table></div>`
+    subject: pe.subject, html: pe.html, text: pe.text
   };
   return { team, patient };
 }
