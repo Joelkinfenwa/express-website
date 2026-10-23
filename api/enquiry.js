@@ -86,9 +86,10 @@ export default async function handler(req, res) {
   const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
   try {
     // Email first: it is the only route that carries an uploaded request form.
-    if (emailReady) await toEmail(d, att);
-    if (emailReady && d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, ''));
-    else if (hubspotReady && !att) await toHubSpot(d);
+    if (emailReady) {
+      await toEmail(d, att);
+      if (d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '')).catch((e) => console.error('quiz email failed:', e.message));
+    } else if (hubspotReady && !att) await toHubSpot(d);
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
     return res.status(200).json({ ok: true });
