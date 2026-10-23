@@ -96,7 +96,13 @@
             var keep = { partner_code: data.partner_code, company: data.company };
             form.reset(); Object.keys(keep).forEach(function (k) { form.elements[k].value = keep[k]; });
             status.setAttribute('data-state', 'ok');
-            status.textContent = 'Referral received. Our team will contact the patient to arrange the home visit. You can submit another below.';
+            status.textContent = 'Referral received.';
+            var done = document.getElementById('r-done');
+            if (done) {
+              var line = document.getElementById('r-done-line');
+              if (line) line.textContent = 'Thank you. We have received the referral for ' + (data.patient_name || 'your patient') + '. Our team will contact them to arrange the home visit.';
+              form.hidden = true; done.hidden = false; done.style.display = 'flex'; done.focus(); window.scrollTo({ top: done.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
+            }
             return;
           }
           status.textContent = form.getAttribute('data-enquiry') === 'booking' ? 'Thank you. Your request has been received and our team will contact you to confirm your appointment time.' : 'Thank you. Your message has been sent and our team will be in touch.';

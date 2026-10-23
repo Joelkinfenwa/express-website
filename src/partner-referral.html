@@ -37,6 +37,12 @@
 <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Partner referrals</span>
 <h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.02; letter-spacing: -0.035em">Send a referral.</h1>
 <p style="margin: 0; color: #4B5650; font-size: 18px">Upload the referral form and our team arranges a home visit with a registered nurse. Billed on your monthly invoice, so there is nothing to pay here.</p>
+<div id="r-done" hidden tabindex="-1" style="background: #17302A; color: #F7F4EF; border-radius: 28px; padding: clamp(28px, 5vw, 56px); flex-direction: column; align-items: flex-start; gap: 18px">
+<span aria-hidden="true" style="width: 72px; height: 72px; border-radius: 50%; background: #F2A981; display: flex; align-items: center; justify-content: center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#17302A" stroke-width="2.8"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.02; letter-spacing: -0.035em">Referral received.</h2>
+<p id="r-done-line" style="margin: 0; font-size: 19px; color: #C5D1CA; max-width: 560px">Our team will contact the patient to arrange the home visit.</p>
+<button type="button" id="r-again" style="min-height: 52px; padding: 0 26px; border: 0; border-radius: 999px; background: #F2A981; color: #1C2420; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer">Send another referral</button>
+</div>
 <form data-enquiry="referral" action="/api/enquiry" method="post" style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: clamp(22px, 4vw, 36px); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px">
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="r-company" style="font-size: 14px; font-weight: 700">Company sending the referral</label><input id="r-company" name="company" required autocomplete="organization" placeholder="e.g. Lifestrands" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="r-code" style="font-size: 14px; font-weight: 700">Access code</label><input id="r-code" name="partner_code" required autocomplete="off" autocapitalize="characters" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
@@ -49,6 +55,7 @@
 </form>
 </section>
 <script>(function(){var c=document.getElementById('r-code'),o=document.getElementById('r-company');try{var s=JSON.parse(localStorage.getItem('exp-partner')||'{}');if(s.c)c.value=s.c;if(s.o)o.value=s.o;}catch(x){}document.querySelector('form[data-enquiry="referral"]').addEventListener('submit',function(){try{localStorage.setItem('exp-partner',JSON.stringify({c:c.value,o:o.value}))}catch(x){}},true);})();</script>
+<script>(function(){var d=document.getElementById('r-done'),f=document.querySelector('form[data-enquiry="referral"]');document.getElementById('r-again').addEventListener('click',function(){d.hidden=true;d.style.display='';f.hidden=false;f.querySelector('.form-status').textContent='';document.getElementById('r-pname').focus();});})();</script>
 </main>
 <footer class="site-footer">
 <div class="footer-inner">

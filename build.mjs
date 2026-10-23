@@ -43,7 +43,10 @@ function analytics() {
 const problems = [];
 const pages = [];
 
-function finalize(html, rel) {
+// Version asset URLs so browsers pick up new CSS/JS straight after a deploy
+const ASSET_VER = Date.now().toString(36);
+function finalize(html, rel) { return finalizeBase(html, rel).replace(/(["'])(\/assets\/[\w./-]+\.(?:js|css))\1/g, `$1$2?v=${ASSET_VER}$1`); }
+function finalizeBase(html, rel) {
   html = html.replace('<!--analytics-->', analytics());
   // data-if="key": keep the element (minus the marker) when key has a value, drop it entirely when empty
   html = html.replace(/<(\w+)([^>]*?) data-if="(\w+)"([^>]*)>([\s\S]*?)<\/\1>/g, (m, tag, a, key, b, inner) =>
