@@ -105,6 +105,6 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error('checkout failed:', e.message);
     if (e.code === 'not_configured') return res.status(503).json({ error: 'Online payment is being set up. Please call us on 02 9545 2940 to order.' });
-    return res.status(502).json({ error: 'We could not start checkout. Please try again, or call us on 02 9545 2940.' });
+    return res.status(502).json({ error: 'We could not start checkout. Please try again, or call us on 02 9545 2940.', ...(req.headers['x-ep-diagnose'] === '1' ? { detail: String(e.message).slice(0, 200), status: e.status } : {}) });
   }
 }
