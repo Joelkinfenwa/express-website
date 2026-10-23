@@ -114,3 +114,7 @@ Vercel environment variables:
 | `SITE_URL` | Optional. Fallback origin for Stripe return links |
 
 Stripe webhook: endpoint `https://expresspathology.com.au/api/stripe-webhook`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+
+## Partner referrals (monthly invoicing)
+
+`/partner-referral` lets invoiced partners upload a referral form with notes, no payment. It is unlisted and protected by an access code. Set `PARTNER_CODES` in Vercel as `Partner name=code`, separated by semicolons, for example `Lifestrands (LSG)=a-long-random-code`.

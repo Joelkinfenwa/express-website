@@ -74,7 +74,7 @@
         })
         .then(function (r) {
           if (r.status === 413) { var e = new Error('too large'); e.tooLarge = true; throw e; }
-          if (!r.ok) throw new Error(String(r.status));
+          if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { var e = new Error(String(r.status)); e.server = r.status === 403 || r.status === 400 ? j.error : null; throw e; });
         })
         .then(function () {
           if (pay) {
@@ -92,11 +92,18 @@
           }
           form.reset();
           status.setAttribute('data-state', 'ok');
+          if (form.getAttribute('data-enquiry') === 'referral') {
+            var keep = { partner_code: data.partner_code, name: data.name, email: data.email };
+            form.reset(); Object.keys(keep).forEach(function (k) { form.elements[k].value = keep[k]; });
+            status.setAttribute('data-state', 'ok');
+            status.textContent = 'Referral received. A confirmation has been emailed to you. You can submit another below.';
+            return;
+          }
           status.textContent = form.getAttribute('data-enquiry') === 'booking' ? 'Thank you. Your request has been received and our team will contact you to confirm your appointment time.' : 'Thank you. Your message has been sent and our team will be in touch.';
         })
         .catch(function (err) {
           status.setAttribute('data-state', 'error');
-          status.textContent = err && err.tooLarge
+          status.textContent = err && err.server ? err.server : err && err.tooLarge
             ? 'That file is too large to send. Please upload a smaller photo or PDF (under 3 MB), or email it to us.'
             : 'Your message could not be sent. Please try again, or call or email us directly.';
         })

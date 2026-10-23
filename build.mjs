@@ -170,7 +170,7 @@ function walk(dir) {
     if (statSync(p).isDirectory()) { mkdirSync(dest, { recursive: true }); walk(p); continue; }
     if (extname(name) !== '.html') { copyFileSync(p, dest); continue; }
     writeFileSync(dest, finalize(fillFragments(readFileSync(p, 'utf8')), rel));
-    if (!['404.html', 'checkout.html', 'order-confirmed.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
+    if (!['404.html', 'checkout.html', 'order-confirmed.html', 'partner-referral.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
   }
 }
 
@@ -574,5 +574,5 @@ if (problems.length) {
 
 const site = config.siteUrl.replace(/\/$/, '');
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc></url>`).join('\n')}\n</urlset>\n`);
-writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nSitemap: ${site}/sitemap.xml\n`);
+writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nDisallow: /partner-referral\nSitemap: ${site}/sitemap.xml\n`);
 console.log(`Built ${pages.length} pages into dist/`);
