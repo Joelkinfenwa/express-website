@@ -310,7 +310,7 @@ ${prep.map(([h, p], i) => `<li style="display: flex; gap: 20px; padding: 20px 0;
   };
   const photoName = (HERO.products || {})[t.handle];
   const photo = heroPhoto(photoName, `${t.title} home blood collection`, 'object-position: center 25%', { eager: false });
-  const slots = { PHOTO: photo ? `<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px"><div style="aspect-ratio: 21 / 9; min-height: 240px; border-radius: 28px; overflow: hidden; background: #E8EDE6">${photo}</div></section>` : '', FACTS: facts, SUITED: suited, GLANCE: glance, CENTRE_OPTION: centreOption, HOME_OPTION: homeOption, UPGRADE: upgrade, MARKERS: markersHtml, PREP: prepHtml, FAQ: faqHtml, RELATED: related.map((x) => card(x)).join('\n') };
+  const slots = { PHOTO: photo ? `<section style="max-width: 1320px; margin: 0 auto; padding: 0 24px 80px"><div style="width: 100%; height: clamp(240px, 40vw, 560px); border-radius: 28px; overflow: hidden; background: #E8EDE6">${photo}</div></section>` : '', FACTS: facts, SUITED: suited, GLANCE: glance, CENTRE_OPTION: centreOption, HOME_OPTION: homeOption, UPGRADE: upgrade, MARKERS: markersHtml, PREP: prepHtml, FAQ: faqHtml, RELATED: related.map((x) => card(x)).join('\n') };
   const html = tpl.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace(/<!--@([A-Z_]+)-->/g, (m, k) => (k in slots ? slots[k] : m));
   const rel = `tests/${t.handle}.html`;
   writeFileSync(join(OUT, rel), finalize(html, rel));
