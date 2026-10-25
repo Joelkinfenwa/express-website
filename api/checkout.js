@@ -11,6 +11,8 @@ const cents = (n) => Math.round(n * 100);
 const str = (v, max = 120) => String(v == null ? '' : v).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
 
 function area(pc) { return PRICES.metro.includes(pc) ? 'metro' : PRICES.regional.includes(pc) ? 'regional' : null; }
+// Payment is always taken. Outside the listed area, price by metro or regional classification.
+function feeArea(pc) { return area(pc) || ((PRICES.metroAll || []).includes(pc) ? 'metro' : 'regional'); }
 function makeRef() { return 'EP-' + Date.now().toString(36).slice(-4).toUpperCase() + Math.random().toString(36).slice(2, 4).toUpperCase(); }
 
 function validatePatient(p, type) {
@@ -45,8 +47,8 @@ export default async function handler(req, res) {
   if (v.error) return res.status(400).json({ error: v.error });
   const p = v.patient;
   const home = type === 'own-form' || body.home === true;
-  const where = area(p.postcode);
-  if (home && !where) return res.status(400).json({ error: `We do not currently list ${p.postcode} for home visits. Choose a collection centre, or contact us and our team will check.`, code: 'not_covered' });
+  const listed = !!area(p.postcode);
+  const where = feeArea(p.postcode);
 
   // Build line items from server-side prices only
   const items = [];
@@ -73,7 +75,7 @@ export default async function handler(req, res) {
   const origin = ALLOWED_ORIGIN.test(String(req.headers.origin || '')) ? req.headers.origin : (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '');
   const summary = items.map((i) => i.name).join('; ').slice(0, 480);
   const metadata = {
-    reference, order_type: type, items: summary, collection: home ? `Home visit (${where})` : 'Collection centre',
+    reference, order_type: type, items: summary, collection: home ? `Home visit (${where}${listed ? '' : ', outside listed area: confirm nurse'})` : 'Collection centre',
     first_name: p.firstName, last_name: p.lastName, dob: p.dob, sex: p.sex, phone: p.phone,
     address: p.address, suburb: p.suburb, state: p.state, postcode: p.postcode,
     preferred_date: str(body.preferredDate, 10), preferred_time: str(body.preferredTime, 40), notes: str(body.notes, 480)

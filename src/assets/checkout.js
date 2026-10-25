@@ -47,9 +47,9 @@
     out.textContent = ''; out.removeAttribute('data-state'); out.className = 'form-status';
     if (!home() || !cov || pc.length !== 4) return true;
     var ok = cov.metro.indexOf(pc) !== -1 || cov.regional.indexOf(pc) !== -1;
-    out.setAttribute('data-state', ok ? 'ok' : 'error');
-    out.textContent = ok ? 'Home visits are available in ' + pc + '.' : 'We do not currently list ' + pc + ' for home visits. Choose a collection centre, or contact us and our team will check.';
-    return ok;
+    out.setAttribute('data-state', 'ok');
+    out.textContent = ok ? 'Home visits are available in ' + pc + '.' : 'Our team will confirm your nurse in ' + pc + ' after booking. If we cannot arrange a visit, we will refund you in full.';
+    return true;
   }
   Array.prototype.forEach.call(radios, function (r) { r.addEventListener('change', render); });
   $('co-postcode').addEventListener('input', coverage);
