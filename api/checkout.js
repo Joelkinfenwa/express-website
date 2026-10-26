@@ -95,6 +95,8 @@ export default async function handler(req, res) {
   try {
     const session = await stripe('POST', '/checkout/sessions', {
       mode: 'payment',
+      // Unpaid sessions expire after an hour so the team is told promptly (checkout.session.expired)
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
       customer_email: p.email,
       client_reference_id: reference,
       success_url: `${origin}/order-confirmed?ref=${encodeURIComponent(reference)}&session_id={CHECKOUT_SESSION_ID}`,

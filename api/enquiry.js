@@ -44,7 +44,7 @@ function attachment(body) {
 }
 
 async function toEmail(d, att) {
-  const subject = d.kind === 'referral' ? `Partner referral (${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/checkout/i.test(d.payment) ? 'paying online' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
+  const subject = d.kind === 'referral' ? `Partner referral (${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/Stripe|choose tests/i.test(d.payment) ? 'NOT PAID YET: sent to online payment, a separate paid-order email confirms payment' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

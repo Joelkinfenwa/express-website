@@ -82,6 +82,18 @@ export default async function handler(req, res) {
   try { event = JSON.parse(raw); } catch { return res.status(400).json({ error: 'Invalid payload' }); }
   const s = event.data && event.data.object;
   const relevant = (event.type === 'checkout.session.completed' && s.payment_status === 'paid') || event.type === 'checkout.session.async_payment_succeeded';
+  // Checkout started on the website but not paid within the hour: tell the team so they can follow up
+  if (event.type === 'checkout.session.expired' && s && (s.metadata || {}).order_type && process.env.RESEND_API_KEY && process.env.ENQUIRY_FROM && process.env.ENQUIRY_TO) {
+    const m = s.metadata;
+    const name = [m.first_name, m.last_name].filter(Boolean).join(' ') || 'Unknown';
+    const total = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format((s.amount_total || 0) / 100);
+    const rows = [['Checkout reference', m.reference], ['Items', m.items], ['Total', total], ['Collection', m.collection], ['Name', name], ['Email', s.customer_email || (s.customer_details || {}).email], ['Phone', m.phone], ['Address', [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ')], ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time]];
+    try {
+      await send({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()).filter(Boolean), subject: `Payment not completed ${m.reference}: ${name} (${total})`,
+        html: `<p><strong>This customer started checkout but did not pay.</strong> Call them to complete the booking, or send a payment link.</p><table>${rows.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join('')}</table>` });
+    } catch (e) { console.error('expired email failed:', e.message); return res.status(500).json({ error: 'Email failed' }); }
+    return res.status(200).json({ received: true, expired: true });
+  }
   if (!relevant) return res.status(200).json({ received: true, ignored: event.type });
   if (!process.env.RESEND_API_KEY || !process.env.ENQUIRY_FROM || !process.env.ENQUIRY_TO) { console.error('order email not configured'); return res.status(500).json({ error: 'Email not configured' }); }
   try {
