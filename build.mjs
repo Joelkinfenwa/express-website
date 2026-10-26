@@ -2,7 +2,7 @@
 // analytics, sitemap and robots, and refuses to build if any required value is
 // missing or any placeholder text would reach the live site.
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync } from 'node:fs';
-import { join, extname, relative } from 'node:path';
+import { join, extname, relative, dirname } from 'node:path';
 import { loadCatalog, CATEGORY_LABELS, CATEGORY_ORDER } from './scripts/catalog.mjs';
 
 const ROOT = new URL('.', import.meta.url).pathname;
@@ -61,6 +61,7 @@ const ASSET_VER = Date.now().toString(36);
 function finalize(html, rel) { return finalizeBase(html, rel).replace(/(["'])(\/assets\/[\w./-]+\.(?:js|css))\1/g, `$1$2?v=${ASSET_VER}$1`); }
 function finalizeBase(html, rel) {
   html = html.replace('<!--analytics-->', analytics());
+  html = html.replace('<a href="/collection-centres">Collection centres</a></div>', '<a href="/collection-centres">Collection centres</a><a href="/guides">Guides</a></div>');
   // data-if="key": keep the element (minus the marker) when key has a value, drop it entirely when empty
   html = html.replace(/<(\w+)([^>]*?) data-if="(\w+)"([^>]*)>([\s\S]*?)<\/\1>/g, (m, tag, a, key, b, inner) =>
     config[key] && String(config[key]).trim() ? `<${tag}${a}${b}>${inner}</${tag}>` : '');
@@ -579,6 +580,52 @@ ${markersHtml ? `<div style="flex: 3 1 520px; min-width: 0; display: flex; flex-
 </section>`);
 }
 
+// ---------- Guides: answer pages for search engines and AI assistants ----------
+{
+  const shell = readFileSync(join(SRC, '_page.html'), 'utf8');
+  const H1 = "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 4.4vw, 56px); line-height: 1.05; letter-spacing: -0.03em";
+  const G = JSON.parse(readFileSync(join(ROOT, 'data/guides.json'), 'utf8')).guides;
+  const PUBLISHED = '2026-10-26', MODIFIED = new Date().toISOString().slice(0, 10);
+  const org = { '@type': 'Organization', name: 'Express Pathology', url: siteUrl + '/' };
+  const strip = (h) => h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const faqItem = (q, a) => `<details style="border-bottom: 1px solid #DCE0D8; padding: 20px 0"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 700; font-size: 19px; min-height: 44px">${esc(q)}<span class="faq-plus" aria-hidden="true" style="font-size: 28px; font-weight: 400; color: #A4502E; transition: transform 0.2s">+</span></summary><p style="margin: 12px 0 0; color: #4B5650">${esc(a)}</p></details>`;
+  const crumbs = (items) => `<nav aria-label="Breadcrumb" style="font-size: 14px; color: #4B5650">${items.map(([n, u]) => u ? `<a href="${u}" style="text-decoration: underline">${esc(n)}</a>` : `<span>${esc(n)}</span>`).join(' / ')}</nav>`;
+  const render = (path, title, desc, jsonld, body) => {
+    const vals = { pageTitle: esc(title), path, metaDescription: esc(desc), jsonld: JSON.stringify(jsonld).replace(/</g, '\\u003c') };
+    mkdirSync(dirname(join(OUT, path.slice(1) + '.html')), { recursive: true });
+    writeFileSync(join(OUT, path.slice(1) + '.html'), finalize(shell.replace(/\{\{@(\w+)\}\}/g, (m, k) => (k in vals ? vals[k] : m)).replace('<!--@BODY-->', body), path.slice(1) + '.html'));
+    pages.push(path);
+  };
+  for (const g of G) {
+    const path = '/guides/' + g.slug;
+    const related = G.filter((x) => x.slug !== g.slug).slice(0, 3);
+    const jsonld = { '@context': 'https://schema.org', '@graph': [
+      { '@type': 'Article', headline: g.title, description: g.description, url: siteUrl + path, mainEntityOfPage: siteUrl + path, datePublished: PUBLISHED, dateModified: MODIFIED, author: org, publisher: org, inLanguage: 'en-AU', abstract: g.answer },
+      { '@type': 'FAQPage', mainEntity: [[g.title, g.answer], ...g.faq].map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: strip(a) } })) },
+      { '@type': 'BreadcrumbList', itemListElement: [['Home', '/'], ['Guides', '/guides'], [g.title, path]].map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: siteUrl + u })) }
+    ] };
+    render(path, `${g.metaTitle} | Express Pathology`, g.description, jsonld, `<article style="max-width: 820px; margin: 0 auto; padding: 32px 24px 96px; display: flex; flex-direction: column; gap: 24px">
+${crumbs([['Home', '/'], ['Guides', '/guides'], [g.title]])}
+<h1 style="${H1}">${esc(g.title)}</h1>
+<p style="margin: 0; padding: 24px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE0D8; font-size: 19px; line-height: 1.55; color: #1C2420"><strong>Short answer:</strong> ${esc(g.answer)}</p>
+<div class="prose">${g.sections.map(([h, html]) => `<h2>${esc(h)}</h2>${html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>')}`).join('\n')}</div>
+<section aria-labelledby="faq-h" style="display: flex; flex-direction: column; gap: 8px"><h2 id="faq-h" style="margin: 16px 0 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 30px; letter-spacing: -0.02em">Common questions</h2>
+<div style="border-top: 1px solid #1C2420">${g.faq.map(([q, a]) => faqItem(q, a)).join('\n')}</div></section>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px">${g.links.map(([n, u], i) => `<a href="${u}" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; font-weight: 700; ${i === 0 ? 'background: #17302A; color: #F7F4EF' : 'border: 1px solid #17302A; color: #17302A'}">${esc(n)}</a>`).join('')}</div>
+<p style="margin: 0; color: #4B5650">Questions? Call <a href="tel:{{phoneTel}}" style="text-decoration: underline">{{phone}}</a>, Monday to Friday, 8am to 5pm.</p>
+<aside style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #DCE0D8; display: flex; flex-direction: column; gap: 10px"><strong>More guides</strong>${related.map((x) => `<a href="/guides/${x.slug}" style="text-decoration: underline">${esc(x.title)}</a>`).join('')}</aside>
+</article>`);
+  }
+  render('/guides', 'Mobile Blood Test Guides | Express Pathology', 'Straight answers about mobile and home blood tests in Australia: cost, Medicare, what to expect, and booking with your doctor\'s request form.',
+    { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mobile blood test guides', url: siteUrl + '/guides', hasPart: G.map((g) => ({ '@type': 'Article', headline: g.title, url: siteUrl + '/guides/' + g.slug })) },
+    `<section style="max-width: 1100px; margin: 0 auto; padding: 32px 24px 96px; display: flex; flex-direction: column; gap: 28px">
+${crumbs([['Home', '/'], ['Guides']])}
+<h1 style="${H1}">Mobile blood test guides.</h1>
+<p style="margin: 0; font-size: 19px; color: #4B5650; max-width: 720px">Straight answers about home and mobile blood tests in Australia, from what they cost to what happens on the day.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px">${G.map((g) => `<a href="/guides/${g.slug}" style="display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 24px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 23px; line-height: 1.2; letter-spacing: -0.015em">${esc(g.title)}</span><span style="color: #4B5650">${esc(g.description)}</span><span style="font-weight: 700; color: #A4502E">Read the guide →</span></a>`).join('\n')}</div>
+</section>`);
+}
+
 // Coverage for the request form
 const cov = JSON.parse(readFileSync(join(ROOT, 'data/coverage.json'), 'utf8'));
 writeFileSync(join(OUT, 'assets/coverage.json'), JSON.stringify({ metro: cov.metro || [], regional: cov.regional || [], metroAll: JSON.parse(readFileSync(join(ROOT, 'data/postcode-class.json'), 'utf8')).metro, metroFee: config.metroFee, regionalFee: config.regionalFee, store: catalog.store, ownForm: catalog.ownForm }));
@@ -599,6 +646,47 @@ if (problems.length) {
 }
 
 const site = config.siteUrl.replace(/\/$/, '');
-writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc></url>`).join('\n')}\n</urlset>\n`);
+writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nDisallow: /partner-referral\nSitemap: ${site}/sitemap.xml\n`);
+// llms.txt: a plain summary for AI assistants and answer engines
+{
+  const areasJ = JSON.parse(readFileSync(join(ROOT, 'data/areas.json'), 'utf8')).areas;
+  const guidesJ = JSON.parse(readFileSync(join(ROOT, 'data/guides.json'), 'utf8')).guides;
+  const panelsJ = catalog.tests.filter((t) => t.centreVariant);
+  writeFileSync(join(OUT, 'llms.txt'), `# Express Pathology
+
+> Mobile blood collection in Australia. A registered nurse collects blood tests at home or at work, with the patient's own doctor's request form or as a private blood test ordered online without a referral. Samples are processed by NATA-accredited partner laboratories. Express Pathology also provides white-label pathology collection for clinics, telehealth services, aged care and corporate health.
+
+## Key facts
+- Home visit with a doctor's request form: ${config.metroFee} metro, ${config.regionalFee} regional, paid online when booking.
+- Private blood tests without a referral: panels from ${money(Math.min(...panelsJ.map((t) => t.price)))}; collect free at one of 2,000+ partner collection centres, or add a nurse home visit for ${config.homeVisitAddOnFee}.
+- Build your own test: ${money(catalog.base ? catalog.base.price : 0)} base fee plus each chosen test.
+- Tests on a doctor's request form go to the requesting doctor. Private tests are emailed as a doctor-reviewed report.
+- The home visit fee is a private fee and is not claimed through Medicare. Private tests ordered without a referral are not covered by Medicare.
+- ${config.cancellationPolicy}
+- Phone ${config.phone} (Monday to Friday, 8am to 5pm). Email ${config.email}.
+
+## Home visit areas
+${areasJ.map((a) => `- [${a.name.replace(/^the /, '')}, ${a.state}](${site}/mobile-blood-collection/${a.slug})`).join('\n')}
+
+## Book and order
+- [Book a home visit](${site}/book)
+- [All blood tests and prices](${site}/tests)
+- [Blood tests without a referral](${site}/blood-tests/without-referral)
+- [Collection centres](${site}/collection-centres)
+- [How to prepare](${site}/prepare)
+
+## Private blood test panels
+${panelsJ.map((t) => `- [${t.title}](${site}/tests/${t.handle}): ${money(t.price)}`).join('\n')}
+
+## Guides
+${guidesJ.map((g) => `- [${g.title}](${site}/guides/${g.slug}): ${g.description}`).join('\n')}
+
+## For partners
+- [White-label pathology for clinics and health platforms](${site}/partners)
+- [Telehealth](${site}/telehealth)
+- [Aged care](${site}/aged-care)
+- [Corporate health](${site}/corporate-health)
+`);
+}
 console.log(`Built ${pages.length} pages into dist/`);
