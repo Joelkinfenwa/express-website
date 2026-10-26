@@ -28,7 +28,11 @@ if (missing.length) {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function analytics() {
-  let out = '';
+  // Vercel Web Analytics and Speed Insights (static HTML install; served by Vercel, no package needed)
+  let out = `<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+`;
   // Google tag (GA4 and/or Google Ads). window.epTrack(event, params) sends a GA4 event and, when a
   // Google Ads conversion label is configured for that event, the matching Ads conversion.
   const ga = config.gaMeasurementId, ads = config.googleAdsId;
