@@ -71,6 +71,15 @@
       prepareFile(file)
         .then(function (att) {
           if (att) data.attachment = att;
+          // Paid bookings reach the team only after payment: hold the request in this tab until the
+          // order confirmation page sends it. No-referral bookings go on to choose tests, with nothing sent yet.
+          if (pay) {
+            if (typeof pay !== 'string') {
+              try { sessionStorage.setItem('ep-req-' + data.reference, JSON.stringify(data)); }
+              catch (x) { try { var lite = Object.assign({}, data); delete lite.attachment; sessionStorage.setItem('ep-req-' + data.reference, JSON.stringify(lite)); } catch (y) {} }
+            }
+            return { ok: true, status: 200 };
+          }
           return fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         })
         .then(function (r) {
@@ -95,7 +104,7 @@
                   if (attempt < 2 && !(j && j.code === 'invalid')) return startPay(attempt + 1);
                   // Keep the details on screen and let the patient retry payment without re-sending the request
                   status.setAttribute('data-state', 'error');
-                  status.textContent = 'Your request has been received, but payment could not start' + (j && j.error ? ': ' + String(j.error).replace(/\.?$/, '.') : '.') + ' Please check your details and press the button to try payment again, or call us on 02 9545 2940.' + (j && j.detail ? ' (Ref: ' + j.detail + ')' : '');
+                  status.textContent = 'Payment could not start' + (j && j.error ? ': ' + String(j.error).replace(/\.?$/, '.') : '.') + ' Please check your details and press the button to try payment again, or call us on 02 9545 2940.' + (j && j.detail ? ' (Ref: ' + j.detail + ')' : '');
                   button.disabled = false;
                   button.textContent = 'Try payment again';
                   form._retryPay = function () { button.disabled = true; status.removeAttribute('data-state'); status.textContent = 'Taking you to secure payment…';

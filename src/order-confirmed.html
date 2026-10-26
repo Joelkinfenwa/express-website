@@ -66,6 +66,8 @@ if(window.fbq)window.fbq('track','Purchase',{value:o.value,currency:o.currency})
 
 
 </div>
+<script>(function(){var q=new URLSearchParams(location.search),sid=q.get('session_id'),ref=q.get('ref');if(!sid||!ref)return;var k='ep-req-'+ref,raw=null;try{raw=sessionStorage.getItem(k)}catch(e){}if(!raw)return;var d;try{d=JSON.parse(raw)}catch(e){return}d.kind='booking-paid';d.session_id=sid;
+function send(n){fetch('/api/enquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(r.ok||r.status===403){try{sessionStorage.removeItem(k)}catch(e){}}else if(n<3)setTimeout(function(){send(n+1)},2000*n)}).catch(function(){if(n<3)setTimeout(function(){send(n+1)},2000*n)})}send(1);})();</script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>

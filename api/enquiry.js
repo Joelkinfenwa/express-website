@@ -1,9 +1,10 @@
 import TESTS from '../lib/test-index.mjs';
+import { stripe } from '../lib/stripe.js';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -70,6 +71,38 @@ async function toPatient(d, origin) {
   if (!r.ok) throw new Error(`Resend patient ${r.status}`);
 }
 
+// A home visit booking with the patient's own doctor's form reaches the team only after payment.
+// The order confirmation page sends the request details and form here; Stripe confirms the payment.
+async function paidBooking(d, att, res) {
+  if (!/^cs_(live|test)_\w+$/.test(d.session_id || '')) return res.status(400).json({ error: 'Invalid session' });
+  if (!(process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM)) return res.status(500).json({ error: 'Email not configured' });
+  try {
+    const s = await stripe('GET', `/checkout/sessions/${d.session_id}?expand[]=payment_intent`);
+    const m = s.metadata || {};
+    if (s.payment_status !== 'paid' || !d.reference || (s.client_reference_id !== d.reference && m.reference !== d.reference)) return res.status(403).json({ error: 'Payment not confirmed' });
+    const pi = s.payment_intent && typeof s.payment_intent === 'object' ? s.payment_intent : null;
+    if (pi && (pi.metadata || {}).form_sent) return res.status(200).json({ ok: true, duplicate: true });
+    const order = pi && /^\d+$/.test((pi.metadata || {}).order_number || '') ? '#' + pi.metadata.order_number : d.reference;
+    const name = d.name || [m.first_name, m.last_name].filter(Boolean).join(' ');
+    const rows = [['Order', order], ['Checkout reference', d.reference], ['Name', name], ['Email', d.email], ['Phone', d.phone], ['Suburb', [d.suburb, d.postcode].filter(Boolean).join(' ')], ['Preferred date', d.preferred_date], ['Preferred time', d.preferred_time], ['Notes', d.message], ['Paid', new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format((s.amount_total || 0) / 100)]]
+      .filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(String(v)).replace(/\n/g, '<br>')}</td></tr>`).join('');
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+      body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()), ...(d.email ? { reply_to: d.email } : {}),
+        subject: `Doctor's request form for paid order ${order}: ${name}${d.suburb ? ', ' + d.suburb : ''}`,
+        html: `<p><strong>Paid home visit with the patient's own request form.</strong> ${att ? 'Request form attached.' : 'The request form could not be carried over from the website. Ask the patient to reply with a photo of it.'}</p><table>${rows}</table>`,
+        ...(att ? { attachments: [att] } : {}) })
+    });
+    if (!r.ok) throw new Error(`Resend ${r.status}`);
+    if (pi) await stripe('POST', `/payment_intents/${pi.id}`, { metadata: { form_sent: '1' } }).catch(() => {});
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('paid booking failed:', e.message);
+    return res.status(502).json({ error: 'Delivery failed' });
+  }
+}
+
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
 export default async function handler(req, res) {
@@ -81,6 +114,7 @@ export default async function handler(req, res) {
   const d = clean(body);
   const att = attachment(body);
   if (att && att.error) return res.status(400).json({ error: att.error });
+  if (d.kind === 'booking-paid') return paidBooking(d, att, res);
   if (d.kind === 'referral') {
     // Partner referral (invoiced monthly): PARTNER_CODES = "Lifestrands (LSG)=code1;Other partner=code2"
     const codes = String(process.env.PARTNER_CODES || '').split(';').map((x) => x.split('=')).filter((x) => x.length === 2).map(([n, c]) => [n.trim(), c.trim()]);
