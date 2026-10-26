@@ -88,7 +88,7 @@
         })
         .then(function () {
           var kind = form.getAttribute('data-enquiry');
-          if (window.epTrack && kind === 'booking') window.epTrack('home_visit_request', { has_referral: data.has_referral || '' });
+          if (window.epTrack && kind === 'booking' && !pay) window.epTrack('home_visit_request', { has_referral: data.has_referral || '' });
           if (window.epTrack && kind === 'partner') window.epTrack('partner_enquiry', {});
           if (window.epTrack && kind === 'contact') window.epTrack('contact_enquiry', {});
           if (pay) {
