@@ -87,6 +87,15 @@ export default async function handler(req, res) {
   try {
     // Sequential order number replaces the checkout reference everywhere the customer or lab sees it
     const m = s.metadata = { ...(s.metadata || {}) };
+    // Payments not made through the website checkout (for example a Stripe payment link sent by the
+    // team): notify the team only, with no order number, request form or patient email
+    if (!m.order_type) {
+      const total = new Intl.NumberFormat('en-AU', { style: 'currency', currency: String(s.currency || 'aud').toUpperCase() }).format((s.amount_total || 0) / 100);
+      const who = (s.customer_details && (s.customer_details.name || s.customer_details.email)) || 'unknown customer';
+      await send({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()), subject: `Payment received (not a website order): ${total} from ${who}`,
+        html: `<p>A payment was received outside the website checkout, for example through a Stripe payment link. No confirmation was sent to the customer.</p><p>Amount: ${esc(total)}<br>Customer: ${esc(who)}${s.customer_details && s.customer_details.email ? ' (' + esc(s.customer_details.email) + ')' : ''}<br>Stripe session: ${esc(s.id)}</p>` });
+      return res.status(200).json({ received: true, external: true });
+    }
     m.checkout_ref = m.reference;
     try { m.reference = '#' + await orderNumber(s); } catch (e) { console.error('order number failed:', e.message); }
     let form = null, formError = '';
