@@ -1,5 +1,5 @@
-// Daily review request (Vercel cron). Emails customers whose website order was paid 4 to 7 days ago
-// and asks for an honest Google review. No incentive is offered. Inactive until GOOGLE_REVIEW_URL is set.
+// Daily review request (Vercel cron). Emails customers two days after their visit (the preferred date
+// they booked), or four days after payment when no date was given, and asks for an honest Google review. No incentive is offered. Inactive until GOOGLE_REVIEW_URL is set.
 // Each order is asked once: the PaymentIntent is marked with metadata.review_sent. Refunded orders are skipped.
 import { stripe } from '../lib/stripe.js';
 
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
   if (!url) return res.status(200).json({ skipped: 'GOOGLE_REVIEW_URL not set' });
   if (!process.env.RESEND_API_KEY || !process.env.ENQUIRY_FROM) return res.status(500).json({ error: 'Email not configured' });
   const now = Math.floor(Date.now() / 1000);
-  const q = `limit=100&status=complete&created[gte]=${now - 7 * DAY}&created[lte]=${now - 4 * DAY}&expand[]=data.payment_intent.latest_charge`;
+  const q = `limit=100&status=complete&created[gte]=${now - 60 * DAY}&created[lte]=${now - 2 * DAY}&expand[]=data.payment_intent.latest_charge`;
   let sent = 0, skipped = 0;
   try {
     const list = await stripe('GET', `/checkout/sessions?${q}`);
@@ -46,6 +46,10 @@ export default async function handler(req, res) {
       const m = s.metadata || {};
       const email = (s.customer_details && s.customer_details.email) || s.customer_email;
       const charge = pi && pi.latest_charge && typeof pi.latest_charge === 'object' ? pi.latest_charge : null;
+      // Due two days after the visit date, or four days after payment; skip anything more than ten days overdue
+      const visit = /^\d{4}-\d{2}-\d{2}$/.test(m.preferred_date || '') ? Math.floor(Date.parse(m.preferred_date + 'T00:00:00+10:00') / 1000) : null;
+      const due = visit ? visit + 2 * DAY : s.created + 4 * DAY;
+      if (now < due || now - due > 10 * DAY) { skipped++; continue; }
       if (s.payment_status !== 'paid' || !m.order_type || !pi || !email || (pi.metadata || {}).review_sent || (charge && (charge.refunded || charge.amount_refunded > 0))) { skipped++; continue; }
       const { text, html } = message(m.first_name || '', url);
       const r = await fetch('https://api.resend.com/emails', {
