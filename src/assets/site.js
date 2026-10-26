@@ -57,6 +57,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.reportValidity()) return;
+      if (form._retryPay) { form._retryPay(); return; }
       var data = { kind: form.getAttribute('data-enquiry'), page: location.pathname };
       var file = null;
       new FormData(form).forEach(function (v, k) {
@@ -85,14 +86,26 @@
             status.setAttribute('data-state', 'ok');
             status.textContent = 'Request received. Taking you to secure payment…';
             if (typeof pay === 'string') { location.href = pay; return; }
-            return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pay.checkout) })
-              .then(function (r) { return r.json(); })
-              .then(function (j) {
-                if (j && j.url) { location.href = j.url; return; }
-                status.setAttribute('data-state', 'error');
-                status.textContent = 'Your request has been received, but online payment could not start. Our team will contact you to arrange payment.';
-                pay = null;
-              });
+            var checkout = pay.checkout;
+            var startPay = function (attempt) {
+              return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(checkout) })
+                .then(function (r) { return r.json().catch(function () { return { error: '', detail: 'HTTP ' + r.status }; }); }, function () { return { error: '', detail: 'network' }; })
+                .then(function (j) {
+                  if (j && j.url) { location.href = j.url; return; }
+                  if (attempt < 2 && !(j && j.code === 'invalid')) return startPay(attempt + 1);
+                  // Keep the details on screen and let the patient retry payment without re-sending the request
+                  status.setAttribute('data-state', 'error');
+                  status.textContent = 'Your request has been received, but payment could not start' + (j && j.error ? ': ' + String(j.error).replace(/\.?$/, '.') : '.') + ' Please check your details and press the button to try payment again, or call us on 02 9545 2940.' + (j && j.detail ? ' (Ref: ' + j.detail + ')' : '');
+                  button.disabled = false;
+                  button.textContent = 'Try payment again';
+                  form._retryPay = function () { button.disabled = true; status.removeAttribute('data-state'); status.textContent = 'Taking you to secure payment…';
+                    var f = new FormData(form), parts = String(f.get('name') || '').trim().split(/\s+/);
+                    checkout.patient = { firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || parts[0] || '', email: String(f.get('email') || ''), phone: String(f.get('phone') || ''), suburb: String(f.get('suburb') || ''), postcode: String(f.get('postcode') || '') };
+                    startPay(2); };
+                  pay = 'failed';
+                });
+            };
+            return startPay(1);
           }
           form.reset();
           status.setAttribute('data-state', 'ok');

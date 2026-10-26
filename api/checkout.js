@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   if (!['panel', 'builder', 'own-form'].includes(type)) return res.status(400).json({ error: 'Unknown order type.' });
 
   const v = validatePatient(body.patient || {}, type);
-  if (v.error) return res.status(400).json({ error: v.error });
+  if (v.error) return res.status(400).json({ error: v.error, code: 'invalid' });
   const p = v.patient;
   const home = type === 'own-form' || body.home === true;
   const listed = !!area(p.postcode);
@@ -107,6 +107,6 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error('checkout failed:', e.message);
     if (e.code === 'not_configured') return res.status(503).json({ error: 'Online payment is being set up. Please call us on 02 9545 2940 to order.' });
-    return res.status(502).json({ error: 'We could not start checkout. Please try again, or call us on 02 9545 2940.' });
+    return res.status(502).json({ error: 'We could not start checkout', detail: String(e.message || 'stripe').replace(/sk_[A-Za-z0-9_]+/g, '').slice(0, 120) });
   }
 }
