@@ -54,7 +54,7 @@ export function emails(s, form = null, formError = '') {
     ['Phone', m.phone], ['Address', [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ')],
     ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Stripe session', s.id]
   ].filter(([, v]) => v);
-  const toPatient = !!form && process.env.FORM_TO_PATIENT !== '0'; // on by default; set FORM_TO_PATIENT=0 to stop
+  const toPatient = !!form; // the request form is always attached to the patient's confirmation email
   const team = {
     from: process.env.ENQUIRY_FROM,
     to: String(process.env.ENQUIRY_TO || '').split(',').map((x) => x.trim()).filter(Boolean),
