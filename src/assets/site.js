@@ -85,8 +85,10 @@
         .then(function (r) {
           if (r.status === 413) { var e = new Error('too large'); e.tooLarge = true; throw e; }
           if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { var e = new Error(String(r.status)); e.server = r.status === 403 || r.status === 400 ? j.error : null; throw e; });
+          return r.json ? r.json().catch(function () { return {}; }) : {};
         })
-        .then(function () {
+        .then(function (res) {
+          res = res || {};
           var kind = form.getAttribute('data-enquiry');
           if (window.epTrack && kind === 'booking' && !pay) window.epTrack('home_visit_request', { has_referral: data.has_referral || '' });
           if (window.epTrack && kind === 'partner') window.epTrack('partner_enquiry', {});
@@ -119,14 +121,14 @@
           form.reset();
           status.setAttribute('data-state', 'ok');
           if (form.getAttribute('data-enquiry') === 'referral') {
-            var keep = { partner_code: data.partner_code, company: data.company };
+            var keep = { partner_code: data.partner_code, company: data.company, email: data.email };
             form.reset(); Object.keys(keep).forEach(function (k) { form.elements[k].value = keep[k]; });
             status.setAttribute('data-state', 'ok');
             status.textContent = 'Referral received.';
             var done = document.getElementById('r-done');
             if (done) {
               var line = document.getElementById('r-done-line');
-              if (line) line.textContent = 'Thank you. We have received the referral for ' + (data.patient_name || 'your patient') + '. Our team will contact them to arrange the home visit.';
+              if (line) line.textContent = 'Thank you. We have received the referral for ' + (data.patient_name || 'your patient') + (res.order ? ' (order ' + res.order + ')' : '') + '. A confirmation has been emailed to you, and our team will contact the patient to arrange the home visit.';
               form.hidden = true; done.hidden = false; done.style.display = 'flex'; done.focus(); window.scrollTo({ top: done.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
             }
             return;

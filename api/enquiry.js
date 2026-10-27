@@ -1,5 +1,6 @@
 import TESTS from '../lib/test-index.mjs';
 import { stripe } from '../lib/stripe.js';
+import { referralNumber } from '../lib/order-number.js';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
@@ -45,7 +46,7 @@ function attachment(body) {
 }
 
 async function toEmail(d, att) {
-  const subject = d.kind === 'referral' ? `Partner referral (${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/Stripe|choose tests/i.test(d.payment) ? 'NOT PAID YET: sent to online payment, a separate paid-order email confirms payment' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
+  const subject = d.kind === 'referral' ? `Partner referral ${d.reference ? d.reference + ' ' : ''}(${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/Stripe|choose tests/i.test(d.payment) ? 'NOT PAID YET: sent to online payment, a separate paid-order email confirms payment' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -103,6 +104,25 @@ async function paidBooking(d, att, res) {
   }
 }
 
+// Partner referral: acknowledge receipt to the person who submitted it, with the order number
+async function toPartner(d) {
+  const e = escapeHtml;
+  const order = d.reference || '';
+  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate"><tr><td style="padding:28px 28px 8px"><div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div>
+<h1 style="font-size:24px;margin:22px 0 10px">Referral received${order ? ' &middot; Order ' + e(order) : ''}</h1>
+<p style="margin:0 0 14px;line-height:1.55">Thank you. We have received your referral for <strong>${e(d.patient_name || 'your patient')}</strong>.</p>
+<table role="presentation" style="margin:0 0 16px;border-collapse:collapse;font-size:15px">${[['Order number', order], ['Patient', d.patient_name], ['Referred by', d.company || d.partner], ['Collection', 'Home visit']].filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:4px 16px 4px 0;color:#5A645E">${e(k)}</td><td style="padding:4px 0;font-weight:700">${e(v)}</td></tr>`).join('')}</table>
+<p style="margin:0 0 14px;line-height:1.55">Our team will contact the patient to arrange their home visit. Please quote the order number if you need to contact us about this referral.</p>
+<p style="margin:0 0 24px;line-height:1.55;color:#4B5650">Questions? Reply to this email or call 02 9545 2940.</p></td></tr></table></div>`;
+  const text = `Thank you. We have received your referral for ${d.patient_name || 'your patient'}.\n\nOrder number: ${order}\nPatient: ${d.patient_name || ''}\nReferred by: ${d.company || d.partner || ''}\nCollection: Home visit\n\nOur team will contact the patient to arrange their home visit. Please quote the order number if you need to contact us about this referral.\n\nExpress Pathology\n02 9545 2940`;
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: `Referral received${order ? ' (Order ' + order + ')' : ''}: ${d.patient_name || 'patient'}`, html, text })
+  });
+  if (!r.ok) throw new Error(`Resend partner ${r.status}`);
+}
+
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
 export default async function handler(req, res) {
@@ -123,6 +143,9 @@ export default async function handler(req, res) {
     if (!match) return res.status(403).json({ error: 'That partner access code is not recognised.' });
     if (!d.patient_name) return res.status(400).json({ error: 'Please enter the patient\'s full name.' });
     if (!att) return res.status(400).json({ error: 'Please attach the referral form.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email || '')) return res.status(400).json({ error: 'Please enter a valid email address for the booking confirmation.' });
+    d.submitter = d.email;
+    try { d.reference = '#' + await referralNumber(match[0]); } catch (e) { console.error('referral number failed:', e.message); }
     d.collection = 'Home visit';
     d.name = d.company || match[0];
     d.partner = match[0];
@@ -135,11 +158,12 @@ export default async function handler(req, res) {
     // Email first: it is the only route that carries an uploaded request form.
     if (emailReady) {
       await toEmail(d, att);
+      if (d.kind === 'referral') await toPartner(d).catch((e) => console.error('partner acknowledgement failed:', e.message));
       if (d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '')).catch((e) => console.error('quiz email failed:', e.message));
     } else if (hubspotReady && !att) await toHubSpot(d);
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}) });
   } catch (err) {
     console.error('enquiry delivery failed:', err.message);
     return res.status(502).json({ error: 'Delivery failed' });
