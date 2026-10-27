@@ -47,7 +47,7 @@
 <script>(function(){var q=new URLSearchParams(location.search),sid=q.get('session_id');if(!sid||!/^cs_(live|test)_\w+$/.test(sid))return;var k='ep-conv-'+sid;try{if(localStorage.getItem(k))return;}catch(e){}
 fetch('/api/order-status?session_id='+encodeURIComponent(sid)).then(function(r){return r.ok?r.json():null}).then(function(o){if(!o||!o.paid)return;
 if(window.epTrack)window.epTrack('purchase',{user_data:o.email_sha256?{sha256_email_address:o.email_sha256}:undefined,value:o.value,currency:o.currency,transaction_id:o.transaction_id,items:o.items});
-if(window.fbq)window.fbq('track','Purchase',{value:o.value,currency:o.currency});try{localStorage.setItem(k,'1')}catch(e){}}).catch(function(){});})();</script>
+if(window.va)window.va('event',{name:'Purchase',data:{value:o.value,products:(o.items||[]).map(function(i){return i.item_name}).join(', ').slice(0,250)||'Order'}});if(window.fbq)window.fbq('track','Purchase',{value:o.value,currency:o.currency});try{localStorage.setItem(k,'1')}catch(e){}}).catch(function(){});})();</script>
 </main>
 <footer class="site-footer">
 <div class="footer-inner">
