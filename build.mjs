@@ -61,6 +61,7 @@ const ASSET_VER = Date.now().toString(36);
 function finalize(html, rel) { return finalizeBase(html, rel).replace(/(["'])(\/assets\/[\w./-]+\.(?:js|css))\1/g, `$1$2?v=${ASSET_VER}$1`); }
 function finalizeBase(html, rel) {
   html = html.replace('<!--analytics-->', analytics());
+  html = html.replace('<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/img/icon-96.png" type="image/png" sizes="96x96"><link rel="icon" href="/assets/img/icon-192.png" type="image/png" sizes="192x192"><link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">');
   html = html.replace('<a href="/collection-centres">Collection centres</a></div>', '<a href="/collection-centres">Collection centres</a><a href="/guides">Guides</a></div>');
   // data-if="key": keep the element (minus the marker) when key has a value, drop it entirely when empty
   html = html.replace(/<(\w+)([^>]*?) data-if="(\w+)"([^>]*)>([\s\S]*?)<\/\1>/g, (m, tag, a, key, b, inner) =>
@@ -648,6 +649,7 @@ if (problems.length) {
 const site = config.siteUrl.replace(/\/$/, '');
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nDisallow: /partner-referral\nSitemap: ${site}/sitemap.xml\n`);
+copyFileSync(join(SRC, 'assets/img/favicon.ico'), join(OUT, 'favicon.ico'));
 // llms.txt: a plain summary for AI assistants and answer engines
 {
   const areasJ = JSON.parse(readFileSync(join(ROOT, 'data/areas.json'), 'utf8')).areas;
