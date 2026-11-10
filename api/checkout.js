@@ -98,6 +98,7 @@ export default async function handler(req, res) {
       // Unpaid sessions expire after an hour so the team is told promptly (checkout.session.expired)
       expires_at: Math.floor(Date.now() / 1000) + 3600,
       customer_email: p.email,
+      allow_promotion_codes: true,
       client_reference_id: reference,
       success_url: `${origin}/order-confirmed?ref=${encodeURIComponent(reference)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${type === 'panel' ? '/tests/' + encodeURIComponent(str(body.panel, 80)) : type === 'builder' ? '/tests#build' : '/book'}`,
