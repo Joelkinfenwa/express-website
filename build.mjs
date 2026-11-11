@@ -163,6 +163,23 @@ function heroPhoto(name, alt, style, { fallback = false, eager = true } = {}) {
   const base = '/assets/img/' + (dir ? dir + '/' : '') + name;
   return `<img src="${base}-1200.webp" srcset="${base}-1200.webp ${dir ? 800 : 1200}w, ${base}.webp ${dir ? 1600 : 2400}w" sizes="(max-width: 900px) 100vw, 50vw" alt="${esc(alt)}" width="1200" height="675"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} style="display: block; width: 100%; height: 100%; object-fit: cover; ${style || ''}">`;
 }
+// Quiz funnel price anchor: what a panel's tests cost when ordered one by one through Build Your Own.
+// Only given when every test in the panel maps to a single test on sale, so the figure is exact.
+const slugQ = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const SINGLE_ALIAS = { 'mba-hdl-ldl': ['general-biochemistry', 'lipid-profile'], mba: ['general-biochemistry'], hdl: ['lipid-profile'], ldl: ['lipid-profile'], 'shbg-igf-1': ['shbg', 'igf-1'], oestradiol: ['oestradiol-e2'],
+  'thyroid-tsh-t3-t4': ['tsh-t3-and-t4'], 'thyroid-tsh-t3-and-t4': ['tsh-t3-and-t4'], 'fbc-esr': ['full-blood-count-and-esr'], 'full-blood-count-esr': ['full-blood-count-and-esr'] };
+function singlePrice(t) {
+  const bySlug = Object.fromEntries(catalog.addons.map((a) => [slugQ(a.title), a.price]));
+  const used = new Set();
+  for (const m of t.markers) {
+    const s = slugQ(m), hit = bySlug[s] != null ? [s] : SINGLE_ALIAS[s];
+    if (!hit || hit.some((x) => bySlug[x] == null)) return null;
+    hit.forEach((x) => used.add(x));
+  }
+  if (!used.size || !catalog.base) return null;
+  const sum = [...used].reduce((a, x) => a + bySlug[x], 0) + catalog.base.price;
+  return sum > t.price ? sum : null;
+}
 const fragments = {
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
   CATEGORY_BUTTONS: catButtons,
@@ -170,7 +187,7 @@ const fragments = {
   HOME_TESTS: homeTests(),
   BUILDER_FEE: catalog.base ? `A ${money(catalog.base.price)} build-your-own fee applies to each order.` : '',
   QUIZ_DATA: JSON.stringify({
-    tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant }])),
+    tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant, markers: displayNames(t), single: singlePrice(t) }])),
     addons: Object.fromEntries(catalog.addons.map((a) => [a.title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), { title: a.title.trim(), price: a.price }])),
     base: catalog.base ? catalog.base.price : 0,
     homeVisit: catalog.homeVisit ? catalog.homeVisit.price : null, quizHomeFrom: QUIZ_HOME_FROM
