@@ -332,6 +332,14 @@
   }
 
   // Funnel mode: first name and email before the result
+  // Follow-up emails: record the quiz completion in Klaviyo from the browser (public client API, no secret)
+  function klaviyoClient(kl, who) {
+    var H = { 'Content-Type': 'application/json', revision: '2024-10-15' }, base = 'https://a.klaviyo.com/client/', q = '/?company_id=' + encodeURIComponent(kl.company);
+    var prof = { data: { type: 'profile', attributes: { email: who.email, first_name: (who.name || '').split(' ')[0] } } };
+    fetch(base + 'events' + q, { method: 'POST', headers: H, body: JSON.stringify({ data: { type: 'event', attributes: { properties: kl.properties, metric: { data: { type: 'metric', attributes: { name: kl.event } } }, profile: prof } } }) }).catch(function () {});
+    if (kl.list) fetch(base + 'subscriptions' + q, { method: 'POST', headers: H, body: JSON.stringify({ data: { type: 'subscription', attributes: { custom_source: 'Test finder quiz', profile: { data: { type: 'profile', attributes: { email: who.email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } } } }, relationships: { list: { data: { type: 'list', id: kl.list } } } } }) }).catch(function () {});
+  }
+
   function gate() {
     step = Q.length;
     bar.style.width = '100%'; stepEl.textContent = 'Done'; back.hidden = false;
@@ -369,6 +377,8 @@
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
+        try { localStorage.setItem('ep-lead-email', lead.email); } catch (e) {}
+        r.json().then(function (j) { if (j && j.kl) klaviyoClient(j.kl, lead); }).catch(function () {});
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
       }).catch(function () {}).then(go);

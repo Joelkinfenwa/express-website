@@ -86,19 +86,32 @@ async function toPatient(d, origin) {
 
 // Quiz funnel: record the lead in Klaviyo so the follow-up emails can run as a flow there.
 // Sends the recommended panel and ready-made links only, never the quiz answers.
-async function quizToKlaviyo(d, origin) {
+// Event payload for the quiz follow-up flow in Klaviyo. Returns null when no panel was recommended.
+function quizEventProps(d, origin) {
   const h = String(d.recommendation || '').split(',').map((x) => x.trim()).find((x) => PRICES.panels[x]);
-  if (!h) return;
+  if (!h) return null;
   const p = PRICES.panels[h], pct = PRICES.quizDiscount || 0;
   const inc = !!(PRICES.quizHomeFrom && PRICES.homeVisit != null && p.price >= PRICES.quizHomeFrom);
   const base = `${origin}/checkout?panel=${encodeURIComponent(h)}${d.collection === 'home' ? '&home=1' : ''}`;
-  await klaviyoEvent('Completed Test Finder', { email: d.email, firstName: (d.name || '').split(' ')[0] }, {
+  return {
     panel: h, panel_title: p.title, panel_price: p.price, panel_url: `${origin}/tests/${h}`,
     checkout_url: `${base}&offer=quiz`, home_visit_included: inc,
     discount_percent: pct, discount_price: pct ? Math.round(p.price * (100 - pct)) / 100 : p.price, discount_url: pct ? `${base}&offer=quiz10` : `${base}&offer=quiz`,
     terms_url: `${origin}/quiz#offer-terms`
-  });
+  };
+}
+async function quizToKlaviyo(d, origin) {
+  const props = quizEventProps(d, origin);
+  if (!props) return;
+  await klaviyoEvent('Completed Test Finder', { email: d.email, firstName: (d.name || '').split(' ')[0] }, props);
   await klaviyoSubscribe(d.email, 'Test finder quiz');
+}
+// Without a private key on the server, the browser records the event with Klaviyo's public client API instead.
+const KL_PUBLIC = process.env.KLAVIYO_PUBLIC_KEY || 'VbA3Zh', KL_LIST = process.env.KLAVIYO_LIST_ID || 'Rv8MbY';
+function quizClientKlaviyo(d, origin) {
+  if (klaviyoReady() || d.kind !== 'quiz' || d.offer !== 'quiz') return null;
+  const props = quizEventProps(d, origin);
+  return props ? { company: KL_PUBLIC, list: KL_LIST, event: 'Completed Test Finder', properties: props } : null;
 }
 
 // A home visit booking with the patient's own doctor's form reaches the team only after payment.
@@ -196,7 +209,8 @@ export default async function handler(req, res) {
     else if (d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady()) { /* lead already recorded in Klaviyo */ }
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
-    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}) });
+    const kl = quizClientKlaviyo(d, SITE);
+    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}) });
   } catch (err) {
     console.error('enquiry delivery failed:', err.message);
     return res.status(502).json({ error: 'Delivery failed' });

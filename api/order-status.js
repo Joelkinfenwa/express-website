@@ -2,6 +2,7 @@
 // Exposes only the total, currency, an order identifier and a one-way hash of the email.
 import crypto from 'node:crypto';
 import { stripe } from '../lib/stripe.js';
+import { klaviyoReady } from '../lib/klaviyo.js';
 
 export default async function handler(req, res) {
   const id = String((req.query && req.query.session_id) || '');
@@ -15,7 +16,9 @@ export default async function handler(req, res) {
       // Enhanced conversions: SHA-256 of the normalised email only, never the email itself
       email_sha256: (() => { const e = String((s.customer_details && s.customer_details.email) || s.customer_email || '').trim().toLowerCase(); return e ? crypto.createHash('sha256').update(e).digest('hex') : ''; })(),
       transaction_id: (s.metadata && s.metadata.reference) || s.id,
-      items: String((s.metadata && s.metadata.items) || '').split('; ').filter(Boolean).map((n) => ({ item_name: n }))
+      items: String((s.metadata && s.metadata.items) || '').split('; ').filter(Boolean).map((n) => ({ item_name: n })),
+      // Without a server key, the browser tells Klaviyo the order is paid so the quiz follow-up emails stop
+      ...(paid && !klaviyoReady() ? { kl: { company: process.env.KLAVIYO_PUBLIC_KEY || 'VbA3Zh', event: 'Placed Website Order' } } : {})
     });
   } catch (e) {
     return res.status(404).json({ error: 'Not found' });
