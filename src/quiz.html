@@ -17,44 +17,97 @@
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
+<style>
+/* Quiz funnel: a full-screen stage for the questions, then a light results page */
+:root{--display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif}
+h1,h2,h3,.logo{font-family:var(--display)}
+.quiz-stage{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;color:#F7F4EF;background:radial-gradient(900px 520px at 85% -10%,rgba(242,169,129,.20),transparent 62%),radial-gradient(700px 500px at -10% 110%,rgba(255,255,255,.06),transparent 60%),#17302A}
+.quiz-stage.is-result{min-height:0;color:#1C2420;background:#F7F4EF}
+.qz-head,.qz-progress,.qz-body,.qz-foot{width:100%;max-width:720px;margin:0 auto;padding-left:24px;padding-right:24px}
+.is-result .qz-head,.is-result .qz-body,.is-result .qz-foot{max-width:880px}
+.qz-head{padding-top:16px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.quiz-stage:not(.is-result) .qz-head a,.quiz-stage:not(.is-result) #tf-q a{color:#F7F4EF}
+.quiz-stage:not(.is-result) .logo span{color:#C5D1CA}
+.qz-progress{display:flex;align-items:center;gap:14px;min-height:44px}
+.is-result .qz-progress{display:none}
+.qz-track{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden}
+.qz-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding-top:24px;padding-bottom:32px}
+.is-result .qz-body{justify-content:flex-start;padding-top:12px}
+.qz-foot{padding-bottom:24px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#9DB0A7}
+.qz-foot ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:600;font-size:14px;color:#C5D1CA}
+.qz-foot li::before{content:'✓';margin-right:6px;color:#F2A981}
+.qz-foot p{margin:0}
+.is-result .qz-foot,.is-result .qz-foot ul{color:#5A645E}
+.quiz-stage:not(.is-result) .tf-link{color:#C5D1CA;text-decoration:none;font-size:14px}
+.quiz-stage:not(.is-result) #tf-q h2{font-size:clamp(30px,6.4vw,48px)!important;line-height:1.04;letter-spacing:-.035em!important;font-weight:700!important}
+.quiz-stage:not(.is-result) #tf-q p{color:#C5D1CA!important}
+.quiz-stage #tf-q .form-status[data-state="error"]{color:#F2A981!important}
+.quiz-stage #tf-q .btn-dark{background:#F2A981;color:#1C2420}
+.quiz-stage .tf-opt{min-height:68px;padding:16px 22px;border-radius:20px;font-size:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#F7F4EF;transition:background .15s,border-color .15s,transform .15s}
+.quiz-stage .tf-opt small{color:#C5D1CA;margin-top:2px}
+.quiz-stage .tf-opt span[aria-hidden]{color:#F2A981!important;font-size:20px}
+.quiz-stage .tf-opt:hover{background:rgba(255,255,255,.12);border-color:#F2A981}
+.quiz-stage .tf-opt:active{transform:scale(.985)}
+.quiz-stage .tf-opt[aria-pressed="true"]{background:#F2A981;border-color:#F2A981;color:#1C2420}
+.quiz-stage .tf-opt[aria-pressed="true"] small,.quiz-stage .tf-opt[aria-pressed="true"] span[aria-hidden]{color:#1C2420!important}
+.quiz-stage .tf-opt:focus-visible,.quiz-stage .tf-link:focus-visible{outline:3px solid #F2A981;outline-offset:3px}
+.qz-step{display:flex;align-items:center;gap:12px;color:#8FA39A;transition:color .25s}
+.qz-step::before{content:'';flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #5E766C;transition:background .25s,border-color .25s}
+.qz-step.is-done{color:#F7F4EF}
+.qz-step.is-done::before{background:#F2A981;border-color:#F2A981}
+@keyframes qz-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#tf-q.qz-in>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
+#tf-q.qz-in [role=group]>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
+#tf-q.qz-in [role=group]>:nth-child(1){animation-delay:.06s}
+#tf-q.qz-in [role=group]>:nth-child(2){animation-delay:.10s}
+#tf-q.qz-in [role=group]>:nth-child(3){animation-delay:.14s}
+#tf-q.qz-in [role=group]>:nth-child(4){animation-delay:.18s}
+#tf-q.qz-in [role=group]>:nth-child(n+5){animation-delay:.22s}
+@media (prefers-reduced-motion:reduce){#tf-q.qz-in>*,#tf-q.qz-in [role=group]>*{animation:none}}
+</style>
 <!--analytics-->
 </head>
 <body>
 <div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55; min-height: 100vh">
 
 <a class="skip" href="#main">Skip to content</a>
-<header style="max-width: 880px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<main id="main">
+<div id="quiz-stage" class="quiz-stage">
+<header class="qz-head">
 <a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
 <a href="tel:{{phoneTel}}" style="font-weight: 700; font-size: 15px; white-space: nowrap">{{phone}}</a>
 </header>
-<main id="main">
-<section style="max-width: 880px; margin: 0 auto; padding: 12px 24px 56px; display: flex; flex-direction: column; gap: 22px">
-<div id="quiz-intro" style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">60-second quiz</span>
-<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 6vw, 60px); line-height: 1.03; letter-spacing: -0.035em">Which blood test should you get?</h1>
-<p style="margin: 0; font-size: 18px; color: #4B5650">Five quick questions. We will recommend a panel for your goals, with no referral needed and doctor review included.</p>
-<p data-if="quizHomeVisitIncludedFrom" style="margin: 0; align-self: flex-start; padding: 8px 14px; border-radius: 999px; background: #17302A; color: #F7F4EF; font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #C5D1CA">Terms</a></p>
+<div class="qz-progress">
+<button type="button" id="tf-back" class="tf-link" hidden aria-label="Back to the previous question">← Back</button>
+<div class="qz-track"><div id="tf-bar" style="height: 100%; width: 20%; background: #F2A981; border-radius: 999px; transition: width 0.35s cubic-bezier(.2,.7,.2,1)"></div></div>
+<span id="tf-step" style="font-size: 14px; font-weight: 600; white-space: nowrap">Question 1 of 5</span>
+</div>
+<div class="qz-body">
+<div id="quiz-intro" style="display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #F2A981">60-second quiz</span>
+<h1 style="margin: 0; font-weight: 700; font-size: clamp(40px, 8.5vw, 72px); line-height: 0.98; letter-spacing: -0.04em">Find the blood test built for you.</h1>
+<p style="margin: 0; font-size: 18px; color: #C5D1CA; max-width: 560px">Five questions. A recommendation that fits your goals and your budget. No referral needed, doctor review included.</p>
+<p data-if="quizHomeVisitIncludedFrom" style="margin: 0; align-self: flex-start; padding: 8px 14px; border-radius: 999px; background: rgba(242,169,129,0.16); border: 1px solid rgba(242,169,129,0.5); color: #F7F4EF; font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #C5D1CA">Terms</a></p>
 </div>
 
-<div id="tf" data-mode="funnel" data-home-fee="{{homeVisitAddOnFee}}" style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: clamp(20px, 4vw, 40px); display: flex; flex-direction: column; gap: 22px">
-<div style="display: flex; align-items: center; gap: 14px"><div style="flex: 1; height: 6px; border-radius: 999px; background: #E8EDE6; overflow: hidden"><div id="tf-bar" style="height: 100%; width: 20%; background: #17302A; border-radius: 999px; transition: width 0.25s"></div></div><span id="tf-step" style="font-size: 14px; font-weight: 600; color: #5A645E; white-space: nowrap">1 of 5</span></div>
-<div id="tf-q" aria-live="polite" style="display: flex; flex-direction: column; gap: 16px"><noscript><p>Please enable JavaScript to use the quiz, or <a href="/tests" style="text-decoration: underline">browse all tests</a>.</p></noscript></div>
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><button type="button" id="tf-back" class="tf-link" hidden>Back</button><span></span></div>
+<div id="tf" data-mode="funnel" data-home-fee="{{homeVisitAddOnFee}}">
+<div id="tf-q" aria-live="polite" style="display: flex; flex-direction: column; gap: 18px"><noscript><p>Please enable JavaScript to use the quiz, or <a href="/tests" style="text-decoration: underline">browse all tests</a>.</p></noscript></div>
 </div>
 
 <div id="tf-result" hidden style="display: flex; flex-direction: column; gap: 22px"></div>
-
-<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 24px; color: #4B5650; font-size: 15px; font-weight: 600">
+</div>
+<div class="qz-foot">
+<ul>
 <li>No referral needed</li>
-<li>Results reviewed by an Australian doctor</li>
+<li>Doctor-reviewed report</li>
 <li>NATA-accredited laboratories</li>
-<li>Registered nurses, or 2,000+ collection centres</li>
+<li>Nurse at home, or 2,000+ centres</li>
 </ul>
-
-<p style="margin: 0; font-size: 14px; color: #5A645E">This quiz suggests tests based on your answers. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.</p>
-</section>
+<p>This quiz suggests tests based on your answers. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.</p>
+</div>
+</div>
 
 <section style="background: #E8EDE6">
 <div style="max-width: 880px; margin: 0 auto; padding: 48px 24px; display: flex; flex-direction: column; gap: 24px">

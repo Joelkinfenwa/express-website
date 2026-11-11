@@ -144,28 +144,34 @@
     return n;
   }
 
+  var stage = document.getElementById('quiz-stage'), intro = document.getElementById('quiz-intro');
+  var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function enter() { if (!FUNNEL || calm) return; qEl.classList.remove('qz-in'); void qEl.offsetWidth; qEl.classList.add('qz-in'); }
   function render() {
     var q = Q[step];
+    if (FUNNEL && intro) intro.hidden = step > 0;
+    if (FUNNEL && stage) stage.classList.remove('is-result');
     bar.style.width = ((step + 1) / Q.length * 100) + '%';
-    stepEl.textContent = (step + 1) + ' of ' + Q.length;
+    stepEl.textContent = (FUNNEL ? 'Question ' : '') + (step + 1) + ' of ' + Q.length;
     back.hidden = step === 0;
     qEl.innerHTML = '';
-    var h = el('h2', { id: 'tf-h', tabindex: '-1', text: q.q, style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" });
+    var h = el('h2', { id: 'tf-h', tabindex: '-1', text: q.q, style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" });
     qEl.appendChild(h);
     var list = el('div', { style: 'display: flex; flex-direction: column; gap: 10px', role: 'group', 'aria-labelledby': 'tf-h' });
     q.opts.forEach(function (o) {
-      var b = el('button', { type: 'button', class: 'tf-opt', 'aria-pressed': String(A[q.id] === o[0]), onclick: function () { A[q.id] = o[0]; next(); } },
+      var b = el('button', { type: 'button', class: 'tf-opt', 'aria-pressed': String(A[q.id] === o[0]), onclick: function () { A[q.id] = o[0]; if (FUNNEL && !calm) { b.setAttribute('aria-pressed', 'true'); setTimeout(next, 170); } else next(); } },
         [el('span', {}, [document.createTextNode(o[1]), o[2] ? el('small', { text: o[2] }) : null]), el('span', { 'aria-hidden': 'true', text: '→', style: 'color: #A4502E' })]);
       list.appendChild(b);
     });
     qEl.appendChild(list);
+    enter();
   }
-  function focusQ() { var h = document.getElementById('tf-h'); if (h) h.focus(); }
+  function focusQ() { var h = document.getElementById('tf-h'); if (!h) return; if (FUNNEL) { h.focus({ preventScroll: true }); window.scrollTo(0, 0); } else h.focus(); }
   function next() {
     if (A.goal === 'sexual' && step === 1) { A.depth = A.depth || 'essential'; }
     step++;
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step++;
-    if (step >= Q.length) return FUNNEL && !lead ? gate() : show();
+    if (step >= Q.length) return FUNNEL && !lead ? matching(gate) : show();
     render(); focusQ();
   }
   back.addEventListener('click', function () {
@@ -185,12 +191,12 @@
     var href = t.builder ? t.url : direct ? '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + '&offer=quiz' : t.url + (A.where === 'home' ? '?collect=home' : '');
     return el('div', { style: 'display: flex; flex-direction: column; gap: 12px; padding: ' + (primary ? '32px' : '24px') + '; border-radius: 28px; ' + (primary ? 'background: #17302A; color: #F7F4EF' : 'background: #FFFFFF; border: 1px solid #DCE0D8') }, [
       el('span', { text: primary ? 'Our recommendation' : 'Also consider', style: 'font-size: 13px; font-weight: 700; color: ' + (primary ? '#F2A981' : '#A4502E') }),
-      el('span', { text: t.title, style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: " + (primary ? '34px' : '24px') + '; letter-spacing: -0.02em; line-height: 1.1' }),
+      el('span', { text: t.title, style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: " + (primary ? '34px' : '24px') + '; letter-spacing: -0.02em; line-height: 1.1' }),
       inc ? el('span', { text: 'Quiz offer: nurse home visit included' + (homeFee ? ' (normally ' + homeFee + ')' : ''), style: 'align-self: flex-start; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; ' + (primary ? 'background: #F2A981; color: #1C2420' : 'background: #E8EDE6; color: #17302A') }) : null,
       primary ? el('p', { text: (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '', style: 'margin: 0; color: #C5D1CA; font-size: 17px' }) : null,
       el('span', { text: (t.count === '1' ? '1 test' : t.count + ' tests') + ' · ' + t.includes, style: 'color: ' + (primary ? '#C5D1CA' : '#4B5650') + '; font-size: 15px' }),
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-top: 6px' }, [
-        el('span', { text: priceLine, style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: " + (primary ? '30px' : '22px') }),
+        el('span', { text: priceLine, style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: " + (primary ? '30px' : '22px') }),
         el('a', { href: href, class: 'btn', text: t.builder ? 'Build this test' : direct ? (primary ? 'Book this test' : 'Choose this test') : primary ? 'View and order' : 'View test', style: primary ? 'background: #F2A981; color: #1C2420' : 'border: 1px solid #1C2420' })
       ]),
       direct ? el('span', { style: 'font-size: 14px; color: ' + (primary ? '#C5D1CA' : '#5A645E') }, [
@@ -201,7 +207,7 @@
   }
 
   // ---------- Funnel result: a sales page built from the answers ----------
-  var H2 = "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1";
+  var H2 = "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1";
   function money(n) { return '$' + (Math.round(n * 100) % 100 === 0 ? Math.round(n) : n.toFixed(2)); }
   function href(h) {
     var t = info(h);
@@ -252,7 +258,7 @@
         document.createTextNode('. As this panel: '), el('strong', { text: money(t.price) }), document.createTextNode('.')]) : null,
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px' }, [
         el('span', { style: 'display: flex; flex-direction: column' }, [
-          el('span', { text: money(tot), style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 40px; letter-spacing: -0.03em; line-height: 1" }),
+          el('span', { text: money(tot), style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: 40px; letter-spacing: -0.03em; line-height: 1" }),
           el('span', { text: home ? (inc ? 'Home visit included' : t.homeOnly ? 'Including home visit' : homeAdd(t) ? 'Including ' + money(homeAdd(t)) + ' home visit' : '') : 'One payment. Doctor review included', style: 'font-size: 14px; color: ' + sub })]),
         el('a', { href: href(h), class: 'btn', id: 'tf-cta', text: 'Book this test', style: 'background: #F2A981; color: #1C2420; min-height: 56px; padding: 0 30px; font-size: 17px; flex: 1 1 200px' })
       ]),
@@ -269,7 +275,7 @@
       el('span', { text: line, style: 'color: #4B5650; font-size: 15px' }),
       included(t) ? el('span', { text: 'Nurse home visit included', style: 'align-self: flex-start; padding: 5px 11px; border-radius: 999px; font-size: 13px; font-weight: 700; background: #E8EDE6; color: #17302A' }) : null,
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: auto' }, [
-        el('span', { text: money(total(h)), style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 24px" }),
+        el('span', { text: money(total(h)), style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: 24px" }),
         el('a', { href: href(h), class: 'btn', text: 'Choose this test', style: 'border: 1px solid #1C2420' })])
     ]);
   }
@@ -309,6 +315,22 @@
     if (cta && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { barEl.hidden = es[0].isIntersecting || resEl.hidden; }).observe(cta);
   }
 
+  // Funnel mode: a short beat while the recommendation is put together
+  function matching(then) {
+    step = Q.length;
+    if (calm) return then();
+    if (intro) intro.hidden = true;
+    bar.style.width = '100%'; stepEl.textContent = 'Almost there'; back.hidden = true;
+    qEl.innerHTML = '';
+    var lines = ['Matching your goals to our panels', 'Fitting it to your budget', 'Checking collection options'];
+    var items = lines.map(function (t) { return el('li', { class: 'qz-step', text: t }); });
+    qEl.appendChild(el('h2', { id: 'tf-h', tabindex: '-1', text: 'Building your recommendation', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(28px, 5vw, 44px); letter-spacing: -0.03em; line-height: 1.05" }));
+    qEl.appendChild(el('ul', { style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 18px' }, items));
+    enter();
+    items.forEach(function (li, i) { setTimeout(function () { li.classList.add('is-done'); }, 350 + i * 420); });
+    setTimeout(then, 350 + lines.length * 420 + 250);
+  }
+
   // Funnel mode: first name and email before the result
   function gate() {
     step = Q.length;
@@ -318,7 +340,7 @@
     var inp = 'min-height: 54px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; width: 100%';
     var status = el('p', { class: 'form-status', role: 'status', 'aria-live': 'polite', style: 'margin: 0' });
     var form = el('form', { novalidate: '', style: 'display: flex; flex-direction: column; gap: 14px' }, [
-      el('h2', { id: 'tf-h', tabindex: '-1', text: 'Your recommendation is ready.', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
+      el('h2', { id: 'tf-h', tabindex: '-1', text: 'Your recommendation is ready.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
       el('p', { text: 'Where should we send a copy?', style: 'margin: 0; color: #4B5650; font-size: 17px' }),
       el('label', { for: 'tf-name', class: 'sr-only', text: 'First name' }), el('input', { id: 'tf-name', name: 'name', required: '', autocomplete: 'given-name', placeholder: 'First name', style: inp }),
       el('label', { for: 'tf-email', class: 'sr-only', text: 'Email' }), el('input', { id: 'tf-email', name: 'email', type: 'email', required: '', autocomplete: 'email', inputmode: 'email', placeholder: 'Email', style: inp }),
@@ -352,6 +374,7 @@
       }).catch(function () {}).then(go);
     });
     qEl.appendChild(form);
+    enter();
     focusQ();
   }
 
@@ -359,6 +382,7 @@
     var p = picks();
     box.hidden = true; resEl.hidden = false; resEl.innerHTML = '';
     if (FUNNEL && p.length) {
+      if (stage) stage.classList.add('is-result');
       showFunnel(p);
       var top = document.getElementById('quiz-intro'); if (top) top.hidden = true;
       window.scrollTo(0, 0);
@@ -367,7 +391,7 @@
       return;
     }
     var head = el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px' }, [
-      el('h2', { id: 'tf-res-h', tabindex: '-1', text: lead && lead.name ? lead.name.split(' ')[0] + ', here is your recommended test' : 'Your recommended test', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.03em" }),
+      el('h2', { id: 'tf-res-h', tabindex: '-1', text: lead && lead.name ? lead.name.split(' ')[0] + ', here is your recommended test' : 'Your recommended test', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.03em" }),
       el('button', { type: 'button', class: 'tf-link', text: 'Start again', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; render(); focusQ(); } })
     ]);
     resEl.appendChild(head);

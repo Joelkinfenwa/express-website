@@ -87,7 +87,7 @@
     bar(money(b.total), b.tests.length + (b.tests.length === 1 ? ' test' : ' tests') + (home ? ' with home visit' : ''), href);
     out.appendChild(el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px' }, [
       el('span', { style: 'display: flex; flex-direction: column' }, [
-        el('span', { text: money(b.total), style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 34px; letter-spacing: -0.03em; line-height: 1" }),
+        el('span', { text: money(b.total), style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: 34px; letter-spacing: -0.03em; line-height: 1" }),
         el('span', { text: b.tests.length + (b.tests.length === 1 ? ' test' : ' tests') + ', one collection, no referral needed', style: 'font-size: 14px; color: #4B5650' })]),
       el('a', { href: href, class: 'btn btn-dark', text: 'Book this test', style: 'min-height: 54px; padding: 0 28px; font-size: 17px; flex: 1 1 180px', onclick: function () { if (window.gtag) window.gtag('event', 'quiz_exit_builder_checkout', {}); } })]));
     var bp = betterPanel(b);
@@ -147,14 +147,14 @@
       el('div', { style: 'display: flex; justify-content: space-between; align-items: flex-start; gap: 12px' }, [
         el('div', { style: 'display: flex; flex-direction: column; gap: 6px' }, [
           el('span', { text: 'Before you go', style: 'font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E' }),
-          el('h2', { id: 'qx-h', tabindex: '-1', text: 'Build a test around you.', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 5vw, 36px); letter-spacing: -0.03em; line-height: 1.05" }),
+          el('h2', { id: 'qx-h', tabindex: '-1', text: 'Build a test around you.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(26px, 5vw, 36px); letter-spacing: -0.03em; line-height: 1.05" }),
           el('p', { text: 'Tell us what you want checked and what you want to spend. We will fit the test to it.', style: 'margin: 0; color: #4B5650' })]),
         el('button', { type: 'button', 'aria-label': 'Close', text: '×', onclick: close, style: 'flex: none; width: 44px; height: 44px; border-radius: 999px; border: 1px solid #D3D8D0; background: #FFFFFF; font-size: 24px; line-height: 1; cursor: pointer' })]),
       el('div', { style: 'display: flex; flex-direction: column; gap: 10px' }, [
         el('strong', { text: '1. What would you like checked?' }),
         el('div', { role: 'group', 'aria-label': 'Areas to check', style: 'display: flex; flex-wrap: wrap; gap: 8px' }, areas.map(chip))]),
       el('div', { style: 'display: flex; flex-direction: column; gap: 6px' }, [
-        el('div', { style: 'display: flex; justify-content: space-between; align-items: baseline' }, [el('strong', { text: '2. What is your budget?' }), el('span', { id: 'qx-budget-val', style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 24px" })]),
+        el('div', { style: 'display: flex; justify-content: space-between; align-items: baseline' }, [el('strong', { text: '2. What is your budget?' }), el('span', { id: 'qx-budget-val', style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: 24px" })]),
         range]),
       el('div', { style: 'display: flex; flex-direction: column; gap: 10px' }, [
         el('strong', { text: '3. Where would you like to be tested?' }),
@@ -163,7 +163,7 @@
       el('p', { text: 'This builds a test from your choices. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.', style: 'margin: 0; font-size: 13px; color: #5A645E' }),
       // Running total that stays in view while choices are made
       el('div', { id: 'qx-bar', style: 'position: sticky; bottom: 0; margin: 0 -24px; padding: 12px 24px calc(12px + env(safe-area-inset-bottom)); background: #FFFFFF; border-top: 1px solid #DCE0D8; display: flex; align-items: center; justify-content: space-between; gap: 12px' }, [
-        el('span', { style: 'display: flex; flex-direction: column; min-width: 0' }, [el('strong', { id: 'qx-bar-total', style: "font-family: 'Instrument Sans', sans-serif; font-size: 22px" }), el('span', { id: 'qx-bar-sub', style: 'font-size: 14px; color: #4B5650' })]),
+        el('span', { style: 'display: flex; flex-direction: column; min-width: 0' }, [el('strong', { id: 'qx-bar-total', style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-size: 22px" }), el('span', { id: 'qx-bar-sub', style: 'font-size: 14px; color: #4B5650' })]),
         el('a', { id: 'qx-bar-cta', href: '#', class: 'btn btn-dark', text: 'Book this test', style: 'flex: none' })])
     ]);
     dlg = el('div', { id: 'qx', style: 'position: fixed; inset: 0; z-index: 60; background: rgba(23,48,42,0.55); display: flex; align-items: flex-end; justify-content: center', onclick: function (e) { if (e.target === dlg) close(); } }, [panel]);
