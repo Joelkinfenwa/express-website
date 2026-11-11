@@ -168,7 +168,7 @@ function heroPhoto(name, alt, style, { fallback = false, eager = true } = {}) {
 const slugQ = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const SINGLE_ALIAS = { 'mba-hdl-ldl': ['general-biochemistry', 'lipid-profile'], mba: ['general-biochemistry'], hdl: ['lipid-profile'], ldl: ['lipid-profile'], 'shbg-igf-1': ['shbg', 'igf-1'], oestradiol: ['oestradiol-e2'],
   'thyroid-tsh-t3-t4': ['tsh-t3-and-t4'], 'thyroid-tsh-t3-and-t4': ['tsh-t3-and-t4'], 'fbc-esr': ['full-blood-count-and-esr'], 'full-blood-count-esr': ['full-blood-count-and-esr'] };
-function singlePrice(t) {
+function singleTests(t) {
   const bySlug = Object.fromEntries(catalog.addons.map((a) => [slugQ(a.title), a.price]));
   const used = new Set();
   for (const m of t.markers) {
@@ -178,7 +178,7 @@ function singlePrice(t) {
   }
   if (!used.size || !catalog.base) return null;
   const sum = [...used].reduce((a, x) => a + bySlug[x], 0) + catalog.base.price;
-  return sum > t.price ? sum : null;
+  return { slugs: [...used], sum: sum > t.price ? sum : null };
 }
 const fragments = {
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
@@ -187,7 +187,7 @@ const fragments = {
   HOME_TESTS: homeTests(),
   BUILDER_FEE: catalog.base ? `A ${money(catalog.base.price)} build-your-own fee applies to each order.` : '',
   QUIZ_DATA: JSON.stringify({
-    tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant, markers: displayNames(t), single: singlePrice(t) }])),
+    tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant, markers: displayNames(t), single: (singleTests(t) || {}).sum || null, slugs: (singleTests(t) || {}).slugs || null }])),
     addons: Object.fromEntries(catalog.addons.map((a) => [a.title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), { title: a.title.trim(), price: a.price }])),
     base: catalog.base ? catalog.base.price : 0,
     homeVisit: catalog.homeVisit ? catalog.homeVisit.price : null, quizHomeFrom: QUIZ_HOME_FROM

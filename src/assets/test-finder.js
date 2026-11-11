@@ -14,6 +14,7 @@
   var FUNNEL = box.getAttribute('data-mode') === 'funnel';
   var HOME_FROM = FUNNEL && D.homeVisit != null ? (D.quizHomeFrom || 0) : 0;
   var lead = null;
+  if (FUNNEL) window.epQuiz = function () { return { answers: A, lead: lead }; };
   function included(t) { return !!HOME_FROM && !t.builder && !t.homeOnly && t.price >= HOME_FROM; }
 
   var Q = [
