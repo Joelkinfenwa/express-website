@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Blood Test Should You Get? 60-Second Quiz | Express Pathology</title>
+<meta name="description" content="Answer five quick questions and get a recommended blood test panel. No referral needed, doctor review included, and a registered nurse can come to you.">
+<link rel="canonical" href="{{siteUrl}}/test-finder">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Which blood test should you get? | Express Pathology">
+<meta property="og:description" content="Five questions, about a minute. Get a recommended blood test panel, with no referral needed.">
+<meta property="og:image" content="{{siteUrl}}/assets/img/og.jpg">
+<meta property="og:url" content="{{siteUrl}}/quiz">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17302A">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+/* Quiz funnel: a full-screen stage for the questions, then a light results page */
+:root{--display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif}
+h1,h2,h3,.logo{font-family:var(--display)}
+.quiz-stage{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;color:#F7F4EF;background:radial-gradient(900px 520px at 85% -10%,rgba(242,169,129,.20),transparent 62%),radial-gradient(700px 500px at -10% 110%,rgba(255,255,255,.06),transparent 60%),#17302A}
+.quiz-stage.is-result{min-height:0;color:#1C2420;background:#F7F4EF}
+.qz-head,.qz-progress,.qz-body,.qz-foot{width:100%;max-width:720px;margin:0 auto;padding-left:24px;padding-right:24px}
+.is-result .qz-head,.is-result .qz-body,.is-result .qz-foot{max-width:880px}
+.qz-head{padding-top:16px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.quiz-stage:not(.is-result) .qz-head a,.quiz-stage:not(.is-result) #tf-q a{color:#F7F4EF}
+.quiz-stage:not(.is-result) .logo span{color:#C5D1CA}
+.qz-progress{display:flex;align-items:center;gap:14px;min-height:44px}
+.is-result .qz-progress{display:none}
+.qz-track{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden}
+.qz-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding-top:24px;padding-bottom:32px}
+.is-result .qz-body{justify-content:flex-start;padding-top:12px}
+.qz-foot{padding-bottom:24px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#9DB0A7}
+.qz-foot ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:600;font-size:14px;color:#C5D1CA}
+.qz-foot li::before{content:'✓';margin-right:6px;color:#F2A981}
+.qz-foot p{margin:0}
+.is-result .qz-foot,.is-result .qz-foot ul{color:#5A645E}
+.quiz-stage:not(.is-result) .tf-link{color:#C5D1CA;text-decoration:none;font-size:14px}
+.quiz-stage:not(.is-result) #tf-q h2{font-size:clamp(30px,6.4vw,48px)!important;line-height:1.04;letter-spacing:-.035em!important;font-weight:700!important}
+.quiz-stage:not(.is-result) #tf-q p{color:#C5D1CA!important}
+.quiz-stage #tf-q .form-status[data-state="error"]{color:#F2A981!important}
+.quiz-stage #tf-q .btn-dark{background:#F2A981;color:#1C2420}
+.quiz-stage .tf-opt{min-height:68px;padding:16px 22px;border-radius:20px;font-size:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#F7F4EF;transition:background .15s,border-color .15s,transform .15s}
+.quiz-stage .tf-opt small{color:#C5D1CA;margin-top:2px}
+.quiz-stage .tf-opt span[aria-hidden]{color:#F2A981!important;font-size:20px}
+.quiz-stage .tf-opt:hover{background:rgba(255,255,255,.12);border-color:#F2A981}
+.quiz-stage .tf-opt:active{transform:scale(.985)}
+.quiz-stage .tf-opt[aria-pressed="true"]{background:#F2A981;border-color:#F2A981;color:#1C2420}
+.quiz-stage .tf-opt[aria-pressed="true"] small,.quiz-stage .tf-opt[aria-pressed="true"] span[aria-hidden]{color:#1C2420!important}
+.quiz-stage .tf-opt:focus-visible,.quiz-stage .tf-link:focus-visible{outline:3px solid #F2A981;outline-offset:3px}
+.qz-step{display:flex;align-items:center;gap:12px;color:#8FA39A;transition:color .25s}
+.qz-step::before{content:'';flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #5E766C;transition:background .25s,border-color .25s}
+.qz-step.is-done{color:#F7F4EF}
+.qz-step.is-done::before{background:#F2A981;border-color:#F2A981}
+.is-landing .qz-progress,.is-landing #tf{display:none}
+.is-landing .qz-body{justify-content:flex-start;max-width:1040px;gap:36px}
+.is-landing .qz-head,.is-landing .qz-foot{max-width:1040px}
+.qz-landing{display:flex;flex-direction:column;gap:36px}
+.qz-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
+.qz-photo{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:76% center;border-radius:28px}
+.qz-start{display:inline-flex;align-items:center;gap:14px;min-height:64px;padding:0 34px;border:0;border-radius:999px;background:#F2A981;color:#1C2420;font:inherit;font-weight:700;font-size:20px;cursor:pointer;transition:transform .15s,background .15s}
+.qz-start:hover{background:#F6B893}
+.qz-start:active{transform:scale(.98)}
+.qz-start:focus-visible,.qz-chip:focus-visible{outline:3px solid #F7F4EF;outline-offset:3px}
+.qz-points{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.qz-points li{display:flex;flex-direction:column;gap:6px;padding:20px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16)}
+.qz-points strong{font-size:18px}
+.qz-points span{color:#C5D1CA;font-size:15px}
+.qz-chip{min-height:48px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#F7F4EF;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.qz-chip:hover{border-color:#F2A981;background:rgba(255,255,255,.08)}
+.qz-running .qz-below{display:none!important}
+@media (max-width:820px){.qz-hero{grid-template-columns:1fr;gap:26px}.qz-photo{aspect-ratio:16/11}.qz-points{grid-template-columns:1fr}}
+@keyframes qz-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#tf-q.qz-in>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
+#tf-q.qz-in [role=group]>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
+#tf-q.qz-in [role=group]>:nth-child(1){animation-delay:.06s}
+#tf-q.qz-in [role=group]>:nth-child(2){animation-delay:.10s}
+#tf-q.qz-in [role=group]>:nth-child(3){animation-delay:.14s}
+#tf-q.qz-in [role=group]>:nth-child(4){animation-delay:.18s}
+#tf-q.qz-in [role=group]>:nth-child(n+5){animation-delay:.22s}
+@media (prefers-reduced-motion:reduce){#tf-q.qz-in>*,#tf-q.qz-in [role=group]>*{animation:none}}
+</style>
+<!--analytics-->
+</head>
+<body>
+<div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55; min-height: 100vh">
+
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+<div id="quiz-stage" class="quiz-stage is-landing">
+<header class="qz-head">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<a href="tel:{{phoneTel}}" style="font-weight: 700; font-size: 15px; white-space: nowrap">{{phone}}</a>
+</header>
+<div class="qz-progress">
+<button type="button" id="tf-back" class="tf-link" hidden aria-label="Back to the previous question">← Back</button>
+<div class="qz-track"><div id="tf-bar" style="height: 100%; width: 20%; background: #F2A981; border-radius: 999px; transition: width 0.35s cubic-bezier(.2,.7,.2,1)"></div></div>
+<span id="tf-step" style="font-size: 14px; font-weight: 600; white-space: nowrap">Question 1 of 5</span>
+</div>
+<div class="qz-body">
+<div id="quiz-landing" class="qz-landing">
+<div class="qz-hero">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #F2A981">60-second quiz</span>
+<h1 style="margin: 0; font-weight: 700; font-size: clamp(42px, 8.5vw, 76px); line-height: 0.98; letter-spacing: -0.04em">Find the blood test built for you.</h1>
+<p style="margin: 0; font-size: 19px; color: #C5D1CA; max-width: 520px">Answer five questions. We recommend a test that fits your goals and your budget, and a registered nurse can collect it at your home or work.</p>
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-top: 6px">
+<button type="button" data-quiz-start id="quiz-start" class="qz-start">Start the quiz<span aria-hidden="true">→</span></button>
+<span style="font-size: 15px; font-weight: 600; color: #C5D1CA">5 questions · No referral needed · Doctor-reviewed report</span>
+</div>
+<p data-if="quizHomeVisitIncludedFrom" style="margin: 6px 0 0; align-self: flex-start; padding: 8px 14px; border-radius: 999px; background: rgba(242,169,129,0.16); border: 1px solid rgba(242,169,129,0.5); color: #F7F4EF; font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #C5D1CA">Terms</a></p>
+</div>
+<img src="/assets/img/hero-1200.webp" srcset="/assets/img/hero-1200.webp 1200w, /assets/img/hero.webp 2400w" sizes="(max-width: 900px) 100vw, 480px" alt="A registered nurse in green scrubs greeted at the front door of a home" width="1200" height="678" fetchpriority="high" class="qz-photo">
+</div>
+<ul class="qz-points">
+<li><strong>Matched to your goals</strong><span>Hormones, training, thyroid, vitamins or a general check.</span></li>
+<li><strong>Fits your budget</strong><span>Panels from $99, or a test built around what you want to spend.</span></li>
+<li><strong>A nurse comes to you</strong><span>At your home or workplace, or walk in to one of 2,000+ centres.</span></li>
+</ul>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<strong style="font-size: 18px">What would you like to understand?</strong>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" data-quiz-start class="qz-chip">My overall health</button><button type="button" data-quiz-start class="qz-chip">My hormones</button><button type="button" data-quiz-start class="qz-chip">Training and performance</button><button type="button" data-quiz-start class="qz-chip">My thyroid</button><button type="button" data-quiz-start class="qz-chip">Vitamins and iron</button>
+</div>
+</div>
+</div>
+
+<div id="tf" data-mode="funnel" data-home-fee="{{homeVisitAddOnFee}}">
+<div id="tf-q" aria-live="polite" style="display: flex; flex-direction: column; gap: 18px"><noscript><p>Please enable JavaScript to use the quiz, or <a href="/tests" style="text-decoration: underline">browse all tests</a>.</p></noscript></div>
+</div>
+
+<div id="tf-result" hidden style="display: flex; flex-direction: column; gap: 22px"></div>
+</div>
+<div class="qz-foot">
+<ul>
+<li>No referral needed</li>
+<li>Doctor-reviewed report</li>
+<li>NATA-accredited laboratories</li>
+<li>Nurse at home, or 2,000+ centres</li>
+</ul>
+<p>This quiz suggests tests based on your answers. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.</p>
+</div>
+</div>
+
+<section class="qz-below" style="background: #E8EDE6">
+<div style="max-width: 880px; margin: 0 auto; padding: 48px 24px; display: flex; flex-direction: column; gap: 24px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.03em">How it works</h2>
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 1</span><strong style="font-size: 18px">Take the quiz and order online</strong><span style="color: #4B5650">Your pathology request form is issued with your order. No GP visit is needed.</span></li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 2</span><strong style="font-size: 18px">Get collected your way</strong><span style="color: #4B5650">A registered nurse comes to your home or workplace, or you walk in to a partner collection centre.</span></li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 3</span><strong style="font-size: 18px">Receive your report</strong><span style="color: #4B5650">An Australian doctor reviews your results, and your report is emailed to you with reference ranges.</span></li>
+</ol>
+</div>
+</section>
+
+<section class="qz-below" style="max-width: 880px; margin: 0 auto; padding: 48px 24px 8px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0 0 6px; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.03em">Common questions</h2>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">Do I need a referral or a GP visit?</summary><p style="margin: 10px 0 0; color: #4B5650">No. Your pathology request form is issued with your order, so you can go straight to collection.</p></details>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">Is this covered by Medicare?</summary><p style="margin: 10px 0 0; color: #4B5650">No. Private tests ordered without a referral are not covered by Medicare. The price you see is the full price, with doctor review included.</p></details>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">What if a nurse cannot come to my area?</summary><p style="margin: 10px 0 0; color: #4B5650">Enter your postcode at checkout. If we cannot arrange a home visit, you can use any of our 2,000+ partner collection centres or receive a full refund.</p></details>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">Do I need to fast?</summary><p style="margin: 10px 0 0; color: #4B5650">Some panels need an 8 to 12 hour fast, with water only. Your confirmation email explains what applies to your test, and our <a href="/prepare" style="text-decoration: underline">preparation guide</a> covers the details.</p></details>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">What do I receive, and can I share it with my GP?</summary><p style="margin: 10px 0 0; color: #4B5650">An Australian doctor reviews your results, and your report is emailed to you with reference ranges. The report is yours, and you can forward it to any doctor.</p></details>
+<details style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 18px; padding: 16px 20px"><summary style="font-weight: 700; cursor: pointer; font-size: 17px">Can I change or cancel?</summary><p style="margin: 10px 0 0; color: #4B5650">{{cancellationPolicy}}</p></details>
+</section>
+
+<section id="offer-terms" class="qz-below" style="max-width: 880px; margin: 0 auto; padding: 40px 24px 64px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: #5A645E">
+<h2 style="margin: 0; font-size: 16px; color: #1C2420">Quiz offer terms and conditions</h2>
+<p data-if="quizHomeVisitIncludedFrom" style="margin: 0"><strong>Home visit included.</strong> When you order a panel priced at ${{quizHomeVisitIncludedFrom}} or more through the quiz and choose a nurse home or workplace visit, the home visit fee (normally {{homeVisitAddOnFee}}) is not charged. Subject to nurse availability in your postcode. If we cannot arrange a visit, you can use a partner collection centre or receive a full refund. Panels priced below ${{quizHomeVisitIncludedFrom}} and Build Your Own orders are not included.</p>
+<p data-if="quizDiscountPercent" style="margin: 0"><strong>{{quizDiscountPercent}}% offer.</strong> Where we email you a {{quizDiscountPercent}}% offer after the quiz, it applies to the price of one panel ordered through the link in that email. It does not apply to the home visit fee and cannot be combined with the home visit offer or any promotion code.</p>
+<p style="margin: 0">One offer per order. Offers have no cash value. Express Pathology may change or withdraw these offers at any time; orders already paid are not affected. Private tests ordered without a referral are not covered by Medicare. {{cancellationPolicy}}</p>
+<p style="margin: 0">Questions? Call <a href="tel:{{phoneTel}}" style="text-decoration: underline">{{phone}}</a> or email <a href="mailto:{{email}}" style="text-decoration: underline">{{email}}</a>.</p>
+</section>
+<script type="application/json" id="tf-data"><!--@QUIZ_DATA--></script>
+<div id="quiz-sticky" hidden style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #17302A; border-top: 1px solid rgba(255,255,255,0.18); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; justify-content: center"><button type="button" data-quiz-start class="qz-start" style="width: 100%; max-width: 560px; justify-content: center">Start the quiz<span aria-hidden="true">→</span></button></div>
+</main>
+<footer style="background: #17302A; color: #C5D1CA">
+<div style="max-width: 880px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+<p style="margin: 0">Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
+<p style="margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px"><span>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span></span><a href="/privacy-policy" style="text-decoration: underline">Privacy policy</a><a href="/terms-of-service" style="text-decoration: underline">Terms of service</a><a href="/refund-policy" style="text-decoration: underline">Refund policy</a></p>
+</div>
+</footer>
+
+</div>
+<script src="/assets/site.js" defer></script>
+<script src="/assets/test-finder.js" defer></script>
+<script src="/assets/quiz-exit.js" defer></script>
+</body>
+</html>
