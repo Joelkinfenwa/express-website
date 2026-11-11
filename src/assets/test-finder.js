@@ -383,6 +383,7 @@
     box.hidden = true; resEl.hidden = false; resEl.innerHTML = '';
     if (FUNNEL && p.length) {
       if (stage) stage.classList.add('is-result');
+      document.body.classList.remove('qz-running');
       showFunnel(p);
       var top = document.getElementById('quiz-intro'); if (top) top.hidden = true;
       window.scrollTo(0, 0);
@@ -428,5 +429,20 @@
     if (window.gtag) window.gtag('event', 'test_finder_complete', { goal: A.goal, recommendation: p[0] });
   }
 
-  render();
+  // Funnel: a landing screen first; the quiz starts from any "Start the quiz" control (?start=1 skips it)
+  var landing = document.getElementById('quiz-landing'), stickyStart = document.getElementById('quiz-sticky');
+  function startQuiz() {
+    if (landing) landing.hidden = true;
+    if (stickyStart) stickyStart.hidden = true;
+    if (stage) stage.classList.remove('is-landing');
+    document.body.classList.add('qz-running');
+    render(); focusQ();
+    if (window.gtag) window.gtag('event', 'quiz_start', {});
+  }
+  if (FUNNEL && landing && !/[?&]start=1\b/.test(location.search)) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-quiz-start]'), function (b) { b.addEventListener('click', startQuiz); });
+    var first = document.getElementById('quiz-start');
+    if (first && stickyStart && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { stickyStart.hidden = es[0].isIntersecting || !stage.classList.contains('is-landing'); }).observe(first);
+  } else if (FUNNEL && landing) startQuiz();
+  else render();
 })();

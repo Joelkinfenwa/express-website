@@ -136,7 +136,7 @@ Every paid panel or Build Your Own order gets a PDF request form, generated in `
 
 | Key | Effect | Link |
 |---|---|---|
-| `quizHomeVisitIncludedFrom` (`249`) | Panels at or above this price get the nurse home visit included | `/checkout?panel=<handle>&home=1&offer=quiz` |
+| `quizHomeVisitIncludedFrom` (off) | When set to a price, panels at or above it get the nurse home visit included. Currently empty, so the home visit is charged as normal | `/checkout?panel=<handle>&home=1&offer=quiz` |
 | `quizDiscountPercent` (`10`) | Percent off the panel, for the follow-up emails | `/checkout?panel=<handle>&offer=quiz10` |
 
 Leave a value empty to turn that offer off. The two offers never combine, and Stripe promotion codes are not accepted on an offer order. The terms shown at `/quiz#offer-terms` are written from the same values.

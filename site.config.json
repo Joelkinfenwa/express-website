@@ -25,6 +25,6 @@
   },
   "metaPixelId": "",
   "_quizOffer": "Offers for the Meta quiz funnel (/quiz). quizHomeVisitIncludedFrom: panels at or above this price get the nurse home visit included when ordered through the quiz (empty turns it off). quizDiscountPercent: percent off the panel in the follow-up emails (empty turns it off). The two never combine.",
-  "quizHomeVisitIncludedFrom": "249",
+  "quizHomeVisitIncludedFrom": "",
   "quizDiscountPercent": "10"
 }

@@ -199,7 +199,7 @@
   } catch (e) {}
   // No interaction for 40 seconds (the closest signal available on phones)
   var idle;
-  function reset() { clearTimeout(idle); idle = setTimeout(function () { var a = document.activeElement; if (document.visibilityState === 'visible' && !(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) trigger(); else reset(); }, 40000); }
+  function reset() { clearTimeout(idle); idle = setTimeout(function () { var a = document.activeElement; if (document.visibilityState === 'visible' && !document.querySelector('.is-landing') && !(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) trigger(); else reset(); }, 40000); }
   ['click', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, reset, { passive: true }); });
   reset();
 })();
