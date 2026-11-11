@@ -9,7 +9,7 @@ const ROOT = new URL('.', import.meta.url).pathname;
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
 const config = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));
-const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyStoreDomain', 'shopifyStorefrontToken', 'shopifyTestsCollection', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'googleAdsId', 'googleAdsLabels', 'metaPixelId']);
+const OPTIONAL = new Set(['abn', 'supportHours', 'shopifyStoreDomain', 'shopifyStorefrontToken', 'shopifyTestsCollection', 'shopifyHomeVisitVariantId', 'gaMeasurementId', 'googleAdsId', 'googleAdsLabels', 'metaPixelId', 'quizHomeVisitIncludedFrom', 'quizDiscountPercent']);
 
 // Environment variables override the file (useful in Vercel: SITE_<KEY>).
 for (const k of Object.keys(config)) {
@@ -55,6 +55,10 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 
 const problems = [];
 const pages = [];
+// Quiz funnel offers: a positive number, or null when the setting is empty
+const posNum = (v) => { const n = Number(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return n > 0 ? n : null; };
+const QUIZ_HOME_FROM = posNum(config.quizHomeVisitIncludedFrom);
+const QUIZ_DISCOUNT = (() => { const n = posNum(config.quizDiscountPercent); return n && n < 100 ? n : null; })();
 
 // Version asset URLs so browsers pick up new CSS/JS straight after a deploy
 const ASSET_VER = Date.now().toString(36);
@@ -168,7 +172,8 @@ const fragments = {
   QUIZ_DATA: JSON.stringify({
     tests: Object.fromEntries(catalog.tests.map((t) => [t.handle, { title: t.title, price: t.price, url: `/tests/${t.handle}`, count: String(displayNames(t).length), includes: summary(t, 4), homeOnly: !t.centreVariant }])),
     addons: Object.fromEntries(catalog.addons.map((a) => [a.title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), { title: a.title.trim(), price: a.price }])),
-    base: catalog.base ? catalog.base.price : 0
+    base: catalog.base ? catalog.base.price : 0,
+    homeVisit: catalog.homeVisit ? catalog.homeVisit.price : null, quizHomeFrom: QUIZ_HOME_FROM
   }).replace(/</g, '\\u003c')
 };
 // Topic links for the tests page
@@ -188,7 +193,7 @@ function walk(dir) {
     if (statSync(p).isDirectory()) { mkdirSync(dest, { recursive: true }); walk(p); continue; }
     if (extname(name) !== '.html') { copyFileSync(p, dest); continue; }
     writeFileSync(dest, finalize(fillFragments(readFileSync(p, 'utf8')), rel));
-    if (!['404.html', 'checkout.html', 'order-confirmed.html', 'partner-referral.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
+    if (!['404.html', 'checkout.html', 'order-confirmed.html', 'partner-referral.html', 'quiz.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
   }
 }
 
@@ -459,6 +464,8 @@ ${byState.map(([st, l]) => `<div style="display: flex; flex-direction: column; g
     fasting: rf.fasting,
     builderFee: catalog.base ? catalog.base.price : 0,
     homeVisit: catalog.homeVisit ? catalog.homeVisit.price : null,
+    // Quiz funnel offers (site.config.json). null = off
+    quizHomeFrom: QUIZ_HOME_FROM, quizDiscount: QUIZ_DISCOUNT,
     ownForm: { metro: fee(config.metroFee), regional: fee(config.regionalFee) },
     metro: cov.metro || [], regional: cov.regional || [],
     // Metro postcodes within 40 km of a base: outside the listed area these pay the metro fee, all others regional (payment is always taken)
@@ -637,6 +644,7 @@ if (!(cov.metro || []).length) console.warn('Note: data/coverage.json has no pos
   const slugB = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   writeFileSync(join(OUT, 'assets/catalog.json'), JSON.stringify({
     addons: catalog.addons.map((a) => ({ ...a, slug: slugB(a.title) })), homeVisit: catalog.homeVisit, base: catalog.base,
+    quizHomeFrom: QUIZ_HOME_FROM, quizDiscount: QUIZ_DISCOUNT,
     panels: Object.fromEntries(catalog.tests.filter((t) => t.centreVariant).map((t) => [t.handle, { title: t.title, price: t.price, count: displayNames(t).length }]))
   }));
 }

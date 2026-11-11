@@ -127,3 +127,27 @@ Every paid panel or Build Your Own order gets a PDF request form, generated in `
 - The fasting box is ticked when a line contains a word in `fasting` (fasting insulin, HOMA IR), matching the website's preparation advice.
 - Logos and the QR code (to /collection-centres) are in `data/form/` and embedded at build into `lib/form-assets.mjs`.
 - Set `FORM_TO_PATIENT=1` in Vercel to also attach the form to the patient's confirmation email.
+
+## Quiz funnel for paid social (`/quiz`)
+
+`/quiz` is the landing page for Meta ads. It runs the same test finder as `/test-finder` in funnel mode: five questions, then first name and email, then the recommendation with the quiz offer and a button straight to checkout. It is not indexed and is not in the sitemap. `/test-finder` is unchanged.
+
+**Offers** are set in `site.config.json` and are priced on the server, never in the browser:
+
+| Key | Effect | Link |
+|---|---|---|
+| `quizHomeVisitIncludedFrom` (`249`) | Panels at or above this price get the nurse home visit included | `/checkout?panel=<handle>&home=1&offer=quiz` |
+| `quizDiscountPercent` (`10`) | Percent off the panel, for the follow-up emails | `/checkout?panel=<handle>&offer=quiz10` |
+
+Leave a value empty to turn that offer off. The two offers never combine, and Stripe promotion codes are not accepted on an offer order. The terms shown at `/quiz#offer-terms` are written from the same values.
+
+**Emails.** The first email (the recommendation, with the offer and checkout link) is sent straight away through Resend. For the follow-up emails, set these in Vercel and build a flow in Klaviyo:
+
+| Name | Value |
+|---|---|
+| `KLAVIYO_PRIVATE_KEY` | A Klaviyo private API key with write access to events, profiles and subscriptions |
+| `KLAVIYO_LIST_ID` | Optional. The list quiz leads are subscribed to |
+
+The site then sends two events. `Completed Test Finder` is the flow trigger and carries `panel_title`, `panel_price`, `checkout_url`, `home_visit_included`, `discount_percent`, `discount_price`, `discount_url` and `terms_url`. `Placed Website Order` is sent when any website order is paid: use it as the flow filter so buyers stop receiving follow-ups. Quiz answers are never sent to Klaviyo or to ad platforms.
+
+**Tracking.** Set `metaPixelId` in `site.config.json`. The page sends a bare `Lead` event when the email is captured, with no answers or test names.

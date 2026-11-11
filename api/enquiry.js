@@ -1,11 +1,13 @@
 import TESTS from '../lib/test-index.mjs';
 import { stripe } from '../lib/stripe.js';
 import { referralNumber } from '../lib/order-number.js';
+import PRICES from '../lib/price-index.mjs';
+import { klaviyoEvent, klaviyoSubscribe, klaviyoReady } from '../lib/klaviyo.js';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'offer', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -58,18 +60,41 @@ async function toEmail(d, att) {
 
 // Test finder: send the patient their recommendation
 async function toPatient(d, origin) {
+  const quiz = d.offer === 'quiz';
   const recs = String(d.recommendation || '').split(',').map((h) => h.trim()).filter((h) => TESTS[h]).slice(0, 3)
-    .map((h) => [TESTS[h].title, `/tests/${h}`, '$' + TESTS[h].price]);
+    .map((h) => {
+      // Quiz funnel: link straight to checkout with the offer; say so when the home visit is included
+      const direct = quiz && PRICES.panels[h];
+      const inc = direct && PRICES.quizHomeFrom && PRICES.homeVisit != null && TESTS[h].price >= PRICES.quizHomeFrom;
+      return [TESTS[h].title, direct ? `/checkout?panel=${encodeURIComponent(h)}${d.collection === 'home' ? '&home=1' : ''}&offer=quiz` : `/tests/${h}`, '$' + TESTS[h].price, inc ? `Quiz offer: nurse home visit included (normally $${PRICES.homeVisit})` : '', direct ? 'Book this test' : 'View test'];
+    });
   if (!recs.length) return;
   const first = escapeHtml((d.name || '').split(' ')[0]);
-  const row = ([title, path, price], i) => `<tr><td style="padding:18px 20px;border-top:1px solid #DCE0D8"><div style="font-size:12px;font-weight:700;color:#A4502E;text-transform:uppercase;letter-spacing:.06em">${i === 0 ? 'Our recommendation' : 'Also consider'}</div><div style="font-size:20px;font-weight:700;margin:4px 0">${escapeHtml(title)}</div><div style="color:#4B5650">${escapeHtml(price)} · no referral needed</div><a href="${origin}${path}" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:999px;background:${i === 0 ? '#17302A' : '#FFFFFF'};color:${i === 0 ? '#F7F4EF' : '#1C2420'};border:1px solid #17302A;text-decoration:none;font-weight:700">View test</a></td></tr>`;
-  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate;overflow:hidden"><tr><td style="padding:28px 20px 8px"><div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div><h1 style="font-size:26px;margin:20px 0 8px">Hi ${first || 'there'}, here is your recommended blood test</h1><p style="color:#4B5650;margin:0 0 12px">Based on your answers to our test finder. Collect at one of 2,000+ partner centres, or add a home visit and a registered nurse comes to you.</p></td></tr>${recs.map(row).join('')}<tr><td style="padding:20px;border-top:1px solid #DCE0D8;font-size:13px;color:#5A645E">This suggestion is based on your answers and is not medical advice. If you have symptoms or a health concern, please speak with your doctor. Reply to this email if you have any questions.</td></tr></table></div>`;
+  const row = ([title, path, price, note, cta], i) => `<tr><td style="padding:18px 20px;border-top:1px solid #DCE0D8"><div style="font-size:12px;font-weight:700;color:#A4502E;text-transform:uppercase;letter-spacing:.06em">${i === 0 ? 'Our recommendation' : 'Also consider'}</div><div style="font-size:20px;font-weight:700;margin:4px 0">${escapeHtml(title)}</div><div style="color:#4B5650">${escapeHtml(price)} · doctor review included · no referral needed</div>${note ? `<div style="margin-top:6px;font-weight:700;color:#17302A">${escapeHtml(note)}</div>` : ''}<a href="${origin}${path}" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:999px;background:${i === 0 ? '#17302A' : '#FFFFFF'};color:${i === 0 ? '#F7F4EF' : '#1C2420'};border:1px solid #17302A;text-decoration:none;font-weight:700">${cta}</a></td></tr>`;
+  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate;overflow:hidden"><tr><td style="padding:28px 20px 8px"><div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div><h1 style="font-size:26px;margin:20px 0 8px">Hi ${first || 'there'}, here is your recommended blood test</h1><p style="color:#4B5650;margin:0 0 12px">Based on your answers to our test finder. Collect at one of 2,000+ partner centres, or add a home visit and a registered nurse comes to you.</p></td></tr>${recs.map(row).join('')}<tr><td style="padding:20px;border-top:1px solid #DCE0D8;font-size:13px;color:#5A645E">This suggestion is based on your answers and is not medical advice. If you have symptoms or a health concern, please speak with your doctor. Reply to this email if you have any questions.${quiz ? ` Quiz offer terms: ${origin}/quiz#offer-terms` : ''}</td></tr></table></div>`;
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
     body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: `Your recommended blood test: ${recs[0][0]}`, html })
   });
   if (!r.ok) throw new Error(`Resend patient ${r.status}`);
+}
+
+// Quiz funnel: record the lead in Klaviyo so the follow-up emails can run as a flow there.
+// Sends the recommended panel and ready-made links only, never the quiz answers.
+async function quizToKlaviyo(d, origin) {
+  const h = String(d.recommendation || '').split(',').map((x) => x.trim()).find((x) => PRICES.panels[x]);
+  if (!h) return;
+  const p = PRICES.panels[h], pct = PRICES.quizDiscount || 0;
+  const inc = !!(PRICES.quizHomeFrom && PRICES.homeVisit != null && p.price >= PRICES.quizHomeFrom);
+  const base = `${origin}/checkout?panel=${encodeURIComponent(h)}${d.collection === 'home' ? '&home=1' : ''}`;
+  await klaviyoEvent('Completed Test Finder', { email: d.email, firstName: (d.name || '').split(' ')[0] }, {
+    panel: h, panel_title: p.title, panel_price: p.price, panel_url: `${origin}/tests/${h}`,
+    checkout_url: `${base}&offer=quiz`, home_visit_included: inc,
+    discount_percent: pct, discount_price: pct ? Math.round(p.price * (100 - pct)) / 100 : p.price, discount_url: pct ? `${base}&offer=quiz10` : `${base}&offer=quiz`,
+    terms_url: `${origin}/quiz#offer-terms`
+  });
+  await klaviyoSubscribe(d.email, 'Test finder quiz');
 }
 
 // A home visit booking with the patient's own doctor's form reaches the team only after payment.
@@ -154,13 +179,17 @@ export default async function handler(req, res) {
   if (d.kind !== 'referral' && (!d.name || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))) return res.status(400).json({ error: 'Name and a valid email are required' });
   const emailReady = process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM;
   const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
+  const SITE = (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '');
+  if (d.kind === 'quiz' && d.offer === 'quiz') await quizToKlaviyo(d, SITE).catch((e) => console.error('klaviyo quiz failed:', e.message));
   try {
     // Email first: it is the only route that carries an uploaded request form.
     if (emailReady) {
-      await toEmail(d, att);
+      // Quiz funnel leads are kept in Klaviyo when it is connected, so the team inbox is not copied on each one
+      if (!(d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady())) await toEmail(d, att);
       if (d.kind === 'referral') await toPartner(d).catch((e) => console.error('partner acknowledgement failed:', e.message));
-      if (d.kind === 'quiz') await toPatient(d, (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '')).catch((e) => console.error('quiz email failed:', e.message));
+      if (d.kind === 'quiz') await toPatient(d, SITE).catch((e) => console.error('quiz email failed:', e.message));
     } else if (hubspotReady && !att) await toHubSpot(d);
+    else if (d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady()) { /* lead already recorded in Klaviyo */ }
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
     return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}) });

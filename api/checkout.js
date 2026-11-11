@@ -50,13 +50,23 @@ export default async function handler(req, res) {
   const listed = !!area(p.postcode);
   const where = feeArea(p.postcode);
 
+  // Quiz funnel offers (never combined): 'quiz' includes the home visit on panels at or above
+  // PRICES.quizHomeFrom; 'quiz10' takes PRICES.quizDiscount percent off the panel.
+  const offer = type === 'panel' ? str(body.offer, 12) : '';
+  let offerNote = '';
+
   // Build line items from server-side prices only
   const items = [];
   const add = (name, price, description) => items.push({ name, price, description });
   if (type === 'panel') {
     const panel = PRICES.panels[str(body.panel, 80)];
     if (!panel) return res.status(400).json({ error: 'That test is no longer available.' });
-    add(panel.title, panel.price, 'Private blood test panel. Pathology request form included.');
+    const pct = offer === 'quiz10' && PRICES.quizDiscount ? PRICES.quizDiscount : 0;
+    const homeIncluded = offer === 'quiz' && home && PRICES.quizHomeFrom && panel.price >= PRICES.quizHomeFrom && PRICES.homeVisit != null;
+    if (pct) offerNote = `Quiz offer: ${pct}% off panel`;
+    if (homeIncluded) offerNote = 'Quiz offer: home visit included';
+    add(panel.title, pct ? Math.round(panel.price * (100 - pct)) / 100 : panel.price,
+      'Private blood test panel. Pathology request form included.' + (pct ? ` ${pct}% quiz offer applied.` : '') + (homeIncluded ? ' Nurse home visit included with your quiz offer.' : ''));
   } else if (type === 'builder') {
     const slugs = [...new Set((Array.isArray(body.tests) ? body.tests : []).map((s) => str(s, 60)))].slice(0, 60);
     const chosen = slugs.map((s) => PRICES.addons[s]).filter(Boolean);
@@ -66,14 +76,14 @@ export default async function handler(req, res) {
   } else {
     add(`Home visit with your doctor's request form (${where})`, PRICES.ownForm[where], 'A registered nurse collects at your home or workplace.');
   }
-  if (home && type !== 'own-form') {
+  if (home && type !== 'own-form' && offerNote !== 'Quiz offer: home visit included') {
     if (PRICES.homeVisit == null) return res.status(400).json({ error: 'Home visits are not available online right now. Please contact us.' });
     add('Home visit', PRICES.homeVisit, 'A registered nurse collects at your home or workplace.');
   }
 
   const reference = type === 'own-form' && /^EP-[A-Z0-9]{4,10}$/.test(str(body.reference, 16)) ? str(body.reference, 16) : makeRef();
   const origin = ALLOWED_ORIGIN.test(String(req.headers.origin || '')) ? req.headers.origin : (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '');
-  const summary = items.map((i) => i.name).join('; ').slice(0, 480);
+  const summary = items.map((i) => i.name).concat(offerNote ? [offerNote] : []).join('; ').slice(0, 480);
   const metadata = {
     reference, order_type: type, items: summary, collection: home ? `Home visit (${where}${listed ? '' : ', outside listed area: confirm nurse'})` : 'Collection centre',
     first_name: p.firstName, last_name: p.lastName, dob: p.dob, sex: p.sex, phone: p.phone,
@@ -82,6 +92,7 @@ export default async function handler(req, res) {
   };
   // What to print on the pathology request form (Stripe metadata values are limited to 500 characters)
   if (type === 'panel') metadata.panel = str(body.panel, 80);
+  if (offerNote) metadata.offer = offerNote;
   if (type === 'builder') {
     const slugs = Object.keys(PRICES.addons).filter((s) => items.some((i) => i.name === PRICES.addons[s].title));
     let chunk = '', n = 1;
@@ -98,10 +109,11 @@ export default async function handler(req, res) {
       // Unpaid sessions expire after an hour so the team is told promptly (checkout.session.expired)
       expires_at: Math.floor(Date.now() / 1000) + 3600,
       customer_email: p.email,
-      allow_promotion_codes: true,
+      // An offer price is already applied, so no promotion code on top of it
+      ...(offerNote ? {} : { allow_promotion_codes: true }),
       client_reference_id: reference,
       success_url: `${origin}/order-confirmed?ref=${encodeURIComponent(reference)}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}${type === 'panel' ? '/tests/' + encodeURIComponent(str(body.panel, 80)) : type === 'builder' ? '/tests#build' : '/book'}`,
+      cancel_url: `${origin}${type === 'panel' ? '/checkout?panel=' + encodeURIComponent(str(body.panel, 80)) + (home ? '&home=1' : '') + (offer === 'quiz' || offer === 'quiz10' ? '&offer=' + offer : '') : type === 'builder' ? '/tests#build' : '/book'}`,
       line_items: items.map((i) => ({ quantity: 1, price_data: { currency: 'aud', unit_amount: cents(i.price), product_data: { name: i.name, ...(i.description ? { description: i.description } : {}) } } })),
       metadata,
       payment_intent_data: { description: `Express Pathology ${reference}`, metadata: { reference, order_type: type } }

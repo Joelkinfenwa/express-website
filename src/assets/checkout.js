@@ -6,9 +6,13 @@
   var $ = function (id) { return document.getElementById(id); };
   var form = $('co-form'); if (!form) return;
   var params = new URLSearchParams(location.search);
-  var fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  var fmt0 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 0, maximumFractionDigits: 0 }), fmt2 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmt = { format: function (n) { return (Math.round(n * 100) % 100 === 0 ? fmt0 : fmt2).format(n); } };
   var order = { type: params.get('panel') ? 'panel' : 'builder', panel: params.get('panel') || '', tests: (params.get('add') || '').split(',').filter(Boolean) };
+  var offer = order.type === 'panel' ? (params.get('offer') || '') : '';
   var cat = null, cov = null;
+  function pct() { return offer === 'quiz10' && cat && cat.quizDiscount ? cat.quizDiscount : 0; }
+  function homeIncluded() { var p = cat && cat.panels[order.panel]; return offer === 'quiz' && !!p && !!cat.quizHomeFrom && p.price >= cat.quizHomeFrom && !!cat.homeVisit; }
   var radios = form.querySelectorAll('input[name="collect"]');
   if (params.get('home') === '1') radios[1].checked = true;
 
@@ -17,13 +21,13 @@
     if (!cat) return [];
     var out = [];
     if (order.type === 'panel') {
-      var p = cat.panels[order.panel]; if (p) out.push([p.title, p.price, p.count + ' tests']);
+      var p = cat.panels[order.panel]; if (p) out.push([p.title, pct() ? Math.round(p.price * (100 - pct())) / 100 : p.price, p.count + ' tests' + (pct() ? ' · ' + pct() + '% quiz offer applied' : '')]);
     } else {
       var chosen = cat.addons.filter(function (a) { return order.tests.indexOf(a.slug) !== -1; });
       if (chosen.length && cat.base) out.push(['Build your own test fee', cat.base.price]);
       chosen.forEach(function (a) { out.push([a.title, a.price]); });
     }
-    if (out.length && home() && cat.homeVisit) out.push(['Home visit', cat.homeVisit.price]);
+    if (out.length && home() && cat.homeVisit) out.push(homeIncluded() ? ['Home visit', 0, 'Included with your quiz offer'] : ['Home visit', cat.homeVisit.price]);
     return out;
   }
   function render() {
@@ -32,13 +36,13 @@
       var li = document.createElement('li');
       li.style.cssText = 'display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #C9D3CB';
       li.innerHTML = '<span style="display:flex;flex-direction:column"><span style="font-weight:600"></span><span style="font-size:14px;color:#4B5650"></span></span><span style="font-weight:700"></span>';
-      li.children[0].children[0].textContent = l[0]; li.children[0].children[1].textContent = l[2] || ''; li.children[1].textContent = fmt.format(l[1]);
+      li.children[0].children[0].textContent = l[0]; li.children[0].children[1].textContent = l[2] || ''; li.children[1].textContent = l[1] === 0 ? 'Included' : fmt.format(l[1]);
       ul.appendChild(li);
     });
     $('co-total').textContent = fmt.format(ls.reduce(function (a, l) { return a + l[1]; }, 0));
     $('co-edit').href = order.type === 'panel' ? '/tests/' + encodeURIComponent(order.panel) : '/tests?add=' + order.tests.join(',') + '#build';
     $('co-visit').hidden = !home();
-    if (cat && cat.homeVisit) $('co-home-fee').textContent = 'A registered nurse comes to you, +' + fmt.format(cat.homeVisit.price);
+    if (cat && cat.homeVisit) $('co-home-fee').textContent = homeIncluded() ? 'A registered nurse comes to you, included with your quiz offer' : 'A registered nurse comes to you, +' + fmt.format(cat.homeVisit.price);
     if (cat && !ls.length) { $('co-status').setAttribute('data-state', 'error'); $('co-status').textContent = 'Your order is empty. Choose a panel or build your own test first.'; $('co-submit').disabled = true; }
     coverage();
   }
@@ -69,7 +73,7 @@
     if (!coverage()) { $('co-postcode').focus(); return; }
     var f = new FormData(form), patient = {};
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
-    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes') };
+    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes') };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
     if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
     fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })

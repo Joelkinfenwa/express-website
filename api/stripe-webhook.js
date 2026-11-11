@@ -7,6 +7,7 @@ import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
 import { patientEmail } from '../lib/patient-email.js';
 import { orderNumber } from '../lib/order-number.js';
+import { klaviyoEvent } from '../lib/klaviyo.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -115,6 +116,10 @@ export default async function handler(req, res) {
     const { team, patient } = emails(s, form, formError);
     await send(team);
     if (patient.to[0]) await send(patient).catch((e) => console.error('patient email failed:', e.message));
+    // Tell Klaviyo the order is paid so follow-up flows stop (no-op without KLAVIYO_PRIVATE_KEY)
+    await klaviyoEvent('Placed Website Order', { email: patient.to[0], firstName: m.first_name, lastName: m.last_name },
+      { reference: m.reference, order_type: m.order_type, panel: m.panel || '', collection: m.collection || '', offer: m.offer || '' }, (s.amount_total || 0) / 100)
+      .catch((e) => console.error('klaviyo order failed:', e.message));
     return res.status(200).json({ received: true });
   } catch (e) {
     console.error('order email failed:', e.message);

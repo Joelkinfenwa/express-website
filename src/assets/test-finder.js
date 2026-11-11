@@ -1,4 +1,7 @@
-/* Test finder: five questions, then a recommended test plus two alternatives. */
+/* Test finder: five questions, then a recommended test plus two alternatives.
+   Funnel mode (data-mode="funnel", used by /quiz for paid social): asks for a first name and email
+   before the result, shows the quiz offer and links straight to checkout. Answers are never sent to
+   ad platforms; only a bare lead event is. */
 (function () {
   'use strict';
   var box = document.getElementById('tf'), qEl = document.getElementById('tf-q'), bar = document.getElementById('tf-bar');
@@ -8,6 +11,10 @@
   var D = {}; try { D = JSON.parse(dataEl.textContent); } catch (e) { return; }
   var T = D.tests || {}, ADD = D.addons || {}, BASE = D.base || 0;
   var homeFee = box.getAttribute('data-home-fee') || '';
+  var FUNNEL = box.getAttribute('data-mode') === 'funnel';
+  var HOME_FROM = FUNNEL && D.homeVisit != null ? (D.quizHomeFrom || 0) : 0;
+  var lead = null;
+  function included(t) { return !!HOME_FROM && !t.builder && !t.homeOnly && t.price >= HOME_FROM; }
 
   var Q = [
     { id: 'sex', q: 'Who is the test for?', opts: [['male', 'Male'], ['female', 'Female']] },
@@ -108,10 +115,11 @@
     if (A.goal === 'sexual' && step === 1) { A.depth = A.depth || 'essential'; }
     step++;
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step++;
-    if (step >= Q.length) return show();
+    if (step >= Q.length) return FUNNEL && !lead ? gate() : show();
     render(); focusQ();
   }
   back.addEventListener('click', function () {
+    if (step >= Q.length) step = Q.length;
     step--;
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step--;
     render(); focusQ();
@@ -121,23 +129,78 @@
     var t = info(h);
     var priceLine = (t.builder ? '$' : '$') + t.price + (A.where === 'home' && homeFee ? ' + ' + homeFee + ' home visit' : '');
     if (t.homeOnly) priceLine = '$' + t.price + ' including home visit';
+    var inc = included(t);
+    if (inc && A.where === 'home') priceLine = '$' + t.price + ' with home visit included';
+    var direct = FUNNEL && !t.builder && !t.homeOnly;
+    var href = t.builder ? t.url : direct ? '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + '&offer=quiz' : t.url + (A.where === 'home' ? '?collect=home' : '');
     return el('div', { style: 'display: flex; flex-direction: column; gap: 12px; padding: ' + (primary ? '32px' : '24px') + '; border-radius: 28px; ' + (primary ? 'background: #17302A; color: #F7F4EF' : 'background: #FFFFFF; border: 1px solid #DCE0D8') }, [
       el('span', { text: primary ? 'Our recommendation' : 'Also consider', style: 'font-size: 13px; font-weight: 700; color: ' + (primary ? '#F2A981' : '#A4502E') }),
       el('span', { text: t.title, style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: " + (primary ? '34px' : '24px') + '; letter-spacing: -0.02em; line-height: 1.1' }),
+      inc ? el('span', { text: 'Quiz offer: nurse home visit included' + (homeFee ? ' (normally ' + homeFee + ')' : ''), style: 'align-self: flex-start; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; ' + (primary ? 'background: #F2A981; color: #1C2420' : 'background: #E8EDE6; color: #17302A') }) : null,
       primary ? el('p', { text: (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '', style: 'margin: 0; color: #C5D1CA; font-size: 17px' }) : null,
       el('span', { text: (t.count === '1' ? '1 test' : t.count + ' tests') + ' · ' + t.includes, style: 'color: ' + (primary ? '#C5D1CA' : '#4B5650') + '; font-size: 15px' }),
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-top: 6px' }, [
         el('span', { text: priceLine, style: "font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: " + (primary ? '30px' : '22px') }),
-        el('a', { href: t.builder ? t.url : t.url + (A.where === 'home' ? '?collect=home' : ''), class: 'btn', text: t.builder ? 'Build this test' : primary ? 'View and order' : 'View test', style: primary ? 'background: #F2A981; color: #1C2420' : 'border: 1px solid #1C2420' })
+        el('a', { href: href, class: 'btn', text: t.builder ? 'Build this test' : direct ? (primary ? 'Book this test' : 'Choose this test') : primary ? 'View and order' : 'View test', style: primary ? 'background: #F2A981; color: #1C2420' : 'border: 1px solid #1C2420' })
+      ]),
+      direct ? el('span', { style: 'font-size: 14px; color: ' + (primary ? '#C5D1CA' : '#5A645E') }, [
+        document.createTextNode('Doctor review included. No referral needed. ' + (inc && A.where !== 'home' ? 'Prefer a nurse at home? Choose it at checkout and the visit is included. ' : '')),
+        el('a', { href: t.url, text: 'See what is tested', style: 'text-decoration: underline; color: inherit' })
+      ]) : null
+    ]);
+  }
+
+  // Funnel mode: first name and email before the result
+  function gate() {
+    step = Q.length;
+    bar.style.width = '100%'; stepEl.textContent = 'Done'; back.hidden = false;
+    qEl.innerHTML = '';
+    var p = picks();
+    var inp = 'min-height: 54px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; width: 100%';
+    var status = el('p', { class: 'form-status', role: 'status', 'aria-live': 'polite', style: 'margin: 0' });
+    var form = el('form', { novalidate: '', style: 'display: flex; flex-direction: column; gap: 14px' }, [
+      el('h2', { id: 'tf-h', tabindex: '-1', text: 'Your recommendation is ready.', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
+      el('p', { text: 'Where should we send a copy?', style: 'margin: 0; color: #4B5650; font-size: 17px' }),
+      el('label', { for: 'tf-name', class: 'sr-only', text: 'First name' }), el('input', { id: 'tf-name', name: 'name', required: '', autocomplete: 'given-name', placeholder: 'First name', style: inp }),
+      el('label', { for: 'tf-email', class: 'sr-only', text: 'Email' }), el('input', { id: 'tf-email', name: 'email', type: 'email', required: '', autocomplete: 'email', inputmode: 'email', placeholder: 'Email', style: inp }),
+      el('input', { name: 'company_website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true', style: 'position: absolute; left: -9999px; width: 1px; height: 1px' }),
+      el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my recommendation', style: 'min-height: 56px; font-size: 17px' }),
+      status,
+      el('p', { style: 'margin: 0; font-size: 13px; color: #5A645E' }, [
+        document.createTextNode('We will email your recommendation and occasional offers from Express Pathology. You can unsubscribe at any time. See our '),
+        el('a', { href: '/privacy-policy', text: 'privacy policy', style: 'text-decoration: underline' }), document.createTextNode('.')
       ])
     ]);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      var btn = form.querySelector('button'); btn.disabled = true; btn.textContent = 'One moment…';
+      lead = { name: form.name.value.trim(), email: form.email.value.trim() };
+      var done = false, go = function () { if (done) return; done = true; show(); };
+      setTimeout(go, 4000); // never hold the result back if the request is slow
+      fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        kind: 'quiz', offer: 'quiz', page: location.pathname, name: lead.name, email: lead.email, company_website: form.company_website.value,
+        collection: A.where === 'home' ? 'home' : 'centre',
+        topic: 'Quiz funnel: ' + (p[0] ? info(p[0]).title : 'no match'),
+        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A),
+        recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
+      }) }).then(function (r) {
+        if (!r.ok) throw new Error();
+        // Lead events carry no answers or test names
+        lead.sent = true;
+        if (window.epTrack) window.epTrack('test_finder_lead', {});
+        if (window.fbq) window.fbq('track', 'Lead');
+      }).catch(function () {}).then(go);
+    });
+    qEl.appendChild(form);
+    focusQ();
   }
 
   function show() {
     var p = picks();
     box.hidden = true; resEl.hidden = false; resEl.innerHTML = '';
     var head = el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px' }, [
-      el('h2', { id: 'tf-res-h', tabindex: '-1', text: 'Your recommended test', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.03em" }),
+      el('h2', { id: 'tf-res-h', tabindex: '-1', text: lead && lead.name ? lead.name.split(' ')[0] + ', here is your recommended test' : 'Your recommended test', style: "margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.03em" }),
       el('button', { type: 'button', class: 'tf-link', text: 'Start again', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; render(); focusQ(); } })
     ]);
     resEl.appendChild(head);
@@ -167,8 +230,10 @@
       }) }).then(function (r) { if (!r.ok) throw new Error(); status.setAttribute('data-state', 'ok'); status.textContent = 'Sent. Check your inbox shortly.'; form.reset(); if (window.epTrack) window.epTrack('test_finder_lead', { recommendation: p[0] }); })
         .catch(function () { status.setAttribute('data-state', 'error'); status.textContent = 'That did not send. Please try again.'; btn.disabled = false; });
     });
-    resEl.appendChild(form);
+    if (!FUNNEL) resEl.appendChild(form);
+    else if (HOME_FROM) resEl.appendChild(el('p', { style: 'margin: 0; font-size: 14px; color: #5A645E' }, [document.createTextNode(lead && lead.sent ? 'We have emailed you a copy. ' : ''), el('a', { href: '#offer-terms', text: 'Quiz offer terms', style: 'text-decoration: underline' }), document.createTextNode(' apply.')]));
     var h2 = document.getElementById('tf-res-h'); if (h2) h2.focus();
+    if (FUNNEL) { var top = document.getElementById('quiz-intro'); if (top) top.hidden = true; window.scrollTo(0, 0); }
     if (window.gtag) window.gtag('event', 'test_finder_complete', { goal: A.goal, recommendation: p[0] });
   }
 

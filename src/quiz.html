@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Blood Test Should You Get? 60-Second Quiz | Express Pathology</title>
+<meta name="description" content="Answer five quick questions and get a recommended blood test panel. No referral needed, doctor review included, and a registered nurse can come to you.">
+<link rel="canonical" href="{{siteUrl}}/test-finder">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Which blood test should you get? | Express Pathology">
+<meta property="og:description" content="Five questions, about a minute. Get a recommended blood test panel, with no referral needed.">
+<meta property="og:image" content="{{siteUrl}}/assets/img/og.jpg">
+<meta property="og:url" content="{{siteUrl}}/quiz">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17302A">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<!--analytics-->
+</head>
+<body>
+<div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55; min-height: 100vh">
+
+<a class="skip" href="#main">Skip to content</a>
+<header style="max-width: 880px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<a href="tel:{{phoneTel}}" style="font-weight: 700; font-size: 15px; white-space: nowrap">{{phone}}</a>
+</header>
+<main id="main">
+<section style="max-width: 880px; margin: 0 auto; padding: 12px 24px 56px; display: flex; flex-direction: column; gap: 22px">
+<div id="quiz-intro" style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">60-second quiz</span>
+<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(34px, 6vw, 60px); line-height: 1.03; letter-spacing: -0.035em">Which blood test should you get?</h1>
+<p style="margin: 0; font-size: 18px; color: #4B5650">Five quick questions. We will recommend a panel for your goals, with no referral needed and doctor review included.</p>
+<p data-if="quizHomeVisitIncludedFrom" style="margin: 0; align-self: flex-start; padding: 8px 14px; border-radius: 999px; background: #17302A; color: #F7F4EF; font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #C5D1CA">Terms</a></p>
+</div>
+
+<div id="tf" data-mode="funnel" data-home-fee="{{homeVisitAddOnFee}}" style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: clamp(20px, 4vw, 40px); display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; align-items: center; gap: 14px"><div style="flex: 1; height: 6px; border-radius: 999px; background: #E8EDE6; overflow: hidden"><div id="tf-bar" style="height: 100%; width: 20%; background: #17302A; border-radius: 999px; transition: width 0.25s"></div></div><span id="tf-step" style="font-size: 14px; font-weight: 600; color: #5A645E; white-space: nowrap">1 of 5</span></div>
+<div id="tf-q" aria-live="polite" style="display: flex; flex-direction: column; gap: 16px"><noscript><p>Please enable JavaScript to use the quiz, or <a href="/tests" style="text-decoration: underline">browse all tests</a>.</p></noscript></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><button type="button" id="tf-back" class="tf-link" hidden>Back</button><span></span></div>
+</div>
+
+<div id="tf-result" hidden style="display: flex; flex-direction: column; gap: 22px"></div>
+
+<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 24px; color: #4B5650; font-size: 15px; font-weight: 600">
+<li>No referral needed</li>
+<li>Results reviewed by an Australian doctor</li>
+<li>NATA-accredited laboratories</li>
+<li>Registered nurses, or 2,000+ collection centres</li>
+</ul>
+
+<p style="margin: 0; font-size: 14px; color: #5A645E">This quiz suggests tests based on your answers. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.</p>
+</section>
+
+<section style="background: #E8EDE6">
+<div style="max-width: 880px; margin: 0 auto; padding: 48px 24px; display: flex; flex-direction: column; gap: 24px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.03em">How it works</h2>
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 1</span><strong style="font-size: 18px">Take the quiz and order online</strong><span style="color: #4B5650">Your pathology request form is issued with your order. No GP visit is needed.</span></li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 2</span><strong style="font-size: 18px">Get collected your way</strong><span style="color: #4B5650">A registered nurse comes to your home or workplace, or you walk in to a partner collection centre.</span></li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 3</span><strong style="font-size: 18px">Receive your report</strong><span style="color: #4B5650">An Australian doctor reviews your results, and your report is emailed to you with reference ranges.</span></li>
+</ol>
+</div>
+</section>
+
+<section id="offer-terms" style="max-width: 880px; margin: 0 auto; padding: 40px 24px 64px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: #5A645E">
+<h2 style="margin: 0; font-size: 16px; color: #1C2420">Quiz offer terms and conditions</h2>
+<p data-if="quizHomeVisitIncludedFrom" style="margin: 0"><strong>Home visit included.</strong> When you order a panel priced at ${{quizHomeVisitIncludedFrom}} or more through the quiz and choose a nurse home or workplace visit, the home visit fee (normally {{homeVisitAddOnFee}}) is not charged. Subject to nurse availability in your postcode. If we cannot arrange a visit, you can use a partner collection centre or receive a full refund. Panels priced below ${{quizHomeVisitIncludedFrom}} and Build Your Own orders are not included.</p>
+<p data-if="quizDiscountPercent" style="margin: 0"><strong>{{quizDiscountPercent}}% offer.</strong> Where we email you a {{quizDiscountPercent}}% offer after the quiz, it applies to the price of one panel ordered through the link in that email. It does not apply to the home visit fee and cannot be combined with the home visit offer or any promotion code.</p>
+<p style="margin: 0">One offer per order. Offers have no cash value. Express Pathology may change or withdraw these offers at any time; orders already paid are not affected. Private tests ordered without a referral are not covered by Medicare. {{cancellationPolicy}}</p>
+<p style="margin: 0">Questions? Call <a href="tel:{{phoneTel}}" style="text-decoration: underline">{{phone}}</a> or email <a href="mailto:{{email}}" style="text-decoration: underline">{{email}}</a>.</p>
+</section>
+<script type="application/json" id="tf-data"><!--@QUIZ_DATA--></script>
+</main>
+<footer style="background: #17302A; color: #C5D1CA">
+<div style="max-width: 880px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+<p style="margin: 0">Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
+<p style="margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px"><span>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span></span><a href="/privacy-policy" style="text-decoration: underline">Privacy policy</a><a href="/terms-of-service" style="text-decoration: underline">Terms of service</a><a href="/refund-policy" style="text-decoration: underline">Refund policy</a></p>
+</div>
+</footer>
+
+</div>
+<script src="/assets/site.js" defer></script>
+<script src="/assets/test-finder.js" defer></script>
+</body>
+</html>
