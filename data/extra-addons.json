@@ -1,0 +1,6 @@
+{
+  "_readme": "Build Your Own tests that are not in the Shopify catalogue. Price is the add-on price; the Build Your Own base fee is added at checkout.",
+  "addons": [
+    { "title": "Glucose", "price": 35 }
+  ]
+}

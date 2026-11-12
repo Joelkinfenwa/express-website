@@ -96,6 +96,12 @@ export async function loadCatalog(root) {
   const addons = products.filter((p) => (p.tags.includes('hidden') || cfg.builderExtra.includes(p.handle)) && !exclude.has(p.handle) && !pub.find((x) => x.handle === p.handle))
     .map((p) => { const v = p.variants[0]; const items = markers(p.body_html); return { id: v.id, title: p.title.trim(), price: parseFloat(v.price), cat: categories(p, items)[0] }; })
     .sort((a, b) => a.title.localeCompare(b.title));
+  // Extra Build Your Own tests defined locally (data/extra-addons.json), unless Shopify already has one of the same name
+  try {
+    const extra = JSON.parse(readFileSync(join(root, 'data/extra-addons.json'), 'utf8')).addons || [];
+    for (const x of extra) if (!addons.find((a) => a.title.toLowerCase() === x.title.toLowerCase())) addons.push({ id: 'extra-' + x.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'), title: x.title, price: Number(x.price), cat: categories({ title: x.title, tags: [] }, [x.title])[0] });
+    addons.sort((a, b) => a.title.localeCompare(b.title));
+  } catch {}
   const hv = byHandle[cfg.builderHomeVisitHandle];
   const base = byHandle[cfg.builderBaseHandle];
   // Home visit with the patient's own doctor's request form: metro and (optional) regional variants
