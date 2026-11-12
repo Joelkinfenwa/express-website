@@ -109,6 +109,26 @@
     sexual: { any: [] }, // no single-test build: the STI Screen is the appropriate starting point
     longevity: { any: ['lipid-profile', 'hba1c', 'apo-b', 'crp', 'lp-a', 'fasting-insulin'] }
   };
+  // Timed result-page offer: $25 off tests of $200 or more if checkout starts within 15 minutes of the result.
+  // The deadline comes signed from the server and is checked again at checkout. Half of visitors see it (group a),
+  // so its effect on orders can be compared with the other half (group b).
+  var NOW_OFF = 25, NOW_MIN = 200, nowOffer = null, nowGroup = 'b';
+  try {
+    nowGroup = localStorage.getItem('ep-now-ab') || (Math.random() < 0.5 ? 'a' : 'b'); localStorage.setItem('ep-now-ab', nowGroup);
+    nowOffer = JSON.parse(localStorage.getItem('ep-now') || 'null');
+    if (nowOffer && Date.now() - nowOffer.t > 864e5) nowOffer = null; // one window per day
+  } catch (e) {}
+  if (/[?&]now=1/.test(location.search)) nowGroup = 'a'; else if (/[?&]now=0/.test(location.search)) nowGroup = 'b';
+  function nowLive() { return FUNNEL && nowGroup === 'a' && !!nowOffer && nowOffer.until > Date.now(); }
+  function nowFits(t) { return !!t && !t.homeOnly && t.price >= NOW_MIN; }
+  function nowOff(h) { return nowLive() && nowFits(info(h)) ? NOW_OFF : 0; }
+  function nowTake(j) {
+    if (nowGroup !== 'a' || nowOffer || !j || !j.x || !j.s) return false;
+    nowOffer = { x: j.x, s: j.s, until: Date.now() + (j.ttl || 900) * 1000, t: Date.now() };
+    try { localStorage.setItem('ep-now', JSON.stringify(nowOffer)); } catch (e) {}
+    return true;
+  }
+  function nowClock() { var ms = Math.max(0, (nowOffer ? nowOffer.until : 0) - Date.now()), m = Math.floor(ms / 60000), sec = Math.floor(ms / 1000) % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; }
   function homeAdd(t) { return A.where === 'home' && D.homeVisit && !t.homeOnly && !included(t) ? D.homeVisit : 0; }
   function total(h) { var t = info(h); return t ? t.price + homeAdd(t) : Infinity; }
   function custom(cap) {
@@ -237,9 +257,10 @@
   function money(n) { return '$' + (Math.round(n * 100) % 100 === 0 ? Math.round(n) : n.toFixed(2)); }
   function href(h) {
     var t = info(h);
-    if (t.builder) return '/checkout?add=' + t.slugs.join(',') + (A.where === 'home' ? '&home=1' : '');
+    var now = nowOff(h) ? '&offer=now&x=' + nowOffer.x + '&s=' + encodeURIComponent(nowOffer.s) : '';
+    if (t.builder) return '/checkout?add=' + t.slugs.join(',') + (A.where === 'home' ? '&home=1' : '') + now;
     if (t.homeOnly) return t.url;
-    return '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + '&offer=quiz';
+    return '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + (now || '&offer=quiz');
   }
   function answerChips() {
     var out = [];
@@ -272,6 +293,11 @@
     var badge = overBudget ? 'Closest to your budget' : cap !== Infinity ? 'Fits your budget' : 'Our most complete option';
     var why = (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '';
     var save = t.single && t.single > t.price ? t.single - t.price : 0;
+    // Lead line: the real number of tests in this option, tied to what the person asked about
+    var LEAD = { general: 'covering your core organs, blood and metabolism', hormones: A.sex === 'male' ? 'linked to energy, mood, libido and recovery' : 'linked to energy, mood, libido and cycles',
+      performance: 'linked to training, recovery and body composition', thyroid: 'covering thyroid hormones and thyroid antibodies', vitamins: 'for the nutrients most often low in Australians',
+      sexual: 'for the most common STIs', longevity: 'for a detailed picture of your long-term health' };
+    var lead = n && LEAD[A.goal] ? LEAD[A.goal] + '.' : '';
     var assure = [
       'No referral or GP visit. Your request form is issued with your order',
       'Reviewed by an Australian doctor, emailed with reference ranges',
@@ -288,13 +314,19 @@
           inc ? el('span', { class: 'rs-pill', text: 'Nurse home visit included' }) : null
         ]),
         el('h3', { text: t.title, class: 'rs-title' }),
-        el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
+        lead ? el('p', { style: 'margin: 0; display: flex; flex-direction: column; gap: 2px' }, [
+          el('strong', { text: n + (n === 1 ? ' test' : ' tests'), style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-size: clamp(38px, 5vw, 46px); font-weight: 700; letter-spacing: -.03em; line-height: 1.05; color: #F2A981" }),
+          el('span', { text: lead, style: 'color: #F7F4EF; font-size: 19px; font-weight: 500; line-height: 1.35' })]) : el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
         el('div', { class: 'rs-price' }, [
           el('strong', { text: money(tot) }),
-          el('span', { text: (n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') })
+          save ? el('s', { text: money(t.single + (tot - t.price)), 'aria-label': 'Usually ' + money(t.single + (tot - t.price)) + ' as single tests', style: 'font-size: 24px; color: #9DB0A6; text-decoration-thickness: 2px' }) : null,
+          el('span', { text: (lead ? 'One blood collection' : n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
         ]),
-        save ? el('span', { class: 'rs-save', text: 'Save ' + money(save) + ' against ordering these tests one by one' }) : null,
-        el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode('Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
+        save ? el('span', { class: 'rs-save', text: 'Save ' + money(save), style: 'font-size: 16px; padding: 7px 14px; border-radius: 999px' }) : null,
+        nowOff(h) ? el('div', { class: 'rs-now', role: 'timer', style: 'display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 14px; background: #F7F4EF; color: #1C2420' }, [
+          el('strong', { style: 'font-size: 18px; line-height: 1.25' }, [document.createTextNode('Book in the next '), el('span', { class: 'rs-now-t', text: nowClock(), style: 'font-variant-numeric: tabular-nums; color: #A4502E' }), document.createTextNode(' and we take ' + money(NOW_OFF) + ' off.')]),
+          el('span', { text: 'You pay ' + money(tot - NOW_OFF) + ' instead of ' + money(tot) + '.', style: 'font-size: 15px; color: #4B5650' })]) : null,
+        el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode(nowOff(h) ? 'Book now for ' + money(tot - NOW_OFF) : 'Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
         el('span', { text: 'One payment. Secure checkout by Stripe.', style: 'font-size: 14px; color: #C5D1CA; text-align: center' }),
         el('ul', { class: 'rs-assure' }, assure.map(function (g) { return tick(g, true); }))
       ]),
@@ -321,11 +353,48 @@
   }
   function nextSteps() {
     var steps = [
-      ['Book online today', 'Your pathology request form is issued with your order. No GP visit is needed.'],
-      [A.where === 'home' ? 'A nurse comes to you' : 'Walk in for your collection', A.where === 'home' ? 'A registered nurse collects at your home or workplace.' : 'Take your form to any of 2,000+ partner collection centres.'],
-      ['Receive your report', 'An Australian doctor reviews your results, and your report is emailed to you with reference ranges.']
+      ['Pay online', 'Your pathology request form arrives by email. No referral and no GP visit.'],
+      [A.where === 'home' ? 'A nurse comes to you' : 'Walk in to a collection centre', A.where === 'home' ? 'A registered nurse collects at your home or workplace, at a time you choose.' : 'Take your form to any of our 2,000+ partner collection centres.'],
+      ['Get your results by email', 'Reviewed by an Australian doctor, with every result shown against its reference range.']
     ];
     return el('ol', { class: 'rs-steps' }, steps.map(function (x, i) { return el('li', {}, [el('b', { text: String(i + 1) }), el('strong', { text: x[0] }), el('span', { text: x[1] })]); }));
+  }
+  // Postcode check for nurse home visits, from the same coverage list the checkout uses
+  function areaCheck() {
+    var out = el('p', { 'aria-live': 'polite', style: 'margin: 0; font-size: 16px; font-weight: 600; min-height: 24px' });
+    var input = el('input', { id: 'rs-pc', type: 'text', inputmode: 'numeric', maxlength: '4', autocomplete: 'postal-code', placeholder: 'Postcode', style: 'width: 130px; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #B9C2BA; font: inherit; background: #FFFFFF' });
+    var cov = null, asked = false;
+    function show() {
+      var pc = input.value.replace(/\D/g, '');
+      if (pc.length !== 4 || !cov) { out.textContent = ''; return; }
+      var ok = cov.metro.indexOf(pc) !== -1 || cov.regional.indexOf(pc) !== -1;
+      out.textContent = ok ? 'Yes. A registered nurse can come to you in ' + pc + (homeFee ? ' for ' + homeFee : '') + ', or you can walk in to a partner collection centre.'
+        : 'You can walk in to a partner collection centre. For a nurse visit in ' + pc + ', our team confirms availability after booking, with a full refund if we cannot arrange it.';
+      if (window.epTrack) window.epTrack('quiz_area_check', { covered: ok ? 'yes' : 'no' });
+    }
+    input.addEventListener('input', function () {
+      if (!asked) { asked = true; fetch('/assets/coverage.json').then(function (r) { return r.json(); }).then(function (j) { cov = j; show(); }).catch(function () {}); }
+      show();
+    });
+    return el('div', { style: 'display: flex; flex-direction: column; gap: 10px; padding: 22px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE0D8' }, [
+      el('label', { for: 'rs-pc', text: 'Can a nurse come to me?', style: H2 + '; font-size: 22px' }),
+      el('span', { text: 'Enter your postcode to check. You can always walk in to a partner collection centre instead.', style: 'font-size: 15px; color: #4B5650' }),
+      input, out
+    ]);
+  }
+  function quickAnswers() {
+    var qa = [
+      ['Do I need a referral?', 'No. We issue your pathology request form with your order.'],
+      ['Where do I go?', 'Any of our 2,000+ partner collection centres. Or a registered nurse can come to your home or workplace' + (homeFee ? ' for ' + homeFee : '') + '.'],
+      ['Do I need to fast?', 'Some tests need an 8 to 12 hour fast, with water only. Your confirmation email tells you exactly what applies to your test.'],
+      ['What do I receive?', 'A report by email, reviewed by an Australian doctor, with each result shown against its reference range. You can forward it to your GP.'],
+      ['Is it covered by Medicare?', 'No. The price shown is the full price, with doctor review included.'],
+      ['What if my collection cannot be arranged?', 'You receive a full refund.']
+    ];
+    return el('dl', { style: 'margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px' }, qa.map(function (x) {
+      return el('div', { style: 'display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 16px; background: #E8EDE6' }, [
+        el('dt', { text: x[0], style: 'font-weight: 700; font-size: 17px' }), el('dd', { text: x[1], style: 'margin: 0; font-size: 15px; color: #33403A' })]);
+    }));
   }
   function sampleReport() {
     var rows = [['Testosterone', '18.4', 'nmol/L', 25, 75, 52], ['TSH', '2.1', 'mIU/L', 20, 70, 40], ['HbA1c', '5.2', '%', 15, 60, 42], ['LDL cholesterol', '3.9', 'mmol/L', 10, 62, 74, 1]];
@@ -364,25 +433,29 @@
   }
   function showFunnel(p) {
     var first = lead && lead.name ? lead.name.split(' ')[0] : '';
-    resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 12px' }, [
-      el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px' }, [
-        el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', we' : 'We') + ' found your test', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }),
-        el('button', { type: 'button', class: 'tf-link', text: 'Start again', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; var b = document.getElementById('tf-sticky'); if (b) b.remove(); var intro = document.getElementById('quiz-intro'); if (intro) intro.hidden = false; render(); focusQ(); } })]),
-      el('ul', { 'aria-label': 'Your answers', style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, answerChips().map(function (c) {
-        return el('li', { text: c, style: 'padding: 5px 11px; border-radius: 999px; background: #E8EDE6; font-size: 14px; font-weight: 600' }); }))
-    ]));
+    resEl.appendChild(el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', we' : 'We') + ' found your test', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }));
     resEl.appendChild(mainCard(p[0]));
+    resEl.appendChild(el('h3', { text: 'How it works', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(nextSteps());
+    resEl.appendChild(areaCheck());
+    resEl.appendChild(el('h3', { text: 'Quick answers', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(quickAnswers());
+    resEl.appendChild(el('a', { href: href(p[0]), class: 'btn btn-dark', text: nowOff(p[0]) ? 'Book now for ' + money(total(p[0]) - NOW_OFF) : 'Book this test, ' + money(total(p[0])), style: 'align-self: flex-start; min-height: 56px; padding: 0 30px; font-size: 18px' }));
+    resEl.appendChild(sampleReport());
     resEl.appendChild(el('h3', { text: 'Why this fits you', style: H2 + '; font-size: 24px; margin-top: 12px' }));
     resEl.appendChild(fitCards(info(p[0])));
-    resEl.appendChild(el('h3', { text: 'What happens next', style: H2 + '; font-size: 24px; margin-top: 12px' }));
-    resEl.appendChild(nextSteps());
-    resEl.appendChild(sampleReport());
-    if (p.length > 1) {
-      resEl.appendChild(el('h3', { text: 'Working to a different budget?', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    var ups = p.slice(1).filter(function (h) { return total(h) > total(p[0]); }), downs = p.slice(1).filter(function (h) { return total(h) <= total(p[0]); });
+    if (ups.length) {
+      resEl.appendChild(el('h3', { text: 'Want a fuller picture?', style: H2 + '; font-size: 24px; margin-top: 12px' }));
       var alts = el('div', { style: 'display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px' });
-      p.slice(1).forEach(function (h) { alts.appendChild(altCard(h, p[0])); });
+      ups.forEach(function (h) { alts.appendChild(altCard(h, p[0])); });
       resEl.appendChild(alts);
     }
+    downs.forEach(function (h) {
+      resEl.appendChild(el('p', { style: 'margin: 0; font-size: 15px; color: #4B5650' }, [
+        document.createTextNode('Prefer to spend less? '),
+        el('a', { href: href(h), text: info(h).title + ', ' + money(total(h)), style: 'font-weight: 600; text-decoration: underline' }), document.createTextNode('.')]));
+    });
     var g = PRIORITY[A.goal] || PRIORITY.general, own = (g[A.sex] || g.any || []).filter(function (s) { return ADD[s]; });
     resEl.appendChild(el('p', { style: 'margin: 0; padding: 20px 24px; border-radius: 22px; background: #E8EDE6; font-size: 16px' }, [
       el('strong', { text: 'We can make a test work for any budget. ' }),
@@ -391,17 +464,35 @@
     resEl.appendChild(el('p', { style: 'margin: 0; font-size: 14px; color: #5A645E' }, [
       document.createTextNode((lead && lead.sent ? 'We have emailed you a copy. ' : '') + 'Knowing your numbers gives you and your doctor a baseline to work from. '),
       HOME_FROM ? el('a', { href: '#offer-terms', text: 'Quiz offer terms', style: 'text-decoration: underline' }) : null, document.createTextNode(HOME_FROM ? ' apply.' : '')]));
+    resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 10px; padding-top: 8px; border-top: 1px solid #DCE0D8' }, [
+      el('span', { text: 'Your answers', style: 'font-size: 13px; font-weight: 700; color: #5A645E' }),
+      el('ul', { 'aria-label': 'Your answers', style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, answerChips().map(function (c) {
+        return el('li', { text: c, style: 'padding: 5px 11px; border-radius: 999px; background: #E8EDE6; font-size: 14px; font-weight: 600' }); })),
+      el('button', { type: 'button', class: 'tf-link', text: 'Start again', style: 'align-self: flex-start', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; var b = document.getElementById('tf-sticky'); if (b) b.remove(); var intro = document.getElementById('quiz-intro'); if (intro) intro.hidden = false; render(); focusQ(); } })
+    ]));
     // Order bar that stays in view once the main button has scrolled away
     var t = info(p[0]), cta = document.getElementById('tf-cta');
     var barEl = el('div', { id: 'tf-sticky', hidden: '', style: 'position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #FFFFFF; border-top: 1px solid #DCE0D8; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; justify-content: center' }, [
       el('div', { style: 'width: 100%; max-width: 832px; display: flex; align-items: center; justify-content: space-between; gap: 12px' }, [
         el('span', { style: 'display: flex; flex-direction: column; min-width: 0' }, [
           el('strong', { text: t.title, style: 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis' }),
-          el('span', { text: money(total(p[0])) + (included(t) && A.where === 'home' ? ' with home visit included' : ''), style: 'font-size: 14px; color: #4B5650' })]),
+          el('span', { style: 'font-size: 14px; color: #4B5650' }, nowOff(p[0]) ? [document.createTextNode(money(total(p[0]) - NOW_OFF) + ' for the next '), el('span', { class: 'rs-now-t', text: nowClock(), style: 'font-variant-numeric: tabular-nums; font-weight: 700; color: #A4502E' })] : [document.createTextNode(money(total(p[0])) + (included(t) && A.where === 'home' ? ' with home visit included' : ''))])]),
         el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test', style: 'flex: none' })])]);
     document.body.appendChild(barEl);
     if (cta && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { barEl.hidden = es[0].isIntersecting || resEl.hidden; }).observe(cta);
+    // Countdown for the timed offer. When it ends the page is redrawn at the standard price.
+    clearInterval(nowTick);
+    if (nowOff(p[0])) {
+      if (window.epTrack) window.epTrack('quiz_now_offer_shown', {});
+      nowTick = setInterval(function () {
+        if (resEl.hidden) return;
+        if (!nowLive()) { clearInterval(nowTick); reshow(); return; }
+        Array.prototype.forEach.call(document.querySelectorAll('.rs-now-t'), function (n) { n.textContent = nowClock(); });
+      }, 1000);
+    }
   }
+  var nowTick = 0;
+  function reshow() { var b = document.getElementById('tf-sticky'); if (b) b.remove(); show(); }
 
   // Funnel mode: a short beat while the recommendation is put together
   function matching(then) {
@@ -471,16 +562,19 @@
         kind: 'quiz', offer: 'quiz', page: location.pathname, name: lead.name, email: lead.email, company_website: form.company_website.value,
         collection: A.where === 'home' ? 'home' : 'centre',
         topic: 'Quiz funnel: ' + (p[0] ? info(p[0]).title : 'no match'),
-        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : ''),
+        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nTimed offer: ' + (nowGroup === 'a' ? 'offer group' : 'control group (no offer)'),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
       }) }).then(function (r) {
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
         try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
-        r.json().then(function (j) { if (j && j.kl) klaviyoClient(j.kl, lead); }).catch(function () {});
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
+        return r.json().then(function (j) {
+          if (j && j.kl) klaviyoClient(j.kl, lead);
+          if (j && nowTake(j.now) && done) reshow(); // the result was already on screen: redraw it with the offer
+        }).catch(function () {});
       }).catch(function () {}).then(go);
     });
     qEl.appendChild(form);

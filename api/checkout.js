@@ -4,6 +4,7 @@
 import PRICES from '../lib/price-index.mjs';
 import { stripe } from '../lib/stripe.js';
 import { findOrder } from '../lib/original-order.js';
+import { NOW_OFF, NOW_MIN, valid as nowOfferValid } from '../lib/now-offer.js';
 
 const ALLOWED_ORIGIN = /^https:\/\/((www\.)?expresspathology\.com\.au|[a-z0-9-]+\.vercel\.app)$|^http:\/\/localhost(:\d+)?$/;
 const STATES = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT'];
@@ -55,6 +56,8 @@ export default async function handler(req, res) {
   // PRICES.quizHomeFrom; 'quiz10' takes PRICES.quizDiscount percent off the panel.
   const offer = type === 'panel' || type === 'builder' ? str(body.offer, 12) : '';
   let offerNote = '';
+  // 'now' is the timed result-page offer: NOW_OFF dollars off tests of NOW_MIN or more, inside a signed 15-minute window
+  const ENDED = { error: 'That 15-minute offer has ended. The price shown is now the standard price. Continue when you are ready.', code: 'offer_ended' };
   let addTo = '';
 
   // Build line items from server-side prices only
@@ -65,10 +68,13 @@ export default async function handler(req, res) {
     if (!panel) return res.status(400).json({ error: 'That test is no longer available.' });
     const pct = offer === 'quiz10' && PRICES.quizDiscount ? PRICES.quizDiscount : 0;
     const homeIncluded = offer === 'quiz' && home && PRICES.quizHomeFrom && panel.price >= PRICES.quizHomeFrom && PRICES.homeVisit != null;
+    const nowOff = offer === 'now' && panel.price >= NOW_MIN ? NOW_OFF : 0;
+    if (nowOff && !nowOfferValid(body.x, body.s)) return res.status(400).json(ENDED);
     if (pct) offerNote = `Quiz offer: ${pct}% off panel`;
     if (homeIncluded) offerNote = 'Quiz offer: home visit included';
-    add(panel.title, pct ? Math.round(panel.price * (100 - pct)) / 100 : panel.price,
-      'Private blood test panel. Pathology request form included.' + (pct ? ` ${pct}% quiz offer applied.` : '') + (homeIncluded ? ' Nurse home visit included with your quiz offer.' : ''));
+    if (nowOff) offerNote = `Result page offer: $${NOW_OFF} off (15 minutes)`;
+    add(panel.title, nowOff ? panel.price - nowOff : pct ? Math.round(panel.price * (100 - pct)) / 100 : panel.price,
+      'Private blood test panel. Pathology request form included.' + (pct ? ` ${pct}% quiz offer applied.` : '') + (nowOff ? ` $${nowOff} offer applied.` : '') + (homeIncluded ? ' Nurse home visit included with your quiz offer.' : ''));
   } else if (type === 'builder') {
     const slugs = [...new Set((Array.isArray(body.tests) ? body.tests : []).map((s) => str(s, 60)))].slice(0, 60);
     const chosen = slugs.map((s) => PRICES.addons[s]).filter(Boolean);
@@ -82,7 +88,11 @@ export default async function handler(req, res) {
       addOn = true; addTo = str(body.addto, 8);
       offerNote = `Add-on to order #${addTo}: base fee waived`;
     }
-    if (PRICES.builderFee && !addOn) add('Build your own test fee', PRICES.builderFee, 'Combines your chosen tests into one collection and one report.');
+    const sub = (addOn ? 0 : PRICES.builderFee || 0) + chosen.reduce((a, t) => a + t.price, 0);
+    const nowOff = offer === 'now' && !addOn && PRICES.builderFee >= NOW_OFF && sub >= NOW_MIN ? NOW_OFF : 0;
+    if (nowOff && !nowOfferValid(body.x, body.s)) return res.status(400).json(ENDED);
+    if (nowOff) offerNote = `Result page offer: $${NOW_OFF} off (15 minutes)`;
+    if (PRICES.builderFee && !addOn) add('Build your own test fee', PRICES.builderFee - nowOff, 'Combines your chosen tests into one collection and one report.' + (nowOff ? ` $${nowOff} offer applied.` : ''));
     for (const t of chosen) add(t.title, t.price);
   } else {
     add(`Home visit with your doctor's request form (${where})`, PRICES.ownForm[where], 'A registered nurse collects at your home or workplace.');

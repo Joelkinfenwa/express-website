@@ -3,6 +3,7 @@ import { stripe } from '../lib/stripe.js';
 import { referralNumber } from '../lib/order-number.js';
 import PRICES from '../lib/price-index.mjs';
 import { klaviyoEvent, klaviyoSubscribe, klaviyoReady } from '../lib/klaviyo.js';
+import { mint as mintNowOffer } from '../lib/now-offer.js';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
@@ -210,7 +211,7 @@ export default async function handler(req, res) {
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
     const kl = quizClientKlaviyo(d, SITE);
-    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}) });
+    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}), ...(d.kind === 'quiz' && d.offer === 'quiz' ? { now: mintNowOffer() } : {}) });
   } catch (err) {
     console.error('enquiry delivery failed:', err.message);
     return res.status(502).json({ error: 'Delivery failed' });
