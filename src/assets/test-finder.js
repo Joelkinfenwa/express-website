@@ -124,6 +124,11 @@
     if (nowOffer && Date.now() - nowOffer.t > 864e5) nowOffer = null; // one window per day
   } catch (e) {}
   if (/[?&]now=1/.test(location.search)) nowGroup = 'a'; else if (/[?&]now=0/.test(location.search)) nowGroup = 'b';
+  // Price shown per day over a year, under the real one-off price. Shown to half of visitors (group a) to measure its effect.
+  var pdGroup = 'b';
+  try { pdGroup = localStorage.getItem('ep-pd') || (Math.random() < 0.5 ? 'a' : 'b'); localStorage.setItem('ep-pd', pdGroup); } catch (e) {}
+  if (/[?&]pd=1/.test(location.search)) pdGroup = 'a'; else if (/[?&]pd=0/.test(location.search)) pdGroup = 'b';
+  function perDay(n) { var c = Math.ceil(n / 365 * 100); return c < 100 ? c + ' cents' : '$' + (c / 100).toFixed(2); }
   function nowLive() { return FUNNEL && nowGroup === 'a' && !!nowOffer && nowOffer.until > Date.now(); }
   function nowFits(t) { return !!t && !t.homeOnly && t.price >= NOW_MIN; }
   function nowOff(h) { return nowLive() && nowFits(info(h)) ? NOW_OFF : 0; }
@@ -328,6 +333,8 @@
           save ? el('s', { text: money(t.single + (tot - t.price)), 'aria-label': 'Usually ' + money(t.single + (tot - t.price)) + ' as single tests', style: 'font-size: 24px; color: #9DB0A6; text-decoration-thickness: 2px' }) : null,
           el('span', { text: (lead ? 'One blood collection' : n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
         ]),
+        FUNNEL && pdGroup === 'a' ? el('p', { class: 'rs-perday', style: 'margin: 0; font-size: 17px; color: #F7F4EF' }, [
+          document.createTextNode('That is '), el('strong', { text: perDay(tot) + ' a day', style: 'color: #F2A981' }), document.createTextNode(' over a year. You pay once, ' + money(tot) + '.')]) : null,
         save ? el('span', { class: 'rs-save', text: 'Save ' + money(save), style: 'font-size: 16px; padding: 7px 14px; border-radius: 999px' }) : null,
         nowOff(h) ? el('div', { class: 'rs-now', role: 'timer', style: 'display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 14px; background: #F7F4EF; color: #1C2420' }, [
           el('strong', { style: 'font-size: 18px; line-height: 1.25' }, [document.createTextNode('Book in the next '), el('span', { class: 'rs-now-t', text: nowClock(), style: 'font-variant-numeric: tabular-nums; color: #A4502E' }), document.createTextNode(' and we take ' + money(NOW_OFF) + ' off.')]),
@@ -486,12 +493,12 @@
         el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test', style: 'flex: none' })])]);
     document.body.appendChild(barEl);
     if (cta && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { barEl.hidden = es[0].isIntersecting || resEl.hidden; }).observe(cta);
-    if (window.epStep && !showFunnel.sent) { showFunnel.sent = true; window.epStep('4 Result viewed', { offer: nowOff(p[0]) ? 'yes' : 'no', group: nowGroup }); }
+    if (window.epStep && !showFunnel.sent) { showFunnel.sent = true; window.epStep('4 Result viewed', { offer: nowOff(p[0]) ? 'yes' : 'no', perday: pdGroup === 'a' ? 'shown' : 'not shown' }); }
     if (!showFunnel.bound) {
       showFunnel.bound = true;
       document.addEventListener('click', function (e) {
         var a = e.target && e.target.closest ? e.target.closest('a[href^="/checkout"]') : null;
-        if (a && window.epStep && (resEl.contains(a) || a.closest('#tf-sticky'))) window.epStep('5 Book button tapped', { offer: /offer=now/.test(a.getAttribute('href')) ? 'yes' : 'no' });
+        if (a && window.epStep && (resEl.contains(a) || a.closest('#tf-sticky'))) window.epStep('5 Book button tapped', { offer: /offer=now/.test(a.getAttribute('href')) ? 'yes' : 'no', perday: pdGroup === 'a' ? 'shown' : 'not shown' });
       });
     }
     // Countdown for the timed offer. When it ends the page is redrawn at the standard price.
@@ -577,7 +584,7 @@
         collection: A.where === 'home' ? 'home' : 'centre',
         timing: A.when || '',
         topic: 'Quiz funnel' + (A.when === 'asap' ? ' (READY NOW)' : A.when === 'weeks' ? ' (next few weeks)' : A.when === 'looking' ? ' (just looking)' : '') + ': ' + (p[0] ? info(p[0]).title : 'no match'),
-        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nTimed offer: ' + (nowGroup === 'a' ? 'offer group' : 'control group (no offer)'),
+        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nPer-day price line: ' + (pdGroup === 'a' ? 'shown' : 'not shown'),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
       }) }).then(function (r) {
         if (!r.ok) throw new Error();

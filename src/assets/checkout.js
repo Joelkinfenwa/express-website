@@ -89,7 +89,7 @@
     if (!coverage()) { $('co-postcode').focus(); return; }
     var f = new FormData(form), patient = {};
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
-    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes'), src: window.epSrc ? window.epSrc() : '', x: offer === 'now' ? nowX : undefined, s: offer === 'now' ? nowS : undefined };
+    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes'), src: (window.epSrc ? window.epSrc() : '') + (function () { try { var g = localStorage.getItem('ep-pd'); return g ? ' | per-day line ' + (g === 'a' ? 'shown' : 'not shown') : ''; } catch (e) { return ''; } })(), x: offer === 'now' ? nowX : undefined, s: offer === 'now' ? nowS : undefined };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
     if (window.epStep) window.epStep('7 Details entered, sent to payment', {}, 'AddPaymentInfo', { value: lines().reduce(function (a, l) { return a + l[1]; }, 0), currency: 'AUD' });
     if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
