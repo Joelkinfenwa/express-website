@@ -128,7 +128,10 @@
     var primary = pool[0];
     if (cap !== Infinity) {
       // The pool is in relevance order for the goal, so take the first option that fits
-      primary = pool.filter(function (h) { return total(h) <= cap; })[0] || custom(cap);
+      primary = pool.filter(function (h) { return total(h) <= cap; })[0];
+      // A panel up to 10% over the budget still leads, labelled as the closest fit, before falling back to a custom build
+      if (!primary) { primary = pool.filter(function (h) { return total(h) <= cap * 1.1; })[0]; if (primary) overBudget = true; }
+      if (!primary) primary = custom(cap);
       if (!primary) { primary = pool.slice().sort(function (a, b) { return total(a) - total(b); })[0]; overBudget = true; }
     }
     if (!primary) return [];
