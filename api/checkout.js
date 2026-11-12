@@ -3,6 +3,7 @@
 // build time), never from the browser.
 import PRICES from '../lib/price-index.mjs';
 import { stripe } from '../lib/stripe.js';
+import { findOrder } from '../lib/original-order.js';
 
 const ALLOWED_ORIGIN = /^https:\/\/((www\.)?expresspathology\.com\.au|[a-z0-9-]+\.vercel\.app)$|^http:\/\/localhost(:\d+)?$/;
 const STATES = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT'];
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
   // PRICES.quizHomeFrom; 'quiz10' takes PRICES.quizDiscount percent off the panel.
   const offer = type === 'panel' || type === 'builder' ? str(body.offer, 12) : '';
   let offerNote = '';
+  let addTo = '';
 
   // Build line items from server-side prices only
   const items = [];
@@ -71,9 +73,15 @@ export default async function handler(req, res) {
     const slugs = [...new Set((Array.isArray(body.tests) ? body.tests : []).map((s) => str(s, 60)))].slice(0, 60);
     const chosen = slugs.map((s) => PRICES.addons[s]).filter(Boolean);
     if (!chosen.length) return res.status(400).json({ error: 'Please choose at least one test.' });
-    // Temporary (November 2026): glucose add-on for a customer's existing order, without the base fee
-    const addOn = offer === 'addgl26' && chosen.every((t) => t.title === 'Glucose');
-    if (addOn) offerNote = 'Add-on to an existing order: base fee waived';
+    // Add-on to an existing paid order (?addto=10046): no base fee, and the tests are added to that
+    // order's request form. Only when the email matches the original order.
+    let addOn = false;
+    if (body.addto) {
+      const orig = await findOrder(str(body.addto, 8)).catch(() => null);
+      if (!orig || orig.email !== p.email.toLowerCase()) return res.status(400).json({ error: `We could not match this to order #${str(body.addto, 8)}. Please use the email address from your original order, or call us on 02 9545 2940.`, code: 'invalid' });
+      addOn = true; addTo = str(body.addto, 8);
+      offerNote = `Add-on to order #${addTo}: base fee waived`;
+    }
     if (PRICES.builderFee && !addOn) add('Build your own test fee', PRICES.builderFee, 'Combines your chosen tests into one collection and one report.');
     for (const t of chosen) add(t.title, t.price);
   } else {
@@ -96,6 +104,7 @@ export default async function handler(req, res) {
   // What to print on the pathology request form (Stripe metadata values are limited to 500 characters)
   if (type === 'panel') metadata.panel = str(body.panel, 80);
   if (offerNote) metadata.offer = offerNote;
+  if (addTo) metadata.addto = addTo;
   if (type === 'builder') {
     const slugs = Object.keys(PRICES.addons).filter((s) => items.some((i) => i.name === PRICES.addons[s].title));
     let chunk = '', n = 1;

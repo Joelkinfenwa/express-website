@@ -10,6 +10,7 @@
   var fmt = { format: function (n) { return (Math.round(n * 100) % 100 === 0 ? fmt0 : fmt2).format(n); } };
   var order = { type: params.get('panel') ? 'panel' : 'builder', panel: params.get('panel') || '', tests: (params.get('add') || '').split(',').filter(Boolean) };
   var offer = params.get('offer') || '';
+  var addTo = /^\d{4,8}$/.test(params.get('addto') || '') ? params.get('addto') : '';
   var cat = null, cov = null;
   function pct() { return offer === 'quiz10' && cat && cat.quizDiscount ? cat.quizDiscount : 0; }
   function homeIncluded() { var p = cat && cat.panels[order.panel]; return offer === 'quiz' && !!p && !!cat.quizHomeFrom && p.price >= cat.quizHomeFrom && !!cat.homeVisit; }
@@ -24,9 +25,9 @@
       var p = cat.panels[order.panel]; if (p) out.push([p.title, pct() ? Math.round(p.price * (100 - pct())) / 100 : p.price, p.count + ' tests' + (pct() ? ' · ' + pct() + '% quiz offer applied' : '')]);
     } else {
       var chosen = cat.addons.filter(function (a) { return order.tests.indexOf(a.slug) !== -1; });
-      var addOn = offer === 'addgl26' && chosen.length && chosen.every(function (a) { return a.title === 'Glucose'; });
+      var addOn = !!addTo;
       if (chosen.length && cat.base && !addOn) out.push(['Build your own test fee', cat.base.price]);
-      chosen.forEach(function (a) { out.push([a.title, a.price]); });
+      chosen.forEach(function (a) { out.push([a.title, a.price, addOn ? 'Added to order #' + addTo + '. Use the email from that order.' : '']); });
     }
     if (out.length && home() && cat.homeVisit) out.push(homeIncluded() ? ['Home visit', 0, 'Included with your quiz offer'] : ['Home visit', cat.homeVisit.price]);
     return out;
@@ -74,7 +75,7 @@
     if (!coverage()) { $('co-postcode').focus(); return; }
     var f = new FormData(form), patient = {};
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
-    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes') };
+    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes') };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
     if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
     fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })

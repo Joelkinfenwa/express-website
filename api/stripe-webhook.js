@@ -3,6 +3,7 @@
 // checkout.session.completed (and checkout.session.async_payment_succeeded), and set
 // STRIPE_WEBHOOK_SECRET in Vercel.
 import { verifySignature } from '../lib/stripe.js';
+import { findOrder } from '../lib/original-order.js';
 import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
 import { patientEmail } from '../lib/patient-email.js';
@@ -42,6 +43,21 @@ export async function requestForm(s) {
   if (!order.items.length) throw new Error('no tests found for ' + m.reference);
   const bytes = await requestFormPdf(order);
   return { filename: `Pathology request form ${String(m.reference).replace('#', 'order ')}.pdf`, content: Buffer.from(bytes).toString('base64') };
+}
+
+// Add-on order: one updated request form under the original order number, listing the original
+// tests plus the added ones, with a note that it replaces the earlier form
+export async function addOnForm(s) {
+  const m = s.metadata || {};
+  const orig = await findOrder(m.addto);
+  if (!orig) throw new Error('original order #' + m.addto + ' not found');
+  const a = orderFromSession(orig.session, PRICES), b = orderFromSession(s, PRICES);
+  const lines = [...new Set([...a.items.flatMap((i) => i.lines), ...b.items.flatMap((i) => i.lines)])];
+  if (!lines.length) throw new Error('no tests found for add-on ' + m.reference);
+  const order = { reference: '#' + m.addto, patient: a.patient, items: [{ title: 'Tests', lines }], fasting: a.fasting || b.fasting,
+    notes: `Updated form: includes add-on order ${m.reference}. Replaces the earlier form for order #${m.addto}.` };
+  const bytes = await requestFormPdf(order);
+  return { filename: `Pathology request form order ${m.addto} (updated).pdf`, content: Buffer.from(bytes).toString('base64') };
 }
 
 export function emails(s, form = null, formError = '') {
@@ -112,8 +128,13 @@ export default async function handler(req, res) {
     m.checkout_ref = m.reference;
     try { m.reference = '#' + await orderNumber(s); } catch (e) { console.error('order number failed:', e.message); }
     let form = null, formError = '';
-    try { form = await requestForm(s); } catch (e) { formError = e.message; console.error('request form failed:', e.message); }
+    try { form = m.addto ? await addOnForm(s) : await requestForm(s); } catch (e) { formError = e.message; console.error('request form failed:', e.message); }
     const { team, patient } = emails(s, form, formError);
+    if (m.addto && form) {
+      patient.subject = `Here is your updated pathology request form (Order #${m.addto})`;
+      team.subject = `New paid add-on ${m.reference} to order #${m.addto}: ${String(m.items || '').split('; ')[0]}`;
+      team.html = `<p><strong>Add-on to order #${esc(m.addto)}.</strong> An updated request form for order #${esc(m.addto)} with the original and added tests is attached and has been emailed to the patient. It replaces the earlier form.</p>` + team.html;
+    }
     await send(team);
     if (patient.to[0]) await send(patient).catch((e) => console.error('patient email failed:', e.message));
     // Tell Klaviyo the order is paid so follow-up flows stop (no-op without KLAVIYO_PRIVATE_KEY)
