@@ -20,61 +20,132 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
 <style>
-/* Quiz funnel: a full-screen stage for the questions, then a light results page */
+/* Quiz funnel: a full landing page first, then a split-screen quiz, then a light results page */
 :root{--display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif}
 h1,h2,h3,.logo{font-family:var(--display)}
-.quiz-stage{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;color:#F7F4EF;background:radial-gradient(900px 520px at 85% -10%,rgba(242,169,129,.20),transparent 62%),radial-gradient(700px 500px at -10% 110%,rgba(255,255,255,.06),transparent 60%),#17302A}
-.quiz-stage.is-result{min-height:0;color:#1C2420;background:#F7F4EF}
-.qz-head,.qz-progress,.qz-body,.qz-foot{width:100%;max-width:720px;margin:0 auto;padding-left:24px;padding-right:24px}
+.lp{color:#1C2420}
+.lp h2{margin:0;font-weight:700;font-size:clamp(34px,5.2vw,56px);line-height:1.02;letter-spacing:-.04em}
+.lp h2 span{display:block;color:#8A948E}
+.lp-wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.lp-sec{padding:88px 0}
+.lp-center{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}
+.lp-lead{margin:0;max-width:600px;font-size:18px;color:#4B5650}
+.lp-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:1px solid currentColor;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.lp-tag::before{content:'';width:6px;height:6px;background:currentColor}
+.lp-cta{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px}
+.lp-cta small{font-size:14px;font-weight:600;color:#5A645E}
+.qz-start{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:60px;padding:0 34px;border:0;border-radius:14px;background:#17302A;color:#F7F4EF;font:inherit;font-weight:700;font-size:18px;cursor:pointer;transition:transform .15s,background .15s}
+.qz-start:hover{background:#0F241F}
+.qz-start:active{transform:scale(.98)}
+.qz-start.is-light{background:#F7F4EF;color:#17302A}
+.qz-start.is-light:hover{background:#FFFFFF}
+.qz-start:focus-visible,.lp-chip:focus-visible{outline:3px solid #F2A981;outline-offset:3px}
+/* Hero */
+.lp-hero{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;color:#F7F4EF;background:#0C1512;overflow:hidden}
+.lp-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 28%}
+.lp-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,14,12,.62) 0%,rgba(8,14,12,.5) 45%,rgba(8,14,12,.86) 100%)}
+.lp-hero>*:not(img){position:relative;z-index:1}
+.lp-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px}
+.lp-nav .logo{color:#F7F4EF}
+.lp-nav .logo span{color:#C5D1CA}
+.lp-nav .qz-start{min-height:46px;padding:0 20px;font-size:15px;border-radius:12px}
+.lp-hero-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;padding:32px 24px}
+.lp-badge{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#F7F4EF}
+.lp-badge i{width:9px;height:9px;border-radius:50%;background:#F2A981}
+.lp-hero h1{margin:0;font-weight:700;font-size:clamp(46px,8.6vw,96px);line-height:.96;letter-spacing:-.045em}
+.lp-hero h1 span{display:block;color:#F2A981}
+.lp-hero p{margin:0;max-width:560px;font-size:19px;color:#DDE4DF}
+.lp-hero .lp-cta small{color:#DDE4DF}
+.lp-trust{margin:0;padding:22px 24px;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 36px;border-top:1px solid rgba(255,255,255,.18);font-size:15px;font-weight:600;color:#DDE4DF}
+.lp-trust li::before{content:'✓';margin-right:8px;color:#F2A981}
+/* Goal chips */
+.lp-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:940px;margin-top:10px}
+.lp-chip{display:inline-flex;align-items:center;gap:14px;min-height:64px;padding:8px 22px 8px 8px;border-radius:16px;border:1px solid #DCE0D8;background:#FFFFFF;color:#1C2420;font:inherit;font-weight:600;font-size:17px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s}
+.lp-chip img{width:48px;height:48px;border-radius:10px;object-fit:cover}
+.lp-chip:hover{border-color:#17302A;box-shadow:0 6px 18px rgba(23,48,42,.1);transform:translateY(-1px)}
+/* How it works */
+.lp-how{position:relative;padding:96px 24px;color:#F7F4EF;background:#17302A;overflow:hidden}
+.lp-how>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.34}
+.lp-how-card{position:relative;max-width:1000px;margin:0 auto;padding:56px 40px;border-radius:28px;background:rgba(18,36,31,.62);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lp-how h2 span{color:#F2A981}
+.lp-steps{margin:44px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;position:relative;width:100%}
+.lp-steps::before{content:'';position:absolute;left:12.5%;right:12.5%;top:9px;height:1px;background:rgba(255,255,255,.35)}
+.lp-steps li{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;font-size:15px;color:#C5D1CA}
+.lp-steps li::before{content:'';position:relative;width:18px;height:18px;border:1px solid #F7F4EF;background:#17302A;box-shadow:inset 0 0 0 5px #17302A,inset 0 0 0 9px #F2A981;margin-bottom:14px}
+.lp-steps b{display:inline-block;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.14);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#F7F4EF}
+.lp-steps strong{font-size:19px;line-height:1.2;color:#F7F4EF;font-family:var(--display);letter-spacing:-.02em}
+/* Report */
+.lp-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+.lp-ticks{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:17px;font-weight:600}
+.lp-ticks li{display:flex;gap:12px}
+.lp-ticks li::before{content:'✓';flex:none;width:26px;height:26px;border-radius:50%;background:#17302A;color:#F7F4EF;display:flex;align-items:center;justify-content:center;font-size:14px}
+.lp-report{padding:30px 30px 26px;border-radius:26px;background:#FFFFFF;border:1px solid #DCE0D8;box-shadow:0 30px 70px rgba(23,48,42,.14);display:flex;flex-direction:column;gap:22px}
+.lp-report header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lp-report header strong{font-family:var(--display);font-size:24px;letter-spacing:-.03em}
+.lp-report header span{font-size:13px;font-weight:700;color:#4B5650}
+.lp-row{display:flex;flex-direction:column;gap:9px}
+.lp-row div:first-child{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.lp-row em{font-style:normal;margin-left:8px;padding:2px 9px;border-radius:999px;background:#F2A981;font-size:12px;font-weight:700}
+.lp-row small{font-weight:500;color:#4B5650}
+.lp-bar{position:relative;height:10px;border-radius:999px;background:#E8EDE6}
+.lp-bar i{position:absolute;top:0;bottom:0;border-radius:999px;background:#C5D1CA}
+.lp-bar b{position:absolute;top:-4px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#17302A;border:3px solid #FFFFFF;box-sizing:border-box}
+.lp-bar b.hi{background:#A4502E}
+.lp-fine{margin:0;font-size:12px;color:#5A645E}
+/* Test menu */
+.lp-menu{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:900px}
+.lp-menu li{padding:10px 18px;border-radius:999px;background:#FFFFFF;border:1px solid #DCE0D8;font-weight:600;font-size:15px}
+/* Access */
+.lp-ways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:36px;width:100%}
+.lp-way{position:relative;min-height:380px;border-radius:26px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;color:#F7F4EF;text-align:left;background:#0C1512}
+.lp-way img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lp-way::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,14,12,.9) 0%,rgba(8,14,12,.35) 55%,rgba(8,14,12,0) 100%)}
+.lp-way>*:not(img){position:relative;z-index:1}
+.lp-way strong{font-family:var(--display);font-size:30px;letter-spacing:-.03em;line-height:1.05}
+.lp-way span{margin-top:8px;font-size:16px;color:#DDE4DF}
+/* Floating call to action */
+#quiz-sticky{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:14px;padding:8px 8px 8px 22px;border-radius:999px;background:rgba(247,244,239,.94);border:1px solid #DCE0D8;box-shadow:0 14px 40px rgba(23,48,42,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap}
+#quiz-sticky[hidden]{display:none}
+#quiz-sticky span{font-weight:600;font-size:15px}
+#quiz-sticky .qz-start{min-height:46px;padding:0 22px;font-size:15px;border-radius:999px}
+/* Quiz */
+.quiz-stage{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;background:#F7F4EF;color:#1C2420}
+.quiz-stage.is-landing{display:none}
+.quiz-stage.is-result{min-height:0}
+.qz-head,.qz-progress,.qz-body,.qz-foot{width:100%;max-width:640px;margin:0 auto;padding-left:24px;padding-right:24px}
 .is-result .qz-head,.is-result .qz-body,.is-result .qz-foot{max-width:880px}
-.qz-head{padding-top:16px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.quiz-stage:not(.is-result) .qz-head a,.quiz-stage:not(.is-result) #tf-q a{color:#F7F4EF}
-.quiz-stage:not(.is-result) .logo span{color:#C5D1CA}
+.qz-head{padding-top:18px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .qz-progress{display:flex;align-items:center;gap:14px;min-height:44px}
 .is-result .qz-progress{display:none}
-.qz-track{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.16);overflow:hidden}
+.qz-track{flex:1;height:6px;border-radius:999px;background:#DCE0D8;overflow:hidden}
 .qz-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding-top:24px;padding-bottom:32px}
 .is-result .qz-body{justify-content:flex-start;padding-top:12px}
-.qz-foot{padding-bottom:24px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#9DB0A7}
-.qz-foot ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:600;font-size:14px;color:#C5D1CA}
-.qz-foot li::before{content:'✓';margin-right:6px;color:#F2A981}
+.qz-foot{padding-bottom:24px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#5A645E}
+.qz-foot ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:600;font-size:14px}
+.qz-foot li::before{content:'✓';margin-right:6px;color:#A4502E}
 .qz-foot p{margin:0}
-.is-result .qz-foot,.is-result .qz-foot ul{color:#5A645E}
-.quiz-stage:not(.is-result) .tf-link{color:#C5D1CA;text-decoration:none;font-size:14px}
-.quiz-stage:not(.is-result) #tf-q h2{font-size:clamp(30px,6.4vw,48px)!important;line-height:1.04;letter-spacing:-.035em!important;font-weight:700!important}
-.quiz-stage:not(.is-result) #tf-q p{color:#C5D1CA!important}
-.quiz-stage #tf-q .form-status[data-state="error"]{color:#F2A981!important}
-.quiz-stage #tf-q .btn-dark{background:#F2A981;color:#1C2420}
-.quiz-stage .tf-opt{min-height:68px;padding:16px 22px;border-radius:20px;font-size:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#F7F4EF;transition:background .15s,border-color .15s,transform .15s}
-.quiz-stage .tf-opt small{color:#C5D1CA;margin-top:2px}
-.quiz-stage .tf-opt span[aria-hidden]{color:#F2A981!important;font-size:20px}
-.quiz-stage .tf-opt:hover{background:rgba(255,255,255,.12);border-color:#F2A981}
+.quiz-stage:not(.is-result) #tf-q h2{font-size:clamp(30px,5vw,44px)!important;line-height:1.04;letter-spacing:-.035em!important;font-weight:700!important}
+.quiz-stage .tf-opt{min-height:68px;padding:16px 22px;border-radius:16px;font-size:18px;transition:background .15s,border-color .15s,transform .15s}
 .quiz-stage .tf-opt:active{transform:scale(.985)}
-.quiz-stage .tf-opt[aria-pressed="true"]{background:#F2A981;border-color:#F2A981;color:#1C2420}
-.quiz-stage .tf-opt[aria-pressed="true"] small,.quiz-stage .tf-opt[aria-pressed="true"] span[aria-hidden]{color:#1C2420!important}
-.quiz-stage .tf-opt:focus-visible,.quiz-stage .tf-link:focus-visible{outline:3px solid #F2A981;outline-offset:3px}
-.qz-step{display:flex;align-items:center;gap:12px;color:#8FA39A;transition:color .25s}
-.qz-step::before{content:'';flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #5E766C;transition:background .25s,border-color .25s}
-.qz-step.is-done{color:#F7F4EF}
-.qz-step.is-done::before{background:#F2A981;border-color:#F2A981}
-.is-landing .qz-progress,.is-landing #tf{display:none}
-.is-landing .qz-body{justify-content:flex-start;max-width:1040px;gap:36px}
-.is-landing .qz-head,.is-landing .qz-foot{max-width:1040px}
-.qz-landing{display:flex;flex-direction:column;gap:36px}
-.qz-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
-.qz-photo{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:76% center;border-radius:28px}
-.qz-start{display:inline-flex;align-items:center;gap:14px;min-height:64px;padding:0 34px;border:0;border-radius:999px;background:#F2A981;color:#1C2420;font:inherit;font-weight:700;font-size:20px;cursor:pointer;transition:transform .15s,background .15s}
-.qz-start:hover{background:#F6B893}
-.qz-start:active{transform:scale(.98)}
-.qz-start:focus-visible,.qz-chip:focus-visible{outline:3px solid #F7F4EF;outline-offset:3px}
-.qz-points{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.qz-points li{display:flex;flex-direction:column;gap:6px;padding:20px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16)}
-.qz-points strong{font-size:18px}
-.qz-points span{color:#C5D1CA;font-size:15px}
-.qz-chip{min-height:48px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#F7F4EF;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
-.qz-chip:hover{border-color:#F2A981;background:rgba(255,255,255,.08)}
+.quiz-stage .tf-opt[aria-pressed="true"]{background:#17302A;border-color:#17302A;color:#F7F4EF}
+.quiz-stage .tf-opt[aria-pressed="true"] small,.quiz-stage .tf-opt[aria-pressed="true"] span[aria-hidden]{color:#F7F4EF!important}
+.qz-step{display:flex;align-items:center;gap:12px;color:#8A948E;transition:color .25s}
+.qz-step::before{content:'';flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #C5D1CA;transition:background .25s,border-color .25s}
+.qz-step.is-done{color:#1C2420}
+.qz-step.is-done::before{background:#17302A;border-color:#17302A}
+#qz-side{display:none}
 .qz-running .qz-below{display:none!important}
-@media (max-width:820px){.qz-hero{grid-template-columns:1fr;gap:26px}.qz-photo{aspect-ratio:16/11}.qz-points{grid-template-columns:1fr}}
+@media (min-width:980px){
+body.qz-running .quiz-stage:not(.is-result){margin-left:44vw}
+body.qz-running #qz-side{display:block;position:fixed;left:0;top:0;bottom:0;width:44vw;background:#0C1512;color:#F7F4EF;overflow:hidden}
+#qz-side img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
+#qz-side::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,14,12,.88) 0%,rgba(8,14,12,.2) 50%,rgba(8,14,12,.3) 100%)}
+#qz-side div{position:absolute;z-index:1;left:36px;right:36px;bottom:36px;display:flex;flex-direction:column;gap:8px}
+#qz-side strong{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#F2A981}
+#qz-side p{margin:0;font-size:20px;line-height:1.35;font-weight:600;max-width:460px}
+.quiz-stage.is-result~#qz-side{display:none!important}
+}
+@media (max-width:820px){.lp-sec{padding:64px 0}.lp-split{grid-template-columns:1fr;gap:32px}.lp-ways{grid-template-columns:1fr}.lp-way{min-height:300px}.lp-steps{grid-template-columns:1fr;gap:28px}.lp-steps::before{display:none}.lp-how{padding:64px 16px}.lp-how-card{padding:40px 22px}.lp-trust{justify-content:flex-start;gap:8px 22px;font-size:14px}.lp-chip{font-size:16px}#quiz-sticky span{display:none}#quiz-sticky{padding:8px}}
 @keyframes qz-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #tf-q.qz-in>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
 #tf-q.qz-in [role=group]>*{animation:qz-in .4s cubic-bezier(.2,.7,.2,1) both}
@@ -92,6 +163,97 @@ h1,h2,h3,.logo{font-family:var(--display)}
 
 <a class="skip" href="#main">Skip to content</a>
 <main id="main">
+<div id="quiz-landing" class="lp">
+<section class="lp-hero">
+<img src="/assets/img/quiz/hero.webp" alt="" width="896" height="1120" fetchpriority="high">
+<header class="lp-nav">
+<a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
+<button type="button" data-quiz-start class="qz-start is-light">Start the quiz</button>
+</header>
+<div class="lp-hero-main">
+<span class="lp-badge"><i></i>Blood tests without the referral</span>
+<h1>Stop guessing.<span>See your numbers.</span></h1>
+<p>Blood tests from $99, matched to your goals and your budget, with every result reviewed by an Australian doctor.</p>
+<div class="lp-cta"><button type="button" data-quiz-start id="quiz-start" class="qz-start is-light">Find my test<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+<p data-if="quizHomeVisitIncludedFrom" style="font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #DDE4DF">Terms</a></p>
+</div>
+<ul class="lp-trust">
+<li>No referral needed</li>
+<li>NATA-accredited laboratories</li>
+<li>Doctor-reviewed report</li>
+<li>2,000+ collection centres</li>
+<li>Nurse visits at home or work</li>
+</ul>
+</section>
+
+<section class="lp-sec" style="background: #F7F4EF">
+<div class="lp-wrap lp-center">
+<h2>Know your body.<span>Start with what matters to you.</span></h2>
+<p class="lp-lead">Choose an area and we will match you to a test in five questions.</p>
+<div class="lp-chips"><button type="button" data-quiz-start data-goal="general" class="lp-chip"><img src="/assets/img/heroes/health-check-1200.webp" alt="" width="48" height="48" loading="lazy">Overall health</button><button type="button" data-quiz-start data-goal="hormones" class="lp-chip"><img src="/assets/img/heroes/men-hormones-1200.webp" alt="" width="48" height="48" loading="lazy">Hormones</button><button type="button" data-quiz-start data-goal="performance" class="lp-chip"><img src="/assets/img/heroes/performance-1200.webp" alt="" width="48" height="48" loading="lazy">Training and performance</button><button type="button" data-quiz-start data-goal="thyroid" class="lp-chip"><img src="/assets/img/heroes/thyroid-1200.webp" alt="" width="48" height="48" loading="lazy">Thyroid</button><button type="button" data-quiz-start data-goal="vitamins" class="lp-chip"><img src="/assets/img/heroes/vitamins-1200.webp" alt="" width="48" height="48" loading="lazy">Vitamins and iron</button><button type="button" data-quiz-start data-goal="sexual" class="lp-chip"><img src="/assets/img/heroes/discreet-kit-1200.webp" alt="" width="48" height="48" loading="lazy">Sexual health</button><button type="button" data-quiz-start data-goal="longevity" class="lp-chip"><img src="/assets/img/heroes/mens-50s-1200.webp" alt="" width="48" height="48" loading="lazy">Long-term health</button></div>
+<div class="lp-cta"><button type="button" data-quiz-start class="qz-start">Find my test<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+</div>
+</section>
+
+<section class="lp-how">
+<img src="/assets/img/hero-1200.webp" alt="" width="1200" height="678" loading="lazy">
+<div class="lp-how-card lp-center">
+<span class="lp-tag">How it works</span>
+<h2>From question to answer<span>in four steps.</span></h2>
+<ol class="lp-steps">
+<li><b>Step 1</b><strong>Take the quiz</strong>Five questions about your goals and budget.</li>
+<li><b>Step 2</b><strong>Order online</strong>Your pathology request form is issued with your order. No GP visit is needed.</li>
+<li><b>Step 3</b><strong>Get collected your way</strong>Walk in to a partner collection centre, or a registered nurse comes to you.</li>
+<li><b>Step 4</b><strong>Receive your report</strong>An Australian doctor reviews your results, and your report is emailed to you.</li>
+</ol>
+<div class="lp-cta"><button type="button" data-quiz-start class="qz-start is-light">Get started<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+</div>
+</section>
+
+<section class="lp-sec" style="background: #FFFFFF">
+<div class="lp-wrap lp-split">
+<div style="display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+<span class="lp-tag" style="color: #A4502E">Your report</span>
+<h2>Every result,<span>made clear.</span></h2>
+<p class="lp-lead">No more wondering what the numbers mean, or whether anyone looked at them.</p>
+<ul class="lp-ticks">
+<li>Each result shown against its reference range</li>
+<li>Reviewed by an Australian doctor</li>
+<li>Emailed to you, and yours to share with any GP</li>
+</ul>
+<div class="lp-cta" style="align-items: flex-start"><button type="button" data-quiz-start class="qz-start">Find my test<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div class="lp-report" role="img" aria-label="A sample report listing five results, each shown as a marker on a reference range bar">
+<header><strong>Your results</strong><span>Reviewed by a doctor</span></header>
+<div class="lp-row"><div><span>Testosterone</span><span>18.4 <small>nmol/L</small></span></div><div class="lp-bar"><i style="left: 25%; width: 50%"></i><b style="left: 52%"></b></div></div><div class="lp-row"><div><span>TSH</span><span>2.1 <small>mIU/L</small></span></div><div class="lp-bar"><i style="left: 20%; width: 50%"></i><b style="left: 40%"></b></div></div><div class="lp-row"><div><span>HbA1c</span><span>5.2 <small>%</small></span></div><div class="lp-bar"><i style="left: 15%; width: 45%"></i><b style="left: 42%"></b></div></div><div class="lp-row"><div><span>LDL cholesterol<em>Above range</em></span><span>3.9 <small>mmol/L</small></span></div><div class="lp-bar"><i style="left: 10%; width: 52%"></i><b class="hi" style="left: 74%"></b></div></div><div class="lp-row"><div><span>Ferritin</span><span>96 <small>µg/L</small></span></div><div class="lp-bar"><i style="left: 18%; width: 62%"></i><b style="left: 36%"></b></div></div>
+</div>
+<p class="lp-fine">Sample report with illustrative values. Results are for information and are not a medical diagnosis.</p>
+</div>
+</div>
+</section>
+
+<section class="lp-sec" style="background: #E8EDE6">
+<div class="lp-wrap lp-center">
+<h2>One collection.<span>As much or as little as you need.</span></h2>
+<p class="lp-lead">Panels from $99, or build your own from single tests.</p>
+<ul class="lp-menu"><li>Testosterone</li><li>Thyroid: TSH, T3 and T4</li><li>Cholesterol and lipids</li><li>HbA1c</li><li>Fasting insulin</li><li>Iron studies</li><li>Vitamin D</li><li>Vitamin B12</li><li>Liver function</li><li>Kidney function</li><li>Cortisol</li><li>Oestradiol</li><li>Progesterone</li><li>PSA</li><li>Full blood count</li><li>CRP</li><li>Apo B</li><li>Lp(a)</li><li>STI screen</li></ul>
+<div class="lp-cta"><button type="button" data-quiz-start class="qz-start">Get my recommended test<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+</div>
+</section>
+
+<section class="lp-sec" style="background: #F7F4EF">
+<div class="lp-wrap lp-center">
+<h2>Tested where it suits you.<span>Your choice at checkout.</span></h2>
+<div class="lp-ways">
+<div class="lp-way"><img src="/assets/img/quiz/centre.webp" alt="A collector talking with a seated woman in a collection room" width="896" height="1120" loading="lazy"><strong>Walk in near you</strong><span>2,000+ partner collection centres across Australia, at no extra fee.</span></div>
+<div class="lp-way"><img src="/assets/img/heroes/area-nurse-1200.webp" alt="A nurse in green scrubs walking along a suburban street with a kit bag" width="1200" height="1500" loading="lazy"><strong>Or a nurse comes to you</strong><span>A registered nurse at your home or workplace, {{homeVisitAddOnFee}} extra.</span></div>
+</div>
+<p class="lp-fine">Images are illustrative.</p>
+<div class="lp-cta"><button type="button" data-quiz-start class="qz-start">Find my test<span aria-hidden="true">→</span></button><small>Takes 60 seconds</small></div>
+</div>
+</section>
+</div>
 <div id="quiz-stage" class="quiz-stage is-landing">
 <header class="qz-head">
 <a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
@@ -99,41 +261,13 @@ h1,h2,h3,.logo{font-family:var(--display)}
 </header>
 <div class="qz-progress">
 <button type="button" id="tf-back" class="tf-link" hidden aria-label="Back to the previous question">← Back</button>
-<div class="qz-track"><div id="tf-bar" style="height: 100%; width: 20%; background: #F2A981; border-radius: 999px; transition: width 0.35s cubic-bezier(.2,.7,.2,1)"></div></div>
+<div class="qz-track"><div id="tf-bar" style="height: 100%; width: 20%; background: #17302A; border-radius: 999px; transition: width 0.35s cubic-bezier(.2,.7,.2,1)"></div></div>
 <span id="tf-step" style="font-size: 14px; font-weight: 600; white-space: nowrap">Question 1 of 5</span>
 </div>
 <div class="qz-body">
-<div id="quiz-landing" class="qz-landing">
-<div class="qz-hero">
-<div style="display: flex; flex-direction: column; gap: 18px">
-<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #F2A981">60-second quiz</span>
-<h1 style="margin: 0; font-weight: 700; font-size: clamp(42px, 8.5vw, 76px); line-height: 0.98; letter-spacing: -0.04em">Find the blood test built for you.</h1>
-<p style="margin: 0; font-size: 19px; color: #C5D1CA; max-width: 520px">Answer five questions. We recommend a test that fits your goals and your budget, and a registered nurse can collect it at your home or work.</p>
-<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-top: 6px">
-<button type="button" data-quiz-start id="quiz-start" class="qz-start">Start the quiz<span aria-hidden="true">→</span></button>
-<span style="font-size: 15px; font-weight: 600; color: #C5D1CA">5 questions · No referral needed · Doctor-reviewed report</span>
-</div>
-<p data-if="quizHomeVisitIncludedFrom" style="margin: 6px 0 0; align-self: flex-start; padding: 8px 14px; border-radius: 999px; background: rgba(242,169,129,0.16); border: 1px solid rgba(242,169,129,0.5); color: #F7F4EF; font-size: 14px; font-weight: 700">Quiz offer: nurse home visit included on panels from ${{quizHomeVisitIncludedFrom}} <a href="#offer-terms" style="font-weight: 400; text-decoration: underline; color: #C5D1CA">Terms</a></p>
-</div>
-<img src="/assets/img/hero-1200.webp" srcset="/assets/img/hero-1200.webp 1200w, /assets/img/hero.webp 2400w" sizes="(max-width: 900px) 100vw, 480px" alt="A registered nurse in green scrubs greeted at the front door of a home" width="1200" height="678" fetchpriority="high" class="qz-photo">
-</div>
-<ul class="qz-points">
-<li><strong>Matched to your goals</strong><span>Hormones, training, thyroid, vitamins or a general check.</span></li>
-<li><strong>Fits your budget</strong><span>Panels from $99, or a test built around what you want to spend.</span></li>
-<li><strong>A nurse comes to you</strong><span>At your home or workplace, or walk in to one of 2,000+ centres.</span></li>
-</ul>
-<div style="display: flex; flex-direction: column; gap: 14px">
-<strong style="font-size: 18px">What would you like to understand?</strong>
-<div style="display: flex; flex-wrap: wrap; gap: 10px">
-<button type="button" data-quiz-start class="qz-chip">My overall health</button><button type="button" data-quiz-start class="qz-chip">My hormones</button><button type="button" data-quiz-start class="qz-chip">Training and performance</button><button type="button" data-quiz-start class="qz-chip">My thyroid</button><button type="button" data-quiz-start class="qz-chip">Vitamins and iron</button>
-</div>
-</div>
-</div>
-
 <div id="tf" data-mode="funnel" data-home-fee="{{homeVisitAddOnFee}}">
 <div id="tf-q" aria-live="polite" style="display: flex; flex-direction: column; gap: 18px"><noscript><p>Please enable JavaScript to use the quiz, or <a href="/tests" style="text-decoration: underline">browse all tests</a>.</p></noscript></div>
 </div>
-
 <div id="tf-result" hidden style="display: flex; flex-direction: column; gap: 22px"></div>
 </div>
 <div class="qz-foot">
@@ -146,17 +280,7 @@ h1,h2,h3,.logo{font-family:var(--display)}
 <p>This quiz suggests tests based on your answers. It is not medical advice. If you have symptoms or a health concern, please speak with your doctor.</p>
 </div>
 </div>
-
-<section class="qz-below" style="background: #E8EDE6">
-<div style="max-width: 880px; margin: 0 auto; padding: 48px 24px; display: flex; flex-direction: column; gap: 24px">
-<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.03em">How it works</h2>
-<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
-<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 1</span><strong style="font-size: 18px">Take the quiz and order online</strong><span style="color: #4B5650">Your pathology request form is issued with your order. No GP visit is needed.</span></li>
-<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 2</span><strong style="font-size: 18px">Get collected your way</strong><span style="color: #4B5650">A registered nurse comes to your home or workplace, or you walk in to a partner collection centre.</span></li>
-<li style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 700; color: #A4502E">Step 3</span><strong style="font-size: 18px">Receive your report</strong><span style="color: #4B5650">An Australian doctor reviews your results, and your report is emailed to you with reference ranges.</span></li>
-</ol>
-</div>
-</section>
+<aside id="qz-side" aria-hidden="true"><img id="qz-side-img" src="/assets/img/heroes/health-check-1200.webp" alt=""><div><strong>Good to know</strong><p id="qz-side-fact">No referral is needed. Your pathology request form is issued with your order.</p></div></aside>
 
 <section class="qz-below" style="max-width: 880px; margin: 0 auto; padding: 48px 24px 8px; display: flex; flex-direction: column; gap: 14px">
 <h2 style="margin: 0 0 6px; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.03em">Common questions</h2>
@@ -176,7 +300,7 @@ h1,h2,h3,.logo{font-family:var(--display)}
 <p style="margin: 0">Questions? Call <a href="tel:{{phoneTel}}" style="text-decoration: underline">{{phone}}</a> or email <a href="mailto:{{email}}" style="text-decoration: underline">{{email}}</a>.</p>
 </section>
 <script type="application/json" id="tf-data"><!--@QUIZ_DATA--></script>
-<div id="quiz-sticky" hidden style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #17302A; border-top: 1px solid rgba(255,255,255,0.18); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; justify-content: center"><button type="button" data-quiz-start class="qz-start" style="width: 100%; max-width: 560px; justify-content: center">Start the quiz<span aria-hidden="true">→</span></button></div>
+<div id="quiz-sticky" hidden><span>Not sure which test?</span><button type="button" data-quiz-start class="qz-start">Start the quiz</button></div>
 </main>
 <footer style="background: #17302A; color: #C5D1CA">
 <div style="max-width: 880px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; font-size: 13px">

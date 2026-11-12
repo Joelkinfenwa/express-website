@@ -13,7 +13,7 @@
   var homeFee = box.getAttribute('data-home-fee') || '';
   var FUNNEL = box.getAttribute('data-mode') === 'funnel';
   var HOME_FROM = FUNNEL && D.homeVisit != null ? (D.quizHomeFrom || 0) : 0;
-  var lead = null;
+  var lead = null, presetGoal = false;
   if (FUNNEL) window.epQuiz = function () { return { answers: A, lead: lead }; };
   function included(t) { return !!HOME_FROM && !t.builder && !t.homeOnly && t.price >= HOME_FROM; }
 
@@ -147,8 +147,19 @@
   var stage = document.getElementById('quiz-stage'), intro = document.getElementById('quiz-intro');
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function enter() { if (!FUNNEL || calm) return; qEl.classList.remove('qz-in'); void qEl.offsetWidth; qEl.classList.add('qz-in'); }
+  var SIDE = {
+    sex: ['heroes/health-check-1200.webp', 'No referral is needed. Your pathology request form is issued with your order.'],
+    goal: ['quiz/side-man.webp', 'Panels start at $99, and every test is also available on its own.'],
+    age: ['heroes/mens-50s-1200.webp', 'Your results are reviewed by an Australian doctor before your report is sent.'],
+    depth: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
+    budget: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
+    where: ['quiz/centre.webp', 'Walk in to one of 2,000+ partner collection centres, or have a registered nurse come to you.']
+  };
+  var sideImg = document.getElementById('qz-side-img'), sideFact = document.getElementById('qz-side-fact');
+  function side(id) { var x = SIDE[id]; if (!x || !sideImg) return; var src = '/assets/img/' + x[0]; if (sideImg.getAttribute('src') !== src) sideImg.setAttribute('src', src); sideFact.textContent = x[1]; }
   function render() {
     var q = Q[step];
+    if (FUNNEL) side(q.id);
     if (FUNNEL && intro) intro.hidden = step > 0;
     if (FUNNEL && stage) stage.classList.remove('is-result');
     bar.style.width = ((step + 1) / Q.length * 100) + '%';
@@ -170,6 +181,7 @@
   function next() {
     if (A.goal === 'sexual' && step === 1) { A.depth = A.depth || 'essential'; }
     step++;
+    if (presetGoal && Q[step] && Q[step].id === 'goal') { presetGoal = false; step++; }
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step++;
     if (step >= Q.length) return FUNNEL && !lead ? matching(gate) : show();
     render(); focusQ();
@@ -441,7 +453,9 @@
 
   // Funnel: a landing screen first; the quiz starts from any "Start the quiz" control (?start=1 skips it)
   var landing = document.getElementById('quiz-landing'), stickyStart = document.getElementById('quiz-sticky');
-  function startQuiz() {
+  function startQuiz(e) {
+    var g = e && e.currentTarget && e.currentTarget.getAttribute && e.currentTarget.getAttribute('data-goal');
+    if (g) { A.goal = g; presetGoal = true; }
     if (landing) landing.hidden = true;
     if (stickyStart) stickyStart.hidden = true;
     if (stage) stage.classList.remove('is-landing');
