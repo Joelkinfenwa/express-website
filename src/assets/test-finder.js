@@ -594,6 +594,8 @@
         try { localStorage.setItem('ep-lead-email', lead.email); if (lead.name) localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
+        // Meta drops most standard events on this dataset, so every lead is also sent as a custom event it does accept
+        if (window.fbq) window.fbq('trackCustom', 'QuizLead');
         if (window.epStep) window.epStep('3 Email given (lead)', { when: A.when || 'not asked' });
         // A separate Meta event for leads who want to be tested as soon as possible, so a campaign can optimise for them
         if (A.when === 'asap') { if (window.fbq) window.fbq('trackCustom', 'ReadyToBookLead'); if (window.epStep) window.epStep('3b Lead wants testing as soon as possible'); }

@@ -23,6 +23,8 @@
   window.epStep = function (name, data, meta, metaData) {
     try { if (window.va) window.va('event', { name: name, data: data || {} }); } catch (e) {}
     try { if (meta && window.fbq) window.fbq('track', meta, metaData || {}); } catch (e) {}
+    // The same step as a custom event: Meta filters most standard events on this dataset but accepts custom ones
+    try { var CUSTOM = { InitiateCheckout: 'CheckoutStarted', AddPaymentInfo: 'PaymentStarted' }; if (meta && CUSTOM[meta] && window.fbq) window.fbq('trackCustom', CUSTOM[meta], metaData || {}); } catch (e) {}
   };
 
   var toggle = document.querySelector('.nav-toggle');
