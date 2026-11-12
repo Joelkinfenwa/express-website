@@ -119,7 +119,7 @@ h1,h2,h3,.logo,.btn,button,input{font-family:var(--display)!important}
 .quiz-stage.is-landing{display:none}
 .quiz-stage.is-result{min-height:0}
 .qz-head,.qz-progress,.qz-body,.qz-foot{width:100%;max-width:640px;margin:0 auto;padding-left:24px;padding-right:24px}
-.is-result .qz-head,.is-result .qz-body,.is-result .qz-foot{max-width:880px}
+.is-result .qz-head,.is-result .qz-body,.is-result .qz-foot{max-width:1080px}
 .qz-head{padding-top:18px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .qz-progress{display:flex;align-items:center;gap:14px;min-height:44px}
 .is-result .qz-progress{display:none}
@@ -140,6 +140,39 @@ h1,h2,h3,.logo,.btn,button,input{font-family:var(--display)!important}
 .qz-step.is-done{color:#1C2420}
 .qz-step.is-done::before{background:#17302A;border-color:#17302A}
 #qz-side{display:none}
+.rs-hero{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);border-radius:28px;overflow:hidden;background:#17302A;color:#F7F4EF;box-shadow:0 30px 70px rgba(23,48,42,.18)}
+.rs-buy{padding:clamp(24px,3.6vw,40px);display:flex;flex-direction:column;gap:16px}
+.rs-pill{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;background:rgba(255,255,255,.12)}
+.rs-pill.is-peach{background:#F2A981;color:#1C2420}
+.rs-title{margin:0;font-weight:600;font-size:clamp(32px,4.4vw,46px);line-height:1.02;letter-spacing:-.035em}
+.rs-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin-top:4px}
+.rs-price strong{font-size:clamp(48px,6vw,64px);font-weight:600;letter-spacing:-.04em;line-height:1}
+.rs-price span{font-size:16px;color:#C5D1CA}
+.rs-save{align-self:flex-start;padding:8px 12px;border-radius:10px;background:rgba(242,169,129,.16);color:#F2A981;font-weight:700;font-size:14px}
+.rs-cta{display:flex;align-items:center;justify-content:center;gap:12px;min-height:62px;border-radius:14px;background:#F2A981;color:#1C2420;font-weight:700;font-size:19px;text-decoration:none;transition:background .15s,transform .15s}
+.rs-cta:hover{background:#F6B893;color:#1C2420}
+.rs-cta:active{transform:scale(.99)}
+.rs-assure{margin:4px 0 0;padding:16px 0 0;list-style:none;display:flex;flex-direction:column;gap:9px;font-size:15px;color:#DDE4DF;border-top:1px solid rgba(255,255,255,.16)}
+.rs-in{margin:10px;padding:clamp(20px,2.6vw,30px);border-radius:20px;background:#F7F4EF;color:#1C2420;display:flex;flex-direction:column;gap:6px}
+.rs-in-h{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#A4502E}
+.rs-group{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #DCE0D8}
+.rs-group:last-child{border-bottom:0;padding-bottom:0}
+.rs-group div{display:flex;flex-direction:column;gap:2px}
+.rs-group strong{font-size:17px}
+.rs-group div span{font-size:14px;line-height:1.45;color:#4B5650}
+.rs-ico{flex:none;width:38px;height:38px;border-radius:50%;background:#17302A;color:#F7F4EF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.rs-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.rs-card{display:flex;flex-direction:column;gap:6px;padding:22px;border-radius:20px;background:#FFFFFF;border:1px solid #DCE0D8}
+.rs-card span{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A4502E}
+.rs-card strong{font-size:22px;letter-spacing:-.02em;line-height:1.15}
+.rs-card p{margin:0;font-size:15px;color:#4B5650}
+.rs-steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.rs-steps li{display:flex;flex-direction:column;gap:6px;padding:22px;border-radius:20px;background:#E8EDE6}
+.rs-steps b{width:34px;height:34px;border-radius:50%;background:#17302A;color:#F7F4EF;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:6px}
+.rs-steps strong{font-size:19px;letter-spacing:-.02em}
+.rs-steps span{font-size:15px;color:#4B5650}
+.rs-report{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;padding:clamp(24px,4vw,44px);border-radius:28px;background:#FFFFFF;border:1px solid #DCE0D8;margin-top:12px}
+@media (max-width:860px){.rs-hero,.rs-report{grid-template-columns:1fr}.rs-3,.rs-steps{grid-template-columns:1fr}.rs-in{margin:0 10px 10px}}
 .qz-running .qz-below{display:none!important}
 @media (min-width:980px){
 body.qz-running .quiz-stage:not(.is-result){margin-left:44vw}
