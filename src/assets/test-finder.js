@@ -321,11 +321,48 @@
   }
   function nextSteps() {
     var steps = [
-      ['Book online today', 'Your pathology request form is issued with your order. No GP visit is needed.'],
-      [A.where === 'home' ? 'A nurse comes to you' : 'Walk in for your collection', A.where === 'home' ? 'A registered nurse collects at your home or workplace.' : 'Take your form to any of 2,000+ partner collection centres.'],
-      ['Receive your report', 'An Australian doctor reviews your results, and your report is emailed to you with reference ranges.']
+      ['Pay online', 'Your pathology request form arrives by email. No referral and no GP visit.'],
+      [A.where === 'home' ? 'A nurse comes to you' : 'Walk in to a collection centre', A.where === 'home' ? 'A registered nurse collects at your home or workplace, at a time you choose.' : 'Take your form to any of our 2,000+ partner collection centres.'],
+      ['Get your results by email', 'Reviewed by an Australian doctor, with every result shown against its reference range.']
     ];
     return el('ol', { class: 'rs-steps' }, steps.map(function (x, i) { return el('li', {}, [el('b', { text: String(i + 1) }), el('strong', { text: x[0] }), el('span', { text: x[1] })]); }));
+  }
+  // Postcode check for nurse home visits, from the same coverage list the checkout uses
+  function areaCheck() {
+    var out = el('p', { 'aria-live': 'polite', style: 'margin: 0; font-size: 16px; font-weight: 600; min-height: 24px' });
+    var input = el('input', { id: 'rs-pc', type: 'text', inputmode: 'numeric', maxlength: '4', autocomplete: 'postal-code', placeholder: 'Postcode', style: 'width: 130px; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #B9C2BA; font: inherit; background: #FFFFFF' });
+    var cov = null, asked = false;
+    function show() {
+      var pc = input.value.replace(/\D/g, '');
+      if (pc.length !== 4 || !cov) { out.textContent = ''; return; }
+      var ok = cov.metro.indexOf(pc) !== -1 || cov.regional.indexOf(pc) !== -1;
+      out.textContent = ok ? 'Yes. A registered nurse can come to you in ' + pc + (homeFee ? ' for ' + homeFee : '') + ', or you can walk in to a partner collection centre.'
+        : 'You can walk in to a partner collection centre. For a nurse visit in ' + pc + ', our team confirms availability after booking, with a full refund if we cannot arrange it.';
+      if (window.epTrack) window.epTrack('quiz_area_check', { covered: ok ? 'yes' : 'no' });
+    }
+    input.addEventListener('input', function () {
+      if (!asked) { asked = true; fetch('/assets/coverage.json').then(function (r) { return r.json(); }).then(function (j) { cov = j; show(); }).catch(function () {}); }
+      show();
+    });
+    return el('div', { style: 'display: flex; flex-direction: column; gap: 10px; padding: 22px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE0D8' }, [
+      el('label', { for: 'rs-pc', text: 'Can a nurse come to me?', style: H2 + '; font-size: 22px' }),
+      el('span', { text: 'Enter your postcode to check. You can always walk in to a partner collection centre instead.', style: 'font-size: 15px; color: #4B5650' }),
+      input, out
+    ]);
+  }
+  function quickAnswers() {
+    var qa = [
+      ['Do I need a referral?', 'No. We issue your pathology request form with your order.'],
+      ['Where do I go?', 'Any of our 2,000+ partner collection centres. Or a registered nurse can come to your home or workplace' + (homeFee ? ' for ' + homeFee : '') + '.'],
+      ['Do I need to fast?', 'Some tests need an 8 to 12 hour fast, with water only. Your confirmation email tells you exactly what applies to your test.'],
+      ['What do I receive?', 'A report by email, reviewed by an Australian doctor, with each result shown against its reference range. You can forward it to your GP.'],
+      ['Is it covered by Medicare?', 'No. The price shown is the full price, with doctor review included.'],
+      ['What if my collection cannot be arranged?', 'You receive a full refund.']
+    ];
+    return el('dl', { style: 'margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px' }, qa.map(function (x) {
+      return el('div', { style: 'display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 16px; background: #E8EDE6' }, [
+        el('dt', { text: x[0], style: 'font-weight: 700; font-size: 17px' }), el('dd', { text: x[1], style: 'margin: 0; font-size: 15px; color: #33403A' })]);
+    }));
   }
   function sampleReport() {
     var rows = [['Testosterone', '18.4', 'nmol/L', 25, 75, 52], ['TSH', '2.1', 'mIU/L', 20, 70, 40], ['HbA1c', '5.2', '%', 15, 60, 42], ['LDL cholesterol', '3.9', 'mmol/L', 10, 62, 74, 1]];
@@ -364,25 +401,29 @@
   }
   function showFunnel(p) {
     var first = lead && lead.name ? lead.name.split(' ')[0] : '';
-    resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 12px' }, [
-      el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px' }, [
-        el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', we' : 'We') + ' found your test', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }),
-        el('button', { type: 'button', class: 'tf-link', text: 'Start again', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; var b = document.getElementById('tf-sticky'); if (b) b.remove(); var intro = document.getElementById('quiz-intro'); if (intro) intro.hidden = false; render(); focusQ(); } })]),
-      el('ul', { 'aria-label': 'Your answers', style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, answerChips().map(function (c) {
-        return el('li', { text: c, style: 'padding: 5px 11px; border-radius: 999px; background: #E8EDE6; font-size: 14px; font-weight: 600' }); }))
-    ]));
+    resEl.appendChild(el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', we' : 'We') + ' found your test', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }));
     resEl.appendChild(mainCard(p[0]));
+    resEl.appendChild(el('h3', { text: 'How it works', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(nextSteps());
+    resEl.appendChild(areaCheck());
+    resEl.appendChild(el('h3', { text: 'Quick answers', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(quickAnswers());
+    resEl.appendChild(el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test, ' + money(total(p[0])), style: 'align-self: flex-start; min-height: 56px; padding: 0 30px; font-size: 18px' }));
+    resEl.appendChild(sampleReport());
     resEl.appendChild(el('h3', { text: 'Why this fits you', style: H2 + '; font-size: 24px; margin-top: 12px' }));
     resEl.appendChild(fitCards(info(p[0])));
-    resEl.appendChild(el('h3', { text: 'What happens next', style: H2 + '; font-size: 24px; margin-top: 12px' }));
-    resEl.appendChild(nextSteps());
-    resEl.appendChild(sampleReport());
-    if (p.length > 1) {
-      resEl.appendChild(el('h3', { text: 'Working to a different budget?', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    var ups = p.slice(1).filter(function (h) { return total(h) > total(p[0]); }), downs = p.slice(1).filter(function (h) { return total(h) <= total(p[0]); });
+    if (ups.length) {
+      resEl.appendChild(el('h3', { text: 'Want a fuller picture?', style: H2 + '; font-size: 24px; margin-top: 12px' }));
       var alts = el('div', { style: 'display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px' });
-      p.slice(1).forEach(function (h) { alts.appendChild(altCard(h, p[0])); });
+      ups.forEach(function (h) { alts.appendChild(altCard(h, p[0])); });
       resEl.appendChild(alts);
     }
+    downs.forEach(function (h) {
+      resEl.appendChild(el('p', { style: 'margin: 0; font-size: 15px; color: #4B5650' }, [
+        document.createTextNode('Prefer to spend less? '),
+        el('a', { href: href(h), text: info(h).title + ', ' + money(total(h)), style: 'font-weight: 600; text-decoration: underline' }), document.createTextNode('.')]));
+    });
     var g = PRIORITY[A.goal] || PRIORITY.general, own = (g[A.sex] || g.any || []).filter(function (s) { return ADD[s]; });
     resEl.appendChild(el('p', { style: 'margin: 0; padding: 20px 24px; border-radius: 22px; background: #E8EDE6; font-size: 16px' }, [
       el('strong', { text: 'We can make a test work for any budget. ' }),
@@ -391,6 +432,12 @@
     resEl.appendChild(el('p', { style: 'margin: 0; font-size: 14px; color: #5A645E' }, [
       document.createTextNode((lead && lead.sent ? 'We have emailed you a copy. ' : '') + 'Knowing your numbers gives you and your doctor a baseline to work from. '),
       HOME_FROM ? el('a', { href: '#offer-terms', text: 'Quiz offer terms', style: 'text-decoration: underline' }) : null, document.createTextNode(HOME_FROM ? ' apply.' : '')]));
+    resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 10px; padding-top: 8px; border-top: 1px solid #DCE0D8' }, [
+      el('span', { text: 'Your answers', style: 'font-size: 13px; font-weight: 700; color: #5A645E' }),
+      el('ul', { 'aria-label': 'Your answers', style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, answerChips().map(function (c) {
+        return el('li', { text: c, style: 'padding: 5px 11px; border-radius: 999px; background: #E8EDE6; font-size: 14px; font-weight: 600' }); })),
+      el('button', { type: 'button', class: 'tf-link', text: 'Start again', style: 'align-self: flex-start', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; var b = document.getElementById('tf-sticky'); if (b) b.remove(); var intro = document.getElementById('quiz-intro'); if (intro) intro.hidden = false; render(); focusQ(); } })
+    ]));
     // Order bar that stays in view once the main button has scrolled away
     var t = info(p[0]), cta = document.getElementById('tf-cta');
     var barEl = el('div', { id: 'tf-sticky', hidden: '', style: 'position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #FFFFFF; border-top: 1px solid #DCE0D8; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; justify-content: center' }, [
