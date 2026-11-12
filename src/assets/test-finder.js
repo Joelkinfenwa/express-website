@@ -109,6 +109,26 @@
     sexual: { any: [] }, // no single-test build: the STI Screen is the appropriate starting point
     longevity: { any: ['lipid-profile', 'hba1c', 'apo-b', 'crp', 'lp-a', 'fasting-insulin'] }
   };
+  // Timed result-page offer: $25 off tests of $200 or more if checkout starts within 15 minutes of the result.
+  // The deadline comes signed from the server and is checked again at checkout. Half of visitors see it (group a),
+  // so its effect on orders can be compared with the other half (group b).
+  var NOW_OFF = 25, NOW_MIN = 200, nowOffer = null, nowGroup = 'b';
+  try {
+    nowGroup = localStorage.getItem('ep-now-ab') || (Math.random() < 0.5 ? 'a' : 'b'); localStorage.setItem('ep-now-ab', nowGroup);
+    nowOffer = JSON.parse(localStorage.getItem('ep-now') || 'null');
+    if (nowOffer && Date.now() - nowOffer.t > 864e5) nowOffer = null; // one window per day
+  } catch (e) {}
+  if (/[?&]now=1/.test(location.search)) nowGroup = 'a'; else if (/[?&]now=0/.test(location.search)) nowGroup = 'b';
+  function nowLive() { return FUNNEL && nowGroup === 'a' && !!nowOffer && nowOffer.until > Date.now(); }
+  function nowFits(t) { return !!t && !t.homeOnly && t.price >= NOW_MIN; }
+  function nowOff(h) { return nowLive() && nowFits(info(h)) ? NOW_OFF : 0; }
+  function nowTake(j) {
+    if (nowGroup !== 'a' || nowOffer || !j || !j.x || !j.s) return false;
+    nowOffer = { x: j.x, s: j.s, until: Date.now() + (j.ttl || 900) * 1000, t: Date.now() };
+    try { localStorage.setItem('ep-now', JSON.stringify(nowOffer)); } catch (e) {}
+    return true;
+  }
+  function nowClock() { var ms = Math.max(0, (nowOffer ? nowOffer.until : 0) - Date.now()), m = Math.floor(ms / 60000), sec = Math.floor(ms / 1000) % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; }
   function homeAdd(t) { return A.where === 'home' && D.homeVisit && !t.homeOnly && !included(t) ? D.homeVisit : 0; }
   function total(h) { var t = info(h); return t ? t.price + homeAdd(t) : Infinity; }
   function custom(cap) {
@@ -237,9 +257,10 @@
   function money(n) { return '$' + (Math.round(n * 100) % 100 === 0 ? Math.round(n) : n.toFixed(2)); }
   function href(h) {
     var t = info(h);
-    if (t.builder) return '/checkout?add=' + t.slugs.join(',') + (A.where === 'home' ? '&home=1' : '');
+    var now = nowOff(h) ? '&offer=now&x=' + nowOffer.x + '&s=' + encodeURIComponent(nowOffer.s) : '';
+    if (t.builder) return '/checkout?add=' + t.slugs.join(',') + (A.where === 'home' ? '&home=1' : '') + now;
     if (t.homeOnly) return t.url;
-    return '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + '&offer=quiz';
+    return '/checkout?panel=' + encodeURIComponent(h) + (A.where === 'home' ? '&home=1' : '') + (now || '&offer=quiz');
   }
   function answerChips() {
     var out = [];
@@ -302,7 +323,10 @@
           el('span', { text: (lead ? 'One blood collection' : n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
         ]),
         save ? el('span', { class: 'rs-save', text: 'Save ' + money(save), style: 'font-size: 16px; padding: 7px 14px; border-radius: 999px' }) : null,
-        el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode('Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
+        nowOff(h) ? el('div', { class: 'rs-now', role: 'timer', style: 'display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 14px; background: #F7F4EF; color: #1C2420' }, [
+          el('strong', { style: 'font-size: 18px; line-height: 1.25' }, [document.createTextNode('Book in the next '), el('span', { class: 'rs-now-t', text: nowClock(), style: 'font-variant-numeric: tabular-nums; color: #A4502E' }), document.createTextNode(' and we take ' + money(NOW_OFF) + ' off.')]),
+          el('span', { text: 'You pay ' + money(tot - NOW_OFF) + ' instead of ' + money(tot) + '.', style: 'font-size: 15px; color: #4B5650' })]) : null,
+        el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode(nowOff(h) ? 'Book now for ' + money(tot - NOW_OFF) : 'Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
         el('span', { text: 'One payment. Secure checkout by Stripe.', style: 'font-size: 14px; color: #C5D1CA; text-align: center' }),
         el('ul', { class: 'rs-assure' }, assure.map(function (g) { return tick(g, true); }))
       ]),
@@ -416,7 +440,7 @@
     resEl.appendChild(areaCheck());
     resEl.appendChild(el('h3', { text: 'Quick answers', style: H2 + '; font-size: 24px; margin-top: 12px' }));
     resEl.appendChild(quickAnswers());
-    resEl.appendChild(el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test, ' + money(total(p[0])), style: 'align-self: flex-start; min-height: 56px; padding: 0 30px; font-size: 18px' }));
+    resEl.appendChild(el('a', { href: href(p[0]), class: 'btn btn-dark', text: nowOff(p[0]) ? 'Book now for ' + money(total(p[0]) - NOW_OFF) : 'Book this test, ' + money(total(p[0])), style: 'align-self: flex-start; min-height: 56px; padding: 0 30px; font-size: 18px' }));
     resEl.appendChild(sampleReport());
     resEl.appendChild(el('h3', { text: 'Why this fits you', style: H2 + '; font-size: 24px; margin-top: 12px' }));
     resEl.appendChild(fitCards(info(p[0])));
@@ -452,11 +476,23 @@
       el('div', { style: 'width: 100%; max-width: 832px; display: flex; align-items: center; justify-content: space-between; gap: 12px' }, [
         el('span', { style: 'display: flex; flex-direction: column; min-width: 0' }, [
           el('strong', { text: t.title, style: 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis' }),
-          el('span', { text: money(total(p[0])) + (included(t) && A.where === 'home' ? ' with home visit included' : ''), style: 'font-size: 14px; color: #4B5650' })]),
+          el('span', { style: 'font-size: 14px; color: #4B5650' }, nowOff(p[0]) ? [document.createTextNode(money(total(p[0]) - NOW_OFF) + ' for the next '), el('span', { class: 'rs-now-t', text: nowClock(), style: 'font-variant-numeric: tabular-nums; font-weight: 700; color: #A4502E' })] : [document.createTextNode(money(total(p[0])) + (included(t) && A.where === 'home' ? ' with home visit included' : ''))])]),
         el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test', style: 'flex: none' })])]);
     document.body.appendChild(barEl);
     if (cta && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { barEl.hidden = es[0].isIntersecting || resEl.hidden; }).observe(cta);
+    // Countdown for the timed offer. When it ends the page is redrawn at the standard price.
+    clearInterval(nowTick);
+    if (nowOff(p[0])) {
+      if (window.epTrack) window.epTrack('quiz_now_offer_shown', {});
+      nowTick = setInterval(function () {
+        if (resEl.hidden) return;
+        if (!nowLive()) { clearInterval(nowTick); reshow(); return; }
+        Array.prototype.forEach.call(document.querySelectorAll('.rs-now-t'), function (n) { n.textContent = nowClock(); });
+      }, 1000);
+    }
   }
+  var nowTick = 0;
+  function reshow() { var b = document.getElementById('tf-sticky'); if (b) b.remove(); show(); }
 
   // Funnel mode: a short beat while the recommendation is put together
   function matching(then) {
@@ -526,16 +562,19 @@
         kind: 'quiz', offer: 'quiz', page: location.pathname, name: lead.name, email: lead.email, company_website: form.company_website.value,
         collection: A.where === 'home' ? 'home' : 'centre',
         topic: 'Quiz funnel: ' + (p[0] ? info(p[0]).title : 'no match'),
-        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : ''),
+        message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nTimed offer: ' + (nowGroup === 'a' ? 'offer group' : 'control group (no offer)'),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
       }) }).then(function (r) {
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
         try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
-        r.json().then(function (j) { if (j && j.kl) klaviyoClient(j.kl, lead); }).catch(function () {});
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
+        return r.json().then(function (j) {
+          if (j && j.kl) klaviyoClient(j.kl, lead);
+          if (j && nowTake(j.now) && done) reshow(); // the result was already on screen: redraw it with the offer
+        }).catch(function () {});
       }).catch(function () {}).then(go);
     });
     qEl.appendChild(form);

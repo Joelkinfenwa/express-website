@@ -13,6 +13,10 @@
   var addTo = /^\d{4,8}$/.test(params.get('addto') || '') ? params.get('addto') : '';
   var cat = null, cov = null;
   function pct() { return offer === 'quiz10' && cat && cat.quizDiscount ? cat.quizDiscount : 0; }
+  // Timed result-page offer: $25 off tests of $200 or more until the signed deadline in the link (checked again by the server)
+  var NOW_OFF = 25, NOW_MIN = 200, nowX = Number(params.get('x') || 0), nowS = params.get('s') || '';
+  function nowOff(sub) { return offer === 'now' && nowX > Date.now() && sub >= NOW_MIN ? NOW_OFF : 0; }
+  function nowNote() { return '$' + NOW_OFF + ' offer applied. Ends at ' + new Date(nowX).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '.'; }
   function homeIncluded() { var p = cat && cat.panels[order.panel]; return offer === 'quiz' && !!p && !!cat.quizHomeFrom && p.price >= cat.quizHomeFrom && !!cat.homeVisit; }
   var radios = form.querySelectorAll('input[name="collect"]');
   if (params.get('home') === '1') radios[1].checked = true;
@@ -22,11 +26,13 @@
     if (!cat) return [];
     var out = [];
     if (order.type === 'panel') {
-      var p = cat.panels[order.panel]; if (p) out.push([p.title, pct() ? Math.round(p.price * (100 - pct())) / 100 : p.price, p.count + ' tests' + (pct() ? ' · ' + pct() + '% quiz offer applied' : '')]);
+      var p = cat.panels[order.panel]; if (p) out.push([p.title, nowOff(p.price) ? p.price - NOW_OFF : pct() ? Math.round(p.price * (100 - pct())) / 100 : p.price, p.count + ' tests' + (pct() ? ' · ' + pct() + '% quiz offer applied' : '') + (nowOff(p.price) ? ' · ' + nowNote() : '')]);
     } else {
       var chosen = cat.addons.filter(function (a) { return order.tests.indexOf(a.slug) !== -1; });
       var addOn = !!addTo;
-      if (chosen.length && cat.base && !addOn) out.push(['Build your own test fee', cat.base.price]);
+      var sub = (cat.base && !addOn ? cat.base.price : 0) + chosen.reduce(function (a, x) { return a + x.price; }, 0);
+      var off = !addOn && cat.base && cat.base.price >= NOW_OFF ? nowOff(sub) : 0;
+      if (chosen.length && cat.base && !addOn) out.push(['Build your own test fee', cat.base.price - off, off ? nowNote() : '']);
       chosen.forEach(function (a) { out.push([a.title, a.price, addOn ? 'Added to order #' + addTo + '. Use the email from that order.' : '']); });
     }
     if (out.length && home() && cat.homeVisit) out.push(homeIncluded() ? ['Home visit', 0, 'Included with your quiz offer'] : ['Home visit', cat.homeVisit.price]);
@@ -64,7 +70,14 @@
   Promise.all([
     fetch('/assets/catalog.json').then(function (r) { return r.json(); }),
     fetch('/assets/coverage.json').then(function (r) { return r.json(); }).catch(function () { return null; })
-  ]).then(function (res) { cat = res[0]; cov = res[1]; render(); }).catch(function () {
+  ]).then(function (res) {
+    cat = res[0]; cov = res[1]; render();
+    // When the timed offer runs out on this page, drop it and show the standard price straight away
+    if (offer === 'now') {
+      var endNow = function () { offer = ''; render(); $('co-status').removeAttribute('data-state'); $('co-status').textContent = 'The 15-minute offer has ended. The price shown is now the standard price.'; };
+      if (nowX <= Date.now()) { offer = ''; render(); } else setTimeout(endNow, Math.min(nowX - Date.now(), 2147483000));
+    }
+  }).catch(function () {
     $('co-status').setAttribute('data-state', 'error'); $('co-status').textContent = 'We could not load your order. Please refresh the page.';
   });
 
@@ -75,13 +88,14 @@
     if (!coverage()) { $('co-postcode').focus(); return; }
     var f = new FormData(form), patient = {};
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
-    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes'), src: window.epSrc ? window.epSrc() : '' };
+    var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes'), src: window.epSrc ? window.epSrc() : '', x: offer === 'now' ? nowX : undefined, s: offer === 'now' ? nowS : undefined };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
     if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
     fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (x.ok && x.j.url) { location.href = x.j.url; return; }
+        if (x.j.code === 'offer_ended') { offer = ''; render(); }
         throw new Error(x.j.error || 'Checkout failed');
       })
       .catch(function (err) {
