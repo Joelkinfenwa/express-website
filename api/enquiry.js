@@ -8,7 +8,7 @@ import { mint as mintNowOffer } from '../lib/now-offer.js';
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'offer', 'tests', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'timing', 'offer', 'tests', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
 const MAX = 4000;
 
 function clean(body) {
@@ -98,7 +98,9 @@ function quizEventProps(d, origin) {
     panel: h, panel_title: p.title, panel_price: p.price, panel_url: `${origin}/tests/${h}`,
     checkout_url: `${base}&offer=quiz`, home_visit_included: inc,
     discount_percent: pct, discount_price: pct ? Math.round(p.price * (100 - pct)) / 100 : p.price, discount_url: pct ? `${base}&offer=quiz10` : `${base}&offer=quiz`,
-    terms_url: `${origin}/quiz#offer-terms`
+    terms_url: `${origin}/quiz#offer-terms`,
+    // When they said they want to be tested: asap, weeks or looking. Used to rank leads; never a health detail.
+    ...(['asap', 'weeks', 'looking'].includes(d.timing) ? { timing: d.timing } : {})
   };
 }
 async function quizToKlaviyo(d, origin) {

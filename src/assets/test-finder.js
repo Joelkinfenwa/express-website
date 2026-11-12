@@ -46,12 +46,17 @@
   // Funnel: open on the question people care about, keep each one short, and say why it is asked
   if (FUNNEL) {
     var byId = {}; Q.forEach(function (q) { byId[q.id] = q; });
-    Q = [byId.goal, byId.sex, byId.age, byId.budget, byId.where];
+    // Asked last: how soon they want the test. It ranks leads and tells Meta which leads are ready to book.
+    byId.when = { id: 'when', q: 'When would you like to get tested?', why: 'So we can send you the right next step.', opts: [
+      ['asap', 'As soon as possible', 'This week or next'],
+      ['weeks', 'In the next few weeks', 'I want to plan it in'],
+      ['looking', 'Just looking for now', 'Send me the details']] };
+    Q = [byId.goal, byId.sex, byId.age, byId.budget, byId.where, byId.when];
     byId.goal.q = 'What do you want answered?'; byId.goal.why = 'Pick the one that matters most. You can add more later.';
     byId.sex.q = 'Is the test for a man or a woman?'; byId.sex.why = 'Some panels differ between men and women.';
     byId.age.q = 'How old are you?'; byId.age.why = 'The tests worth doing change with age.';
     byId.budget.q = 'What would you like to spend?'; byId.budget.why = 'We fit the recommendation to your budget. Panels start at $99.';
-    byId.where.q = 'Where would you like your blood taken?'; byId.where.why = 'Last question. You can change this at checkout.';
+    byId.where.q = 'Where would you like your blood taken?'; byId.where.why = 'You can change this at checkout.';
   }
   var A = {}, step = 0;
 
@@ -186,7 +191,8 @@
     age: ['heroes/mens-50s.webp', 'Your results are reviewed by an Australian doctor before your report is sent.'],
     depth: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
     budget: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
-    where: ['quiz/centre.webp', 'Walk in to one of 2,000+ partner collection centres, or have a registered nurse come to you.']
+    where: ['quiz/centre.webp', 'Walk in to one of 2,000+ partner collection centres, or have a registered nurse come to you.'],
+    when: ['heroes/health-check.webp', 'Your pathology request form is issued with your order, so you can go straight to collection.']
   };
   var sideImg = document.getElementById('qz-side-img'), sideFact = document.getElementById('qz-side-fact');
   function side(id) { var x = SIDE[id]; if (!x || !sideImg) return; var src = '/assets/img/' + x[0]; if (sideImg.getAttribute('src') !== src) sideImg.setAttribute('src', src); sideFact.textContent = x[1]; }
@@ -569,7 +575,8 @@
       fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         kind: 'quiz', offer: 'quiz', page: location.pathname, name: lead.name, email: lead.email, company_website: form.company_website.value,
         collection: A.where === 'home' ? 'home' : 'centre',
-        topic: 'Quiz funnel: ' + (p[0] ? info(p[0]).title : 'no match'),
+        timing: A.when || '',
+        topic: 'Quiz funnel' + (A.when === 'asap' ? ' (READY NOW)' : A.when === 'weeks' ? ' (next few weeks)' : A.when === 'looking' ? ' (just looking)' : '') + ': ' + (p[0] ? info(p[0]).title : 'no match'),
         message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nTimed offer: ' + (nowGroup === 'a' ? 'offer group' : 'control group (no offer)'),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
       }) }).then(function (r) {
@@ -579,7 +586,9 @@
         try { localStorage.setItem('ep-lead-email', lead.email); if (lead.name) localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
-        if (window.epStep) window.epStep('3 Email given (lead)');
+        if (window.epStep) window.epStep('3 Email given (lead)', { when: A.when || 'not asked' });
+        // A separate Meta event for leads who want to be tested as soon as possible, so a campaign can optimise for them
+        if (A.when === 'asap') { if (window.fbq) window.fbq('trackCustom', 'ReadyToBookLead'); if (window.epStep) window.epStep('3b Lead wants testing as soon as possible'); }
         return r.json().then(function (j) {
           if (j && j.kl) klaviyoClient(j.kl, lead);
           if (j && nowTake(j.now) && done) reshow(); // the result was already on screen: redraw it with the offer
