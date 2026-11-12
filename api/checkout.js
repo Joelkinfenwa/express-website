@@ -52,7 +52,7 @@ export default async function handler(req, res) {
 
   // Quiz funnel offers (never combined): 'quiz' includes the home visit on panels at or above
   // PRICES.quizHomeFrom; 'quiz10' takes PRICES.quizDiscount percent off the panel.
-  const offer = type === 'panel' ? str(body.offer, 12) : '';
+  const offer = type === 'panel' || type === 'builder' ? str(body.offer, 12) : '';
   let offerNote = '';
 
   // Build line items from server-side prices only
@@ -71,7 +71,10 @@ export default async function handler(req, res) {
     const slugs = [...new Set((Array.isArray(body.tests) ? body.tests : []).map((s) => str(s, 60)))].slice(0, 60);
     const chosen = slugs.map((s) => PRICES.addons[s]).filter(Boolean);
     if (!chosen.length) return res.status(400).json({ error: 'Please choose at least one test.' });
-    if (PRICES.builderFee) add('Build your own test fee', PRICES.builderFee, 'Combines your chosen tests into one collection and one report.');
+    // Temporary (November 2026): glucose add-on for a customer's existing order, without the base fee
+    const addOn = offer === 'addgl26' && chosen.every((t) => t.title === 'Glucose');
+    if (addOn) offerNote = 'Add-on to an existing order: base fee waived';
+    if (PRICES.builderFee && !addOn) add('Build your own test fee', PRICES.builderFee, 'Combines your chosen tests into one collection and one report.');
     for (const t of chosen) add(t.title, t.price);
   } else {
     add(`Home visit with your doctor's request form (${where})`, PRICES.ownForm[where], 'A registered nurse collects at your home or workplace.');

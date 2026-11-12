@@ -9,7 +9,7 @@
   var fmt0 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 0, maximumFractionDigits: 0 }), fmt2 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
   var fmt = { format: function (n) { return (Math.round(n * 100) % 100 === 0 ? fmt0 : fmt2).format(n); } };
   var order = { type: params.get('panel') ? 'panel' : 'builder', panel: params.get('panel') || '', tests: (params.get('add') || '').split(',').filter(Boolean) };
-  var offer = order.type === 'panel' ? (params.get('offer') || '') : '';
+  var offer = params.get('offer') || '';
   var cat = null, cov = null;
   function pct() { return offer === 'quiz10' && cat && cat.quizDiscount ? cat.quizDiscount : 0; }
   function homeIncluded() { var p = cat && cat.panels[order.panel]; return offer === 'quiz' && !!p && !!cat.quizHomeFrom && p.price >= cat.quizHomeFrom && !!cat.homeVisit; }
@@ -24,7 +24,8 @@
       var p = cat.panels[order.panel]; if (p) out.push([p.title, pct() ? Math.round(p.price * (100 - pct())) / 100 : p.price, p.count + ' tests' + (pct() ? ' · ' + pct() + '% quiz offer applied' : '')]);
     } else {
       var chosen = cat.addons.filter(function (a) { return order.tests.indexOf(a.slug) !== -1; });
-      if (chosen.length && cat.base) out.push(['Build your own test fee', cat.base.price]);
+      var addOn = offer === 'addgl26' && chosen.length && chosen.every(function (a) { return a.title === 'Glucose'; });
+      if (chosen.length && cat.base && !addOn) out.push(['Build your own test fee', cat.base.price]);
       chosen.forEach(function (a) { out.push([a.title, a.price]); });
     }
     if (out.length && home() && cat.homeVisit) out.push(homeIncluded() ? ['Home visit', 0, 'Included with your quiz offer'] : ['Home visit', cat.homeVisit.price]);
