@@ -291,9 +291,10 @@
         el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
         el('div', { class: 'rs-price' }, [
           el('strong', { text: money(tot) }),
-          el('span', { text: (n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') })
+          save ? el('s', { text: money(t.single + (tot - t.price)), 'aria-label': 'Usually ' + money(t.single + (tot - t.price)) + ' as single tests', style: 'font-size: 24px; color: #9DB0A6; text-decoration-thickness: 2px' }) : null,
+          el('span', { text: (n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
         ]),
-        save ? el('span', { class: 'rs-save', text: 'Save ' + money(save) + ' against ordering these tests one by one' }) : null,
+        save ? el('span', { class: 'rs-save', text: 'You save ' + money(save) + '. The same tests cost ' + money(t.single) + ' bought one at a time.' }) : null,
         el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode('Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
         el('span', { text: 'One payment. Secure checkout by Stripe.', style: 'font-size: 14px; color: #C5D1CA; text-align: center' }),
         el('ul', { class: 'rs-assure' }, assure.map(function (g) { return tick(g, true); }))
