@@ -43,6 +43,16 @@
     ['b300', '$150 to $300', 'A broader panel, most popular'],
     ['b450', '$300 to $450', 'Our detailed panels'],
     ['any', 'Show me the most complete option', 'The fullest picture we offer']] };
+  // Funnel: open on the question people care about, keep each one short, and say why it is asked
+  if (FUNNEL) {
+    var byId = {}; Q.forEach(function (q) { byId[q.id] = q; });
+    Q = [byId.goal, byId.sex, byId.age, byId.budget, byId.where];
+    byId.goal.q = 'What do you want answered?'; byId.goal.why = 'Pick the one that matters most. You can add more later.';
+    byId.sex.q = 'Is the test for a man or a woman?'; byId.sex.why = 'Some panels differ between men and women.';
+    byId.age.q = 'How old are you?'; byId.age.why = 'The tests worth doing change with age.';
+    byId.budget.q = 'What would you like to spend?'; byId.budget.why = 'We fit the recommendation to your budget. Panels start at $99.';
+    byId.where.q = 'Where would you like your blood taken?'; byId.where.why = 'Last question. You can change this at checkout.';
+  }
   var A = {}, step = 0;
 
   // [primary, alternative, alternative] by goal, sex and depth
@@ -148,9 +158,9 @@
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function enter() { if (!FUNNEL || calm) return; qEl.classList.remove('qz-in'); void qEl.offsetWidth; qEl.classList.add('qz-in'); }
   var SIDE = {
-    sex: ['heroes/health-check-1200.webp', 'No referral is needed. Your pathology request form is issued with your order.'],
+    sex: ['heroes/health-check.webp', 'No referral is needed. Your pathology request form is issued with your order.'],
     goal: ['quiz/side-man.webp', 'Panels start at $99, and every test is also available on its own.'],
-    age: ['heroes/mens-50s-1200.webp', 'Your results are reviewed by an Australian doctor before your report is sent.'],
+    age: ['heroes/mens-50s.webp', 'Your results are reviewed by an Australian doctor before your report is sent.'],
     depth: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
     budget: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
     where: ['quiz/centre.webp', 'Walk in to one of 2,000+ partner collection centres, or have a registered nurse come to you.']
@@ -163,11 +173,12 @@
     if (FUNNEL && intro) intro.hidden = step > 0;
     if (FUNNEL && stage) stage.classList.remove('is-result');
     bar.style.width = ((step + 1) / Q.length * 100) + '%';
-    stepEl.textContent = (FUNNEL ? 'Question ' : '') + (step + 1) + ' of ' + Q.length;
+    stepEl.textContent = FUNNEL && step === Q.length - 1 ? 'Last question' : (FUNNEL ? 'Question ' : '') + (step + 1) + ' of ' + Q.length;
     back.hidden = step === 0;
     qEl.innerHTML = '';
     var h = el('h2', { id: 'tf-h', tabindex: '-1', text: q.q, style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" });
     qEl.appendChild(h);
+    if (FUNNEL && q.why) qEl.appendChild(el('p', { text: q.why, style: 'margin: -6px 0 6px; font-size: 17px; color: #4B5650' }));
     var list = el('div', { style: 'display: flex; flex-direction: column; gap: 10px', role: 'group', 'aria-labelledby': 'tf-h' });
     q.opts.forEach(function (o) {
       var b = el('button', { type: 'button', class: 'tf-opt', 'aria-pressed': String(A[q.id] === o[0]), onclick: function () { A[q.id] = o[0]; if (FUNNEL && !calm) { b.setAttribute('aria-pressed', 'true'); setTimeout(next, 170); } else next(); } },
@@ -179,7 +190,7 @@
   }
   function focusQ() { var h = document.getElementById('tf-h'); if (!h) return; if (FUNNEL) { h.focus({ preventScroll: true }); window.scrollTo(0, 0); } else h.focus(); }
   function next() {
-    if (A.goal === 'sexual' && step === 1) { A.depth = A.depth || 'essential'; }
+    if (A.goal === 'sexual' && Q[step] && Q[step].id === 'goal') { A.depth = A.depth || 'essential'; }
     step++;
     if (presetGoal && Q[step] && Q[step].id === 'goal') { presetGoal = false; step++; }
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step++;
@@ -352,6 +363,17 @@
     if (kl.list) fetch(base + 'subscriptions' + q, { method: 'POST', headers: H, body: JSON.stringify({ data: { type: 'subscription', attributes: { custom_source: 'Test finder quiz', profile: { data: { type: 'profile', attributes: { email: who.email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } } } }, relationships: { list: { data: { type: 'list', id: kl.list } } } } }) }).catch(function () {});
   }
 
+  function teaser(p) {
+    var t = p[0] ? info(p[0]) : null; if (!t) return null;
+    var n = (t.markers || []).length, bits = [];
+    if (n) bits.push(n + (n === 1 ? ' test' : ' tests'));
+    bits.push('Matched to your goal and budget');
+    if (p.length > 1) bits.push((p.length - 1) + ' alternative' + (p.length > 2 ? 's' : ''));
+    return el('div', { class: 'qz-teaser' }, [
+      el('span', { class: 'qz-lock', 'aria-hidden': 'true', text: '✓' }),
+      el('div', {}, [el('strong', { class: 'qz-blur', 'aria-hidden': 'true', text: t.title }), el('span', { text: bits.join(' · ') })])
+    ]);
+  }
   function gate() {
     step = Q.length;
     bar.style.width = '100%'; stepEl.textContent = 'Done'; back.hidden = false;
@@ -360,12 +382,13 @@
     var inp = 'min-height: 54px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; width: 100%';
     var status = el('p', { class: 'form-status', role: 'status', 'aria-live': 'polite', style: 'margin: 0' });
     var form = el('form', { novalidate: '', style: 'display: flex; flex-direction: column; gap: 14px' }, [
-      el('h2', { id: 'tf-h', tabindex: '-1', text: 'Your recommendation is ready.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
-      el('p', { text: 'Where should we send a copy?', style: 'margin: 0; color: #4B5650; font-size: 17px' }),
+      el('h2', { id: 'tf-h', tabindex: '-1', text: 'We found your match.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
+      teaser(p),
+      el('p', { text: 'Where should we send it?', style: 'margin: 4px 0 0; color: #4B5650; font-size: 17px' }),
       el('label', { for: 'tf-name', class: 'sr-only', text: 'First name' }), el('input', { id: 'tf-name', name: 'name', required: '', autocomplete: 'given-name', placeholder: 'First name', style: inp }),
       el('label', { for: 'tf-email', class: 'sr-only', text: 'Email' }), el('input', { id: 'tf-email', name: 'email', type: 'email', required: '', autocomplete: 'email', inputmode: 'email', placeholder: 'Email', style: inp }),
       el('input', { name: 'company_website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true', style: 'position: absolute; left: -9999px; width: 1px; height: 1px' }),
-      el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my recommendation', style: 'min-height: 56px; font-size: 17px' }),
+      el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my match', style: 'min-height: 56px; font-size: 17px' }),
       status,
       el('p', { style: 'margin: 0; font-size: 13px; color: #5A645E' }, [
         document.createTextNode('We will email your recommendation and occasional offers from Express Pathology. You can unsubscribe at any time. See our '),
@@ -455,7 +478,7 @@
   var landing = document.getElementById('quiz-landing'), stickyStart = document.getElementById('quiz-sticky');
   function startQuiz(e) {
     var g = e && e.currentTarget && e.currentTarget.getAttribute && e.currentTarget.getAttribute('data-goal');
-    if (g) { A.goal = g; presetGoal = true; }
+    if (g) { A.goal = g; presetGoal = true; if (Q[0].id === 'goal') { step = 1; presetGoal = false; } }
     if (landing) landing.hidden = true;
     if (stickyStart) stickyStart.hidden = true;
     if (stage) stage.classList.remove('is-landing');
