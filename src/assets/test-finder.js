@@ -13,7 +13,7 @@
   var homeFee = box.getAttribute('data-home-fee') || '';
   var FUNNEL = box.getAttribute('data-mode') === 'funnel';
   var HOME_FROM = FUNNEL && D.homeVisit != null ? (D.quizHomeFrom || 0) : 0;
-  var lead = null;
+  var lead = null, presetGoal = false;
   if (FUNNEL) window.epQuiz = function () { return { answers: A, lead: lead }; };
   function included(t) { return !!HOME_FROM && !t.builder && !t.homeOnly && t.price >= HOME_FROM; }
 
@@ -43,6 +43,16 @@
     ['b300', '$150 to $300', 'A broader panel, most popular'],
     ['b450', '$300 to $450', 'Our detailed panels'],
     ['any', 'Show me the most complete option', 'The fullest picture we offer']] };
+  // Funnel: open on the question people care about, keep each one short, and say why it is asked
+  if (FUNNEL) {
+    var byId = {}; Q.forEach(function (q) { byId[q.id] = q; });
+    Q = [byId.goal, byId.sex, byId.age, byId.budget, byId.where];
+    byId.goal.q = 'What do you want answered?'; byId.goal.why = 'Pick the one that matters most. You can add more later.';
+    byId.sex.q = 'Is the test for a man or a woman?'; byId.sex.why = 'Some panels differ between men and women.';
+    byId.age.q = 'How old are you?'; byId.age.why = 'The tests worth doing change with age.';
+    byId.budget.q = 'What would you like to spend?'; byId.budget.why = 'We fit the recommendation to your budget. Panels start at $99.';
+    byId.where.q = 'Where would you like your blood taken?'; byId.where.why = 'Last question. You can change this at checkout.';
+  }
   var A = {}, step = 0;
 
   // [primary, alternative, alternative] by goal, sex and depth
@@ -147,16 +157,28 @@
   var stage = document.getElementById('quiz-stage'), intro = document.getElementById('quiz-intro');
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function enter() { if (!FUNNEL || calm) return; qEl.classList.remove('qz-in'); void qEl.offsetWidth; qEl.classList.add('qz-in'); }
+  var SIDE = {
+    sex: ['heroes/health-check.webp', 'No referral is needed. Your pathology request form is issued with your order.'],
+    goal: ['quiz/side-man.webp', 'Panels start at $99, and every test is also available on its own.'],
+    age: ['heroes/mens-50s.webp', 'Your results are reviewed by an Australian doctor before your report is sent.'],
+    depth: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
+    budget: ['quiz/side-food.webp', 'Tell us your budget and we will fit the recommendation to it.'],
+    where: ['quiz/centre.webp', 'Walk in to one of 2,000+ partner collection centres, or have a registered nurse come to you.']
+  };
+  var sideImg = document.getElementById('qz-side-img'), sideFact = document.getElementById('qz-side-fact');
+  function side(id) { var x = SIDE[id]; if (!x || !sideImg) return; var src = '/assets/img/' + x[0]; if (sideImg.getAttribute('src') !== src) sideImg.setAttribute('src', src); sideFact.textContent = x[1]; }
   function render() {
     var q = Q[step];
+    if (FUNNEL) side(q.id);
     if (FUNNEL && intro) intro.hidden = step > 0;
     if (FUNNEL && stage) stage.classList.remove('is-result');
     bar.style.width = ((step + 1) / Q.length * 100) + '%';
-    stepEl.textContent = (FUNNEL ? 'Question ' : '') + (step + 1) + ' of ' + Q.length;
+    stepEl.textContent = FUNNEL && step === Q.length - 1 ? 'Last question' : (FUNNEL ? 'Question ' : '') + (step + 1) + ' of ' + Q.length;
     back.hidden = step === 0;
     qEl.innerHTML = '';
     var h = el('h2', { id: 'tf-h', tabindex: '-1', text: q.q, style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" });
     qEl.appendChild(h);
+    if (FUNNEL && q.why) qEl.appendChild(el('p', { text: q.why, style: 'margin: -6px 0 6px; font-size: 17px; color: #4B5650' }));
     var list = el('div', { style: 'display: flex; flex-direction: column; gap: 10px', role: 'group', 'aria-labelledby': 'tf-h' });
     q.opts.forEach(function (o) {
       var b = el('button', { type: 'button', class: 'tf-opt', 'aria-pressed': String(A[q.id] === o[0]), onclick: function () { A[q.id] = o[0]; if (FUNNEL && !calm) { b.setAttribute('aria-pressed', 'true'); setTimeout(next, 170); } else next(); } },
@@ -168,8 +190,9 @@
   }
   function focusQ() { var h = document.getElementById('tf-h'); if (!h) return; if (FUNNEL) { h.focus({ preventScroll: true }); window.scrollTo(0, 0); } else h.focus(); }
   function next() {
-    if (A.goal === 'sexual' && step === 1) { A.depth = A.depth || 'essential'; }
+    if (A.goal === 'sexual' && Q[step] && Q[step].id === 'goal') { A.depth = A.depth || 'essential'; }
     step++;
+    if (presetGoal && Q[step] && Q[step].id === 'goal') { presetGoal = false; step++; }
     if (A.goal === 'sexual' && Q[step] && Q[step].id === 'depth') step++;
     if (step >= Q.length) return FUNNEL && !lead ? matching(gate) : show();
     render(); focusQ();
@@ -224,45 +247,102 @@
     return el('li', { style: 'display: flex; gap: 10px; align-items: flex-start' }, [
       el('span', { 'aria-hidden': 'true', text: '✓', style: 'flex: none; font-weight: 700; color: ' + (dark ? '#F2A981' : '#A4502E') }), el('span', { text: text })]);
   }
+  // Result page: markers grouped by what they tell you, so a long panel reads at a glance
+  var GROUPS = [
+    ['Hormones', /testosterone|shbg|sex hormone|luteinis|follicle|lh\b|fsh|oestradiol|prolactin|progesterone|dhea|igf|growth hormone|cortisol|amh|psa/i],
+    ['Thyroid', /tsh|\bt3\b|\bt4\b|thyro|tpo/i],
+    ['Heart and metabolism', /lipid|cholesterol|hdl|ldl|hba1c|insulin|glucose|apo ?b|lp\(a\)|crp|triglyc/i],
+    ['Blood, iron and vitamins', /blood count|fbc|esr|iron|ferritin|vitamin|b12|folate/i],
+    ['Liver, kidneys and general health', /biochem|liver|kidney|electrolyte|urea|mba/i]
+  ];
+  function grouped(markers) {
+    var out = GROUPS.map(function (g) { return { name: g[0], items: [] }; }), other = { name: 'Also included', items: [] };
+    (markers || []).forEach(function (m) {
+      for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][1].test(m)) { out[i].items.push(m); return; }
+      other.items.push(m);
+    });
+    return out.concat([other]).filter(function (g) { return g.items.length; });
+  }
   function mainCard(h) {
     var t = info(h), inc = included(t), home = A.where === 'home', tot = total(h), cap = CAP[A.budget] || Infinity;
-    var sub = '#C5D1CA', n = (t.markers || []).length || Number(t.count);
-    var gets = [
-      n + (n === 1 ? ' test' : ' tests') + ' from one collection',
-      'Your pathology request form, issued with your order. No referral or GP visit needed',
-      'A report reviewed by an Australian doctor, emailed to you with reference ranges',
-      home ? (inc ? 'A registered nurse comes to your home or workplace, included' + (homeFee ? ' (normally ' + homeFee + ')' : '') : 'A registered nurse comes to your home or workplace' + (homeAdd(t) ? ' (' + money(homeAdd(t)) + ')' : ''))
-           : 'Collection at any of 2,000+ partner centres' + (inc ? ', or a nurse at home included at checkout' : ''),
-      'Processed by a NATA-accredited laboratory'
-    ];
+    var n = (t.markers || []).length || Number(t.count);
     var badge = overBudget ? 'Closest to your budget' : cap !== Infinity ? 'Fits your budget' : 'Our most complete option';
-    return el('div', { id: 'tf-main', style: 'display: flex; flex-direction: column; gap: 16px; padding: clamp(24px, 4vw, 36px); border-radius: 28px; background: #17302A; color: #F7F4EF' }, [
-      el('div', { style: 'display: flex; flex-wrap: wrap; gap: 8px' }, [
-        el('span', { text: 'Our recommendation', style: 'font-size: 13px; font-weight: 700; color: #F2A981; padding: 6px 0' }),
-        el('span', { text: badge, style: 'padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.12)' }),
-        inc ? el('span', { text: 'Nurse home visit included', style: 'padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: #F2A981; color: #1C2420' }) : null
+    var why = (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '';
+    var save = t.single && t.single > t.price ? t.single - t.price : 0;
+    var assure = [
+      'No referral or GP visit. Your request form is issued with your order',
+      'Reviewed by an Australian doctor, emailed with reference ranges',
+      home ? (inc ? 'A registered nurse comes to you, included' + (homeFee ? ' (normally ' + homeFee + ')' : '') : 'A registered nurse comes to your home or workplace' + (homeAdd(t) ? ' (' + money(homeAdd(t)) + ')' : ''))
+           : 'Walk in to any of 2,000+ partner collection centres' + (inc ? ', or a nurse at home included at checkout' : ''),
+      'Full refund if we cannot arrange your collection'
+    ];
+    var groups = grouped(t.markers);
+    return el('div', { id: 'tf-main', class: 'rs-hero' }, [
+      el('div', { class: 'rs-buy' }, [
+        el('div', { style: 'display: flex; flex-wrap: wrap; gap: 8px' }, [
+          el('span', { class: 'rs-pill is-peach', text: 'Your match' }),
+          el('span', { class: 'rs-pill', text: badge }),
+          inc ? el('span', { class: 'rs-pill', text: 'Nurse home visit included' }) : null
+        ]),
+        el('h3', { text: t.title, class: 'rs-title' }),
+        el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
+        el('div', { class: 'rs-price' }, [
+          el('strong', { text: money(tot) }),
+          el('span', { text: (n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') })
+        ]),
+        save ? el('span', { class: 'rs-save', text: 'Save ' + money(save) + ' against ordering these tests one by one' }) : null,
+        el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode('Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
+        el('span', { text: 'One payment. Secure checkout by Stripe.', style: 'font-size: 14px; color: #C5D1CA; text-align: center' }),
+        el('ul', { class: 'rs-assure' }, assure.map(function (g) { return tick(g, true); }))
       ]),
-      el('h3', { text: t.title, style: H2 + '; font-size: clamp(30px, 5vw, 40px)' }),
-      el('p', { text: (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '', style: 'margin: 0; color: ' + sub + '; font-size: 17px' }),
-      el('div', { style: 'display: flex; flex-direction: column; gap: 10px' }, [
-        el('strong', { text: 'What is tested', style: 'font-size: 15px' }),
-        el('ul', { style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, (t.markers || []).map(function (m) {
-          return el('li', { text: m, style: 'padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.25); font-size: 14px' }); }))
+      el('div', { class: 'rs-in' }, [
+        el('strong', { text: 'What this test checks', class: 'rs-in-h' }),
+        el('div', {}, groups.map(function (g) {
+          return el('div', { class: 'rs-group' }, [
+            el('span', { class: 'rs-ico', 'aria-hidden': 'true', text: String(g.items.length) }),
+            el('div', {}, [el('strong', { text: g.name }), el('span', { text: g.items.join(', ') })])
+          ]);
+        }))
+      ])
+    ]);
+  }
+  function fitCards(t) {
+    var goal = (Q.filter(function (q) { return q.id === 'goal'; })[0].opts.filter(function (o) { return o[0] === A.goal; })[0] || [])[1] || 'Your goal';
+    var cap = CAP[A.budget] || Infinity, tot = total(picks()[0]);
+    var cards = [
+      ['Your goal', goal, 'This panel was chosen for what you told us you want answered.'],
+      ['Your budget', overBudget ? 'Closest we can get' : cap !== Infinity ? 'Within ' + money(cap) : 'The most complete', overBudget ? 'At ' + money(tot) + ', this is the nearest panel to your budget. Lower cost options are below.' : cap !== Infinity ? 'At ' + money(tot) + ', it sits inside the budget you set.' : 'You asked for the fullest picture we offer.'],
+      ['Your collection', A.where === 'home' ? 'At home or work' : 'At a collection centre', A.where === 'home' ? 'A registered nurse comes to you. You choose the time at checkout.' : 'Walk in to any of 2,000+ partner centres. You can switch to a nurse visit at checkout.']
+    ];
+    return el('div', { class: 'rs-3' }, cards.map(function (c) { return el('div', { class: 'rs-card' }, [el('span', { text: c[0] }), el('strong', { text: c[1] }), el('p', { text: c[2] })]); }));
+  }
+  function nextSteps() {
+    var steps = [
+      ['Book online today', 'Your pathology request form is issued with your order. No GP visit is needed.'],
+      [A.where === 'home' ? 'A nurse comes to you' : 'Walk in for your collection', A.where === 'home' ? 'A registered nurse collects at your home or workplace.' : 'Take your form to any of 2,000+ partner collection centres.'],
+      ['Receive your report', 'An Australian doctor reviews your results, and your report is emailed to you with reference ranges.']
+    ];
+    return el('ol', { class: 'rs-steps' }, steps.map(function (x, i) { return el('li', {}, [el('b', { text: String(i + 1) }), el('strong', { text: x[0] }), el('span', { text: x[1] })]); }));
+  }
+  function sampleReport() {
+    var rows = [['Testosterone', '18.4', 'nmol/L', 25, 75, 52], ['TSH', '2.1', 'mIU/L', 20, 70, 40], ['HbA1c', '5.2', '%', 15, 60, 42], ['LDL cholesterol', '3.9', 'mmol/L', 10, 62, 74, 1]];
+    return el('div', { class: 'rs-report' }, [
+      el('div', { style: 'display: flex; flex-direction: column; gap: 12px; align-items: flex-start' }, [
+        el('h3', { text: 'Your numbers, made clear', style: H2 + '; font-size: clamp(26px, 3.4vw, 36px)' }),
+        el('p', { text: 'Every result is shown against its reference range, so you can see at a glance what is in range and what is worth raising with your doctor.', style: 'margin: 0; color: #4B5650; font-size: 17px' }),
+        el('a', { href: href(picks()[0]), class: 'btn btn-dark', text: 'Book this test', style: 'min-height: 52px; padding: 0 26px' })
       ]),
-      el('div', { style: 'display: flex; flex-direction: column; gap: 10px' }, [
-        el('strong', { text: 'What you get', style: 'font-size: 15px' }),
-        el('ul', { style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; color: ' + sub }, gets.map(function (g) { return tick(g, true); }))
-      ]),
-      t.single ? el('p', { style: 'margin: 0; padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.08); font-size: 15px' }, [
-        document.createTextNode('These ' + n + ' tests ordered one by one through Build Your Own: '), el('s', { text: money(t.single) }),
-        document.createTextNode('. As this panel: '), el('strong', { text: money(t.price) }), document.createTextNode('.')]) : null,
-      el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px' }, [
-        el('span', { style: 'display: flex; flex-direction: column' }, [
-          el('span', { text: money(tot), style: "font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: 40px; letter-spacing: -0.03em; line-height: 1" }),
-          el('span', { text: home ? (inc ? 'Home visit included' : t.homeOnly ? 'Including home visit' : homeAdd(t) ? 'Including ' + money(homeAdd(t)) + ' home visit' : '') : 'One payment. Doctor review included', style: 'font-size: 14px; color: ' + sub })]),
-        el('a', { href: href(h), class: 'btn', id: 'tf-cta', text: 'Book this test', style: 'background: #F2A981; color: #1C2420; min-height: 56px; padding: 0 30px; font-size: 17px; flex: 1 1 200px' })
-      ]),
-      el('span', { text: 'Secure payment by Stripe. If we cannot arrange your collection, you receive a full refund.', style: 'font-size: 14px; color: ' + sub })
+      el('div', {}, [
+        el('div', { class: 'lp-report', role: 'img', 'aria-label': 'A sample report with four results, each shown on a reference range bar' }, [
+          el('header', {}, [el('strong', { text: 'Your results' }), el('span', { text: 'Reviewed by a doctor' })])
+        ].concat(rows.map(function (r) {
+          return el('div', { class: 'lp-row' }, [
+            el('div', {}, [el('span', {}, [document.createTextNode(r[0]), r[6] ? el('em', { text: 'Above range' }) : null]), el('span', {}, [document.createTextNode(r[1] + ' '), el('small', { text: r[2] })])]),
+            el('div', { class: 'lp-bar' }, [el('i', { style: 'left: ' + r[3] + '%; width: ' + (r[4] - r[3]) + '%' }), el('b', { class: r[6] ? 'hi' : '', style: 'left: ' + r[5] + '%' })])
+          ]);
+        }))),
+        el('p', { class: 'lp-fine', text: 'Sample report with illustrative values. Results are for information and are not a medical diagnosis.', style: 'margin-top: 10px' })
+      ])
     ]);
   }
   function altCard(h, main) {
@@ -283,14 +363,19 @@
     var first = lead && lead.name ? lead.name.split(' ')[0] : '';
     resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 12px' }, [
       el('div', { style: 'display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px' }, [
-        el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', here' : 'Here') + ' is the test for you', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }),
+        el('h2', { id: 'tf-res-h', tabindex: '-1', text: (first ? first + ', we' : 'We') + ' found your test', style: H2 + '; font-size: clamp(28px, 3.4vw, 40px)' }),
         el('button', { type: 'button', class: 'tf-link', text: 'Start again', onclick: function () { A = {}; step = 0; resEl.hidden = true; box.hidden = false; var b = document.getElementById('tf-sticky'); if (b) b.remove(); var intro = document.getElementById('quiz-intro'); if (intro) intro.hidden = false; render(); focusQ(); } })]),
       el('ul', { 'aria-label': 'Your answers', style: 'margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px' }, answerChips().map(function (c) {
         return el('li', { text: c, style: 'padding: 5px 11px; border-radius: 999px; background: #E8EDE6; font-size: 14px; font-weight: 600' }); }))
     ]));
     resEl.appendChild(mainCard(p[0]));
+    resEl.appendChild(el('h3', { text: 'Why this fits you', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(fitCards(info(p[0])));
+    resEl.appendChild(el('h3', { text: 'What happens next', style: H2 + '; font-size: 24px; margin-top: 12px' }));
+    resEl.appendChild(nextSteps());
+    resEl.appendChild(sampleReport());
     if (p.length > 1) {
-      resEl.appendChild(el('h3', { text: 'Working to a different budget?', style: H2 + '; font-size: 24px; margin-top: 8px' }));
+      resEl.appendChild(el('h3', { text: 'Working to a different budget?', style: H2 + '; font-size: 24px; margin-top: 12px' }));
       var alts = el('div', { style: 'display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px' });
       p.slice(1).forEach(function (h) { alts.appendChild(altCard(h, p[0])); });
       resEl.appendChild(alts);
@@ -340,6 +425,17 @@
     if (kl.list) fetch(base + 'subscriptions' + q, { method: 'POST', headers: H, body: JSON.stringify({ data: { type: 'subscription', attributes: { custom_source: 'Test finder quiz', profile: { data: { type: 'profile', attributes: { email: who.email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } } } }, relationships: { list: { data: { type: 'list', id: kl.list } } } } }) }).catch(function () {});
   }
 
+  function teaser(p) {
+    var t = p[0] ? info(p[0]) : null; if (!t) return null;
+    var n = (t.markers || []).length, bits = [];
+    if (n) bits.push(n + (n === 1 ? ' test' : ' tests'));
+    bits.push('Matched to your goal and budget');
+    if (p.length > 1) bits.push((p.length - 1) + ' alternative' + (p.length > 2 ? 's' : ''));
+    return el('div', { class: 'qz-teaser' }, [
+      el('span', { class: 'qz-lock', 'aria-hidden': 'true', text: '✓' }),
+      el('div', {}, [el('strong', { class: 'qz-blur', 'aria-hidden': 'true', text: t.title }), el('span', { text: bits.join(' · ') })])
+    ]);
+  }
   function gate() {
     step = Q.length;
     bar.style.width = '100%'; stepEl.textContent = 'Done'; back.hidden = false;
@@ -348,12 +444,13 @@
     var inp = 'min-height: 54px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420; width: 100%';
     var status = el('p', { class: 'form-status', role: 'status', 'aria-live': 'polite', style: 'margin: 0' });
     var form = el('form', { novalidate: '', style: 'display: flex; flex-direction: column; gap: 14px' }, [
-      el('h2', { id: 'tf-h', tabindex: '-1', text: 'Your recommendation is ready.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
-      el('p', { text: 'Where should we send a copy?', style: 'margin: 0; color: #4B5650; font-size: 17px' }),
+      el('h2', { id: 'tf-h', tabindex: '-1', text: 'We found your match.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
+      teaser(p),
+      el('p', { text: 'Where should we send it?', style: 'margin: 4px 0 0; color: #4B5650; font-size: 17px' }),
       el('label', { for: 'tf-name', class: 'sr-only', text: 'First name' }), el('input', { id: 'tf-name', name: 'name', required: '', autocomplete: 'given-name', placeholder: 'First name', style: inp }),
       el('label', { for: 'tf-email', class: 'sr-only', text: 'Email' }), el('input', { id: 'tf-email', name: 'email', type: 'email', required: '', autocomplete: 'email', inputmode: 'email', placeholder: 'Email', style: inp }),
       el('input', { name: 'company_website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true', style: 'position: absolute; left: -9999px; width: 1px; height: 1px' }),
-      el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my recommendation', style: 'min-height: 56px; font-size: 17px' }),
+      el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my match', style: 'min-height: 56px; font-size: 17px' }),
       status,
       el('p', { style: 'margin: 0; font-size: 13px; color: #5A645E' }, [
         document.createTextNode('We will email your recommendation and occasional offers from Express Pathology. You can unsubscribe at any time. See our '),
@@ -377,7 +474,7 @@
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
-        try { localStorage.setItem('ep-lead-email', lead.email); } catch (e) {}
+        try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         r.json().then(function (j) { if (j && j.kl) klaviyoClient(j.kl, lead); }).catch(function () {});
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
@@ -441,7 +538,9 @@
 
   // Funnel: a landing screen first; the quiz starts from any "Start the quiz" control (?start=1 skips it)
   var landing = document.getElementById('quiz-landing'), stickyStart = document.getElementById('quiz-sticky');
-  function startQuiz() {
+  function startQuiz(e) {
+    var g = e && e.currentTarget && e.currentTarget.getAttribute && e.currentTarget.getAttribute('data-goal');
+    if (g) { A.goal = g; presetGoal = true; if (Q[0].id === 'goal') { step = 1; presetGoal = false; } }
     if (landing) landing.hidden = true;
     if (stickyStart) stickyStart.hidden = true;
     if (stage) stage.classList.remove('is-landing');

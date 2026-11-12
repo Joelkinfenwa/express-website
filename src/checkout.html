@@ -17,30 +17,86 @@
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
+<style>
+/* Checkout: a focused page with no site navigation, the order always in view */
+body>div,body>div *{font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif!important}
+.co-head{max-width:1120px;margin:0 auto;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.co-head .co-safe{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#4B5650}
+.co-steps{margin:0;padding:0;list-style:none;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#8A948E}
+.co-steps li{display:flex;align-items:center;gap:8px}
+.co-steps li+li::before{content:'';width:28px;height:1px;background:#C5D1CA;margin-right:2px}
+.co-steps b{width:24px;height:24px;border-radius:50%;border:1.5px solid #C5D1CA;display:flex;align-items:center;justify-content:center;font-size:12px}
+.co-steps .is-done{color:#17302A}
+.co-steps .is-done b{background:#17302A;border-color:#17302A;color:#F7F4EF}
+.co-steps .is-now{color:#1C2420}
+.co-steps .is-now b{border-color:#17302A;color:#17302A}
+.co-wrap{max-width:1120px;margin:0 auto;padding:16px 24px 80px;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:40px;align-items:start}
+.co-main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.co-main h1{margin:6px 0 0;font-weight:600;font-size:clamp(34px,4.4vw,48px);line-height:1.04;letter-spacing:-.035em}
+#co-form{background:#FFFFFF;border:1px solid #DCE0D8;border-radius:24px;padding:clamp(20px,3.4vw,34px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;box-shadow:0 20px 50px rgba(23,48,42,.06)}
+#co-form>div{grid-column:span 3}
+#co-form>.co-third{grid-column:span 2}
+#co-form>.co-full,#co-form>fieldset,#co-form>p,#co-form>button,#co-form>span,#co-form>#co-visit{grid-column:1/-1!important}
+#co-form label,#co-form legend{font-size:13px!important;font-weight:600!important;color:#4B5650}
+#co-form input:not([type=radio]),#co-form select,#co-form textarea{min-height:52px!important;border:1px solid #D3D8D0!important;border-radius:12px!important;font-size:16px!important;transition:border-color .15s,box-shadow .15s;width:100%;box-sizing:border-box}
+#co-form input:not([type=radio]):focus,#co-form select:focus,#co-form textarea:focus{outline:0;border-color:#17302A!important;box-shadow:0 0 0 3px rgba(23,48,42,.12)}
+.co-sec{grid-column:1/-1!important;display:flex;flex-direction:column;gap:2px;padding-top:8px}
+.co-sec:not(:first-child){margin-top:10px;padding-top:22px;border-top:1px solid #E8EDE6}
+.co-sec strong{font-size:20px;letter-spacing:-.02em;color:#1C2420}
+.co-sec span{font-size:14px;color:#5A645E}
+#co-form fieldset{display:grid!important;grid-template-columns:1fr 1fr;gap:12px!important}
+#co-form fieldset legend{display:none}
+.co-opt{align-items:flex-start;padding:18px;border-radius:16px;transition:border-color .15s,box-shadow .15s}
+.co-opt strong{font-size:17px;color:#1C2420}
+.co-opt:has(input:checked){border-color:#17302A;background:#F7F4EF;box-shadow:0 0 0 1px #17302A}
+#co-submit{min-height:62px!important;border-radius:14px!important;font-size:18px!important;transition:background .15s,transform .15s}
+#co-submit:hover{background:#0F241F!important}
+#co-submit:active{transform:scale(.995)}
+.co-trust{grid-column:1/-1;margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;font-size:14px;font-weight:600;color:#4B5650}
+.co-trust li::before{content:'✓';margin-right:6px;color:#A4502E}
+.co-sum{position:sticky;top:20px;border-radius:24px;background:#17302A;color:#F7F4EF;padding:28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 70px rgba(23,48,42,.18)}
+.co-sum h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#F2A981}
+#co-lines{border-top:0!important}
+#co-lines li{border-bottom:1px solid rgba(255,255,255,.16)!important;padding:4px 0 16px!important}
+#co-lines li>span:first-child>span:first-child{font-size:22px;letter-spacing:-.02em;line-height:1.15}
+#co-lines li>span:first-child>span:last-child{color:#C5D1CA!important}
+#co-lines li+li>span:first-child>span:first-child{font-size:16px}
+#co-lines li+li{padding-top:12px!important}
+#co-total{font-size:44px!important;font-weight:600;letter-spacing:-.04em!important;line-height:1}
+.co-inc{margin:0;padding:16px 0 0;list-style:none;display:flex;flex-direction:column;gap:9px;font-size:15px;color:#DDE4DF;border-top:1px solid rgba(255,255,255,.16)}
+.co-inc li{display:flex;gap:10px}
+.co-inc li::before{content:'✓';color:#F2A981;font-weight:700}
+.co-sum a{color:#C5D1CA}
+.co-foot{max-width:1120px;margin:0 auto;padding:0 24px 40px;font-size:13px;color:#5A645E;display:flex;flex-direction:column;gap:8px}
+.co-foot p{margin:0}
+@media (max-width:920px){.co-wrap{grid-template-columns:1fr;gap:20px}.co-sum{position:static;order:-1;padding:22px}.co-inc{display:none}#co-total{font-size:34px!important}.co-steps span{display:none}.co-steps li.is-now span{display:inline}}
+@media (max-width:560px){#co-form>div,#co-form>.co-third{grid-column:1/-1}#co-form fieldset{grid-template-columns:1fr}.co-head .co-safe{display:none}}
+</style>
 <!--analytics-->
 </head>
 <body>
 <div style="font-family: 'Figtree', system-ui, sans-serif; color: #1C2420; background: #F7F4EF; font-size: 16px; line-height: 1.55">
 
 <a class="skip" href="#main">Skip to content</a>
-<header class="site-header">
-<nav aria-label="Main" class="nav">
+<header class="co-head">
 <a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
-<div class="nav-links" id="nav-links"><a href="/#how">At-home collection</a><a href="/tests">Blood tests</a><a href="/partners">Partners</a><a href="/about">About</a><a href="/prepare">Help</a></div>
-<div class="nav-actions"><a href="{{bookingUrl}}" class="btn btn-dark">Book a nurse</a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div>
-</nav>
+<ol class="co-steps" aria-label="Checkout progress"><li class="is-done"><b>✓</b><span>Your test</span></li><li class="is-now" aria-current="step"><b>2</b><span>Your details</span></li><li><b>3</b><span>Payment</span></li></ol>
+<a href="tel:{{phoneTel}}" class="co-safe">Questions? {{phone}}</a>
 </header>
 <main id="main">
-<section style="max-width: 1320px; margin: 0 auto; padding: 32px 24px 96px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
-<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
-<span style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #A4502E">Checkout</span>
-<h1 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.02; letter-spacing: -0.035em">Your details.</h1>
-<p style="margin: 0; color: #4B5650; font-size: 18px; max-width: 640px">These appear on your pathology request form, so please enter them exactly as they appear on your Medicare card or ID.</p>
-<form id="co-form" novalidate style="background: #FFFFFF; border: 1px solid #DCE0D8; border-radius: 28px; padding: clamp(22px, 4vw, 36px); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px">
-<div style="display: flex; flex-direction: column; gap: 6px"><label for="co-first" style="font-size: 14px; font-weight: 700">First name</label><input id="co-first" name="firstName" required autocomplete="given-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-last" style="font-size: 14px; font-weight: 700">Last name</label><input id="co-last" name="lastName" required autocomplete="family-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-dob" style="font-size: 14px; font-weight: 700">Date of birth</label><input id="co-dob" name="dob" type="date" required autocomplete="bday" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-sex" style="font-size: 14px; font-weight: 700">Sex</label><select id="co-sex" name="sex" required style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-email" style="font-size: 14px; font-weight: 700">Email</label><input id="co-email" name="email" type="email" required autocomplete="email" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-phone" style="font-size: 14px; font-weight: 700">Mobile</label><input id="co-phone" name="phone" type="tel" required autocomplete="tel" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="co-address" style="font-size: 14px; font-weight: 700">Street address</label><input id="co-address" name="address" required autocomplete="street-address" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-suburb" style="font-size: 14px; font-weight: 700">Suburb</label><input id="co-suburb" name="suburb" required autocomplete="address-level2" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-state" style="font-size: 14px; font-weight: 700">State</label><select id="co-state" name="state" required style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-postcode" style="font-size: 14px; font-weight: 700">Postcode</label><input id="co-postcode" name="postcode" required inputmode="numeric" maxlength="4" autocomplete="postal-code" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div></div>
-<fieldset style="grid-column: 1 / -1; margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px"><legend style="font-size: 14px; font-weight: 700; margin-bottom: 10px">How would you like to be tested?</legend>
+<section class="co-wrap">
+<div class="co-main">
+<h1>Almost there.</h1>
+<p style="margin: 0; color: #4B5650; font-size: 18px; max-width: 560px">Two minutes of details, then secure payment. Your pathology request form is issued as soon as you pay.</p>
+<form id="co-form" novalidate>
+<div class="co-sec"><strong>About you</strong><span>These appear on your request form, so enter them as shown on your Medicare card or ID.</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="co-first" style="font-size: 14px; font-weight: 700">First name</label><input id="co-first" name="firstName" required autocomplete="given-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-last" style="font-size: 14px; font-weight: 700">Last name</label><input id="co-last" name="lastName" required autocomplete="family-name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-dob" style="font-size: 14px; font-weight: 700">Date of birth</label><input id="co-dob" name="dob" type="date" required autocomplete="bday" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-sex" style="font-size: 14px; font-weight: 700">Sex</label><select id="co-sex" name="sex" required style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-email" style="font-size: 14px; font-weight: 700">Email</label><input id="co-email" name="email" type="email" required autocomplete="email" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-phone" style="font-size: 14px; font-weight: 700">Mobile</label><input id="co-phone" name="phone" type="tel" required autocomplete="tel" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div class="co-sec"><strong>Your address</strong><span>The laboratory needs this on your request form. Nothing is posted to you.</span></div>
+<div class="co-full" style="display: flex; flex-direction: column; gap: 6px"><label for="co-address" style="font-size: 14px; font-weight: 700">Street address</label><input id="co-address" name="address" required autocomplete="street-address" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-suburb" style="font-size: 14px; font-weight: 700">Suburb</label><input id="co-suburb" name="suburb" required autocomplete="address-level2" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-state" style="font-size: 14px; font-weight: 700">State</label><select id="co-state" name="state" required style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="co-postcode" style="font-size: 14px; font-weight: 700">Postcode</label><input id="co-postcode" name="postcode" required inputmode="numeric" maxlength="4" autocomplete="postal-code" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div></div>
+<div class="co-sec"><strong>How would you like to be tested?</strong><span>You can change this with us any time before your collection.</span></div>
+<fieldset style="margin: 0; padding: 0; border: 0"><legend style="font-size: 14px; font-weight: 700; margin-bottom: 10px">How would you like to be tested?</legend>
 <label class="co-opt"><input type="radio" name="collect" value="centre" checked><span><strong>Walk-in collection centre</strong><small>2,000+ partner centres, no extra fee</small></span></label>
 <label class="co-opt"><input type="radio" name="collect" value="home"><span><strong>Nurse at home or work</strong><small id="co-home-fee">A registered nurse comes to you</small></span></label>
 </fieldset>
@@ -49,38 +105,45 @@
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="co-date" style="font-size: 14px; font-weight: 700">Preferred date</label><input id="co-date" name="preferredDate" type="date" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="co-time" style="font-size: 14px; font-weight: 700">Preferred time</label><select id="co-time" name="preferredTime" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; color: #1C2420"><option>Early morning (before 9am)</option><option>Morning (9am to 12pm)</option><option>Afternoon (12pm to 5pm)</option><option>Any time</option></select></div>
 </div>
-<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="co-notes" style="font-size: 14px; font-weight: 700">Anything we should know? (optional)</label><textarea id="co-notes" name="notes" rows="2" maxlength="400" placeholder="Access notes or mobility needs" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
+<div class="co-full" style="display: flex; flex-direction: column; gap: 6px"><label for="co-notes" style="font-size: 14px; font-weight: 700">Anything we should know? (optional)</label><textarea id="co-notes" name="notes" rows="2" maxlength="400" placeholder="Access notes or mobility needs" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
 <p class="form-status" id="co-status" role="status" aria-live="polite"></p>
 <button type="submit" id="co-submit" style="grid-column: 1 / -1; min-height: 56px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer">Continue to secure payment</button>
-<span style="grid-column: 1 / -1; font-size: 14px; color: #5A645E; text-align: center">Payment is processed securely by Stripe. By continuing you agree to our <a href="/terms-of-service" style="text-decoration: underline">terms</a> and <a href="/refund-policy" style="text-decoration: underline">refund policy</a>.</span>
+<ul class="co-trust"><li>Secure payment by Stripe</li><li>Full refund if we cannot arrange your collection</li><li>Doctor-reviewed report</li></ul>
+<span style="font-size: 13px; color: #5A645E; text-align: center"> By continuing you agree to our <a href="/terms-of-service" style="text-decoration: underline">terms</a> and <a href="/refund-policy" style="text-decoration: underline">refund policy</a>.</span>
 </form>
 </div>
-<aside aria-label="Order summary" style="flex: 1 1 340px; min-width: 0; background: #E8EDE6; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px">
-<span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -0.02em">Your order</span>
-<ul id="co-lines" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; border-top: 1px solid #1C2420"></ul>
-<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 700">Total</span><span id="co-total" style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 34px; letter-spacing: -0.03em">$0</span></div>
-<a id="co-edit" href="/tests" style="font-weight: 700; text-decoration: underline; font-size: 15px">Change order</a>
+<aside aria-label="Order summary" class="co-sum">
+<h2>Your order</h2>
+<ul id="co-lines" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column"></ul>
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><span style="font-weight: 600; color: #C5D1CA">Total today</span><span id="co-total">$0</span></div>
+<ul class="co-inc">
+<li>Pathology request form issued with your order. No GP visit needed</li>
+<li>Results reviewed by an Australian doctor</li>
+<li>Report emailed to you with reference ranges</li>
+<li>Processed by a NATA-accredited laboratory</li>
+<li>Full refund if we cannot arrange your collection</li>
+</ul>
+<a id="co-edit" href="/tests" style="font-weight: 600; text-decoration: underline; font-size: 14px">Change order</a>
 </aside>
 </section>
 </main>
-<footer class="site-footer">
-<div class="footer-inner">
-<div class="footer-cols">
-<div class="footer-col"><span class="footer-brand">express<em>.</em></span><span>Mobile blood collection and pathology infrastructure across Australia.</span></div>
-<div class="footer-col"><strong>Patients</strong><a href="{{bookingUrl}}">Book a home visit</a><a href="/mobile-blood-collection">Areas we cover</a><a href="/tests">Blood tests</a><a href="/test-finder">Find my test</a><a href="/prepare">Preparing for your visit</a><a href="/collection-centres">Collection centres</a></div>
-<div class="footer-col"><strong>Partners</strong><a href="/partners">Partner with Express</a><a href="/telehealth">Telehealth</a><a href="/mens-health-clinics">Men's health</a><a href="/aged-care">Aged care</a><a href="/partners#integrate">Integration</a><a href="/partners#enquire">Partner enquiries</a></div>
-<div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/careers">Nurse careers</a><a href="/contact">Contact</a><a href="/privacy-policy">Privacy policy</a><a href="/terms-of-service">Terms of service</a><a href="/refund-policy">Refund policy</a></div>
-</div>
-<div class="footer-legal">
-<p>Express Pathology provides pathology collection and private testing services. Results are for informational purposes and do not constitute a medical diagnosis. Always consult a qualified healthcare professional to interpret your results.</p>
-<p>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span></p>
-</div>
-</div>
+<footer class="co-foot">
+<p>Express Pathology provides pathology collection and private testing services. Private tests ordered without a referral are not covered by Medicare. Results are for informational purposes and do not constitute a medical diagnosis.</p>
+<p>© 2026 Express Pathology<span data-if="abn"> · ABN {{abn}}</span> · <a href="/privacy-policy" style="text-decoration: underline">Privacy</a> · <a href="/terms-of-service" style="text-decoration: underline">Terms</a> · <a href="/refund-policy" style="text-decoration: underline">Refunds</a></p>
 </footer>
 
 
 </div>
 <script src="/assets/site.js" defer></script>
 <script src="/assets/checkout.js" defer></script>
+<script>
+// Carry the first name and email from the quiz so they are not typed twice
+(function () { try {
+  var e = localStorage.getItem('ep-lead-email'), n = localStorage.getItem('ep-lead-name');
+  var fe = document.getElementById('co-email'), fn = document.getElementById('co-first');
+  if (e && fe && !fe.value) fe.value = e;
+  if (n && fn && !fn.value) fn.value = n;
+} catch (x) {} })();
+</script>
 </body>
 </html>
