@@ -3,7 +3,7 @@ import { stripe } from '../lib/stripe.js';
 import { referralNumber } from '../lib/order-number.js';
 import PRICES from '../lib/price-index.mjs';
 import { klaviyoEvent, klaviyoSubscribe, klaviyoReady } from '../lib/klaviyo.js';
-import { mint as mintNowOffer } from '../lib/now-offer.js';
+import { mint as mintNowOffer, NOW_OFF, NOW_MIN } from '../lib/now-offer.js';
 // Vercel serverless function: receives home visit requests, partner enquiries and contact messages.
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
@@ -83,6 +83,70 @@ async function toPatient(d, origin) {
     body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: custom ? 'Your custom blood test from Express Pathology' : `Your recommended blood test: ${recs[0][0]}`, html })
   });
   if (!r.ok) throw new Error(`Resend patient ${r.status}`);
+}
+
+// Quiz leads who said they want to be tested as soon as possible get this email in place of the standard
+// recommendation email, two minutes after the quiz: their test, how it works, and the questions people ask
+// before booking. Returns false when there is nothing to recommend, so the caller can fall back.
+async function toReadyNow(d, origin, nowTok) {
+  const home = d.collection === 'home';
+  const slugs = [...new Set(String(d.tests || '').split(',').map((x) => x.trim()))].filter((x) => PRICES.addons[x]).slice(0, 30);
+  const h = String(d.recommendation || '').split(',').map((x) => x.trim()).find((x) => PRICES.panels[x]);
+  let title, price, detail, path;
+  if (slugs.length) {
+    const names = slugs.map((x) => PRICES.addons[x].title);
+    price = slugs.reduce((a, x) => a + PRICES.addons[x].price, 0) + (PRICES.builderFee || 0);
+    title = 'Your custom test'; detail = `${names.join(', ')}. ${slugs.length} ${slugs.length === 1 ? 'test' : 'tests'} in one collection.`;
+    path = `/checkout?add=${slugs.map(encodeURIComponent).join(',')}${home ? '&home=1' : ''}`;
+  } else if (h) {
+    const p = PRICES.panels[h];
+    title = p.title; price = p.price; detail = `${p.lines.length} tests in one collection: ${p.lines.join(', ')}.`;
+    path = `/checkout?panel=${encodeURIComponent(h)}${home ? '&home=1' : ''}`;
+  } else return false;
+  const offer = nowTok && price >= NOW_MIN && (h || (PRICES.builderFee || 0) >= NOW_OFF);
+  const link = origin + path + (offer ? `&offer=now&x=${nowTok.x}&s=${encodeURIComponent(nowTok.s)}` : h && !slugs.length ? '&offer=quiz' : '');
+  const until = offer ? new Date(nowTok.x).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', timeZone: 'Australia/Sydney' }) : '';
+  const e = escapeHtml, P = 'margin:0 0 12px;color:#33403A;font-size:16px;line-height:1.5', H = 'font-size:18px;font-weight:700;margin:22px 0 8px;color:#1C2420';
+  const btn = `<a href="${link}" style="display:inline-block;margin:6px 0 4px;padding:14px 26px;border-radius:999px;background:#17302A;color:#F7F4EF;text-decoration:none;font-weight:700;font-size:17px">${offer ? `Book now for $${price - NOW_OFF}` : 'Book this test'}</a>`;
+  const qa = [
+    ['Is this a real lab?', 'Yes. Your sample is tested in a NATA-accredited Australian laboratory.'],
+    ['Do I need a referral?', 'No. We issue your pathology request form with your order.'],
+    ['Is there a centre near me?', `There are more than 2,000 partner collection centres across Australia.${PRICES.homeVisit != null ? ` If you cannot get to one, a registered nurse can come to your home or workplace for $${PRICES.homeVisit}.` : ''}`],
+    ['Do I need to fast?', 'Some tests need an 8 to 12 hour fast, with water only. Your confirmation email tells you exactly what applies to your test.'],
+    ['Can I show my GP?', 'Yes. The report is yours, and you can forward it to any doctor.'],
+    ['What if my collection cannot be arranged?', 'You receive a full refund.']
+  ];
+  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#1C2420"><table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate"><tr><td style="padding:28px 24px">
+<div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div>
+<h1 style="font-size:24px;line-height:1.2;margin:20px 0 10px">You said as soon as possible. Here is the fastest way.</h1>
+<div style="padding:18px 20px;border-radius:16px;background:#17302A;color:#F7F4EF;margin:14px 0">
+<div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#F2A981">Your match</div>
+<div style="font-size:22px;font-weight:700;margin:4px 0 6px">${e(title)}</div>
+<div style="font-size:15px;line-height:1.45;color:#C5D1CA">${e(detail)}</div>
+<div style="font-size:26px;font-weight:700;margin-top:10px">$${price}${home && PRICES.homeVisit != null ? `<span style="font-size:14px;font-weight:400;color:#C5D1CA"> plus $${PRICES.homeVisit} home visit</span>` : ''}</div>
+</div>
+${offer ? `<p style="${P};font-weight:700;color:#1C2420">Book by ${until} (Sydney time) and we take $${NOW_OFF} off: $${price - NOW_OFF} instead of $${price}.</p>` : ''}
+${btn}
+<p style="${P};margin-top:14px">More than 5,000 Australians have been tested through Express Pathology.</p>
+<div style="${H}">How it works</div>
+<p style="${P}"><strong>1. Pay online.</strong> Your pathology request form is emailed with your order. No referral and no GP visit.</p>
+<p style="${P}"><strong>2. Get collected.</strong> Walk in to any of our 2,000+ partner collection centres${PRICES.homeVisit != null ? `, or have a registered nurse come to you for $${PRICES.homeVisit}` : ''}.</p>
+<p style="${P}"><strong>3. Get your results by email.</strong> Reviewed by an Australian doctor, with every result shown against its reference range.</p>
+<div style="${H}">Before you book</div>
+${qa.map(([q, a]) => `<p style="${P}"><strong>${e(q)}</strong><br>${e(a)}</p>`).join('')}
+${btn}
+<p style="margin:18px 0 0;color:#5A645E;font-size:14px;line-height:1.5">Questions? Reply to this email or call 02 9545 2940.${offer ? ` The $${NOW_OFF} offer applies to one order started from this email before the time shown and cannot be combined with another offer. <a href="${origin}/quiz#offer-terms" style="color:#5A645E">Terms</a>.` : ''} Private tests ordered without a referral are not covered by Medicare. You are receiving this because you asked for your recommendation from our test finder.</p>
+</td></tr></table></div>`;
+  const send = (extra) => fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [d.email], reply_to: process.env.ENQUIRY_TO.split(',')[0].trim(), subject: `Your ${title === 'Your custom test' ? 'custom blood test' : title} is ready to book`, html, ...extra })
+  });
+  // Sent two minutes after the quiz. If the delayed send is refused, send straight away so the lead is never left without it.
+  let r = await send({ scheduled_at: new Date(Date.now() + 2 * 60e3).toISOString() });
+  if (!r.ok) r = await send({});
+  if (!r.ok) throw new Error(`Resend ready-now ${r.status}`);
+  return true;
 }
 
 // Quiz funnel: record the lead in Klaviyo so the follow-up emails can run as a flow there.
@@ -200,6 +264,7 @@ export default async function handler(req, res) {
   const emailReady = process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM;
   const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
   const SITE = (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '');
+  const nowTok = d.kind === 'quiz' && d.offer === 'quiz' ? mintNowOffer() : null; // one deadline, shared by the result page and the email
   if (d.kind === 'quiz' && d.offer === 'quiz') await quizToKlaviyo(d, SITE).catch((e) => console.error('klaviyo quiz failed:', e.message));
   try {
     // Email first: it is the only route that carries an uploaded request form.
@@ -207,13 +272,19 @@ export default async function handler(req, res) {
       // Quiz funnel leads are kept in Klaviyo when it is connected, so the team inbox is not copied on each one
       if (!(d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady())) await toEmail(d, att);
       if (d.kind === 'referral') await toPartner(d).catch((e) => console.error('partner acknowledgement failed:', e.message));
-      if (d.kind === 'quiz') await toPatient(d, SITE).catch((e) => console.error('quiz email failed:', e.message));
+      if (d.kind === 'quiz') {
+        // Ready-now leads get the fuller booking email; everyone else gets the standard recommendation
+        const sent = d.timing === 'asap' ? await toReadyNow(d, SITE, nowTok).catch((e) => { console.error('ready-now email failed:', e.message); return false; }) : false;
+        // Funnel leads who are not ready now get no instant email (switched off 12 Nov); other quiz forms still do
+        const skip = d.offer === 'quiz' && (d.timing === 'weeks' || d.timing === 'looking');
+        if (!sent && !skip) await toPatient(d, SITE).catch((e) => console.error('quiz email failed:', e.message));
+      }
     } else if (hubspotReady && !att) await toHubSpot(d);
     else if (d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady()) { /* lead already recorded in Klaviyo */ }
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
     const kl = quizClientKlaviyo(d, SITE);
-    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}), ...(d.kind === 'quiz' && d.offer === 'quiz' ? { now: mintNowOffer() } : {}) });
+    return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}), ...(nowTok ? { now: nowTok } : {}) });
   } catch (err) {
     console.error('enquiry delivery failed:', err.message);
     return res.status(502).json({ error: 'Delivery failed' });

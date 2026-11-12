@@ -475,7 +475,7 @@
       document.createTextNode('Every test is also available on its own, from ' + money(Math.min.apply(null, Object.keys(ADD).map(function (k) { return ADD[k].price; }))) + ' each plus a ' + money(BASE) + ' fee. '),
       el('a', { href: '/tests?add=' + own.slice(0, 2).join(',') + (A.where === 'home' ? '&collect=home' : '') + '#build', text: 'Build your own', style: 'font-weight: 700; text-decoration: underline' }), document.createTextNode('.')]));
     resEl.appendChild(el('p', { style: 'margin: 0; font-size: 14px; color: #5A645E' }, [
-      document.createTextNode((lead && lead.sent ? 'We have emailed you a copy. ' : '') + 'Knowing your numbers gives you and your doctor a baseline to work from. '),
+      document.createTextNode((lead && lead.sent && A.when === 'asap' ? 'We are emailing you a copy now. ' : '') + 'Knowing your numbers gives you and your doctor a baseline to work from. '),
       HOME_FROM ? el('a', { href: '#offer-terms', text: 'Quiz offer terms', style: 'text-decoration: underline' }) : null, document.createTextNode(HOME_FROM ? ' apply.' : '')]));
     resEl.appendChild(el('div', { style: 'display: flex; flex-direction: column; gap: 10px; padding-top: 8px; border-top: 1px solid #DCE0D8' }, [
       el('span', { text: 'Your answers', style: 'font-size: 13px; font-weight: 700; color: #5A645E' }),
@@ -583,6 +583,7 @@
         kind: 'quiz', offer: 'quiz', page: location.pathname, name: lead.name, email: lead.email, company_website: form.company_website.value,
         collection: A.where === 'home' ? 'home' : 'centre',
         timing: A.when || '',
+        tests: p[0] && p[0].indexOf('b:') === 0 ? p[0].slice(2) : '',
         topic: 'Quiz funnel' + (A.when === 'asap' ? ' (READY NOW)' : A.when === 'weeks' ? ' (next few weeks)' : A.when === 'looking' ? ' (just looking)' : '') + ': ' + (p[0] ? info(p[0]).title : 'no match'),
         message: 'Recommended: ' + p.map(function (h) { return info(h).title; }).join(', ') + '\nAnswers: ' + JSON.stringify(A) + '\nCame from: ' + (window.epSrc ? window.epSrc() : '') + '\nPer-day price line: ' + (pdGroup === 'a' ? 'shown' : 'not shown'),
         recommendation: p.filter(function (h) { return h.indexOf('b:') !== 0; }).join(',')
