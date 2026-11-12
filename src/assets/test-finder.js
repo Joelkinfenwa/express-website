@@ -474,7 +474,7 @@
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
-        try { localStorage.setItem('ep-lead-email', lead.email); } catch (e) {}
+        try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         r.json().then(function (j) { if (j && j.kl) klaviyoClient(j.kl, lead); }).catch(function () {});
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
