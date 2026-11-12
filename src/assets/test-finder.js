@@ -272,6 +272,11 @@
     var badge = overBudget ? 'Closest to your budget' : cap !== Infinity ? 'Fits your budget' : 'Our most complete option';
     var why = (A.goal === 'hormones' && A.sex === 'male' ? 'The hormones most linked to energy, mood, libido and recovery, measured together so they can be read in context.' : WHY[A.goal]) || '';
     var save = t.single && t.single > t.price ? t.single - t.price : 0;
+    // Lead line: the real number of tests in this option, tied to what the person asked about
+    var LEAD = { general: 'covering your core organs, blood and metabolism', hormones: A.sex === 'male' ? 'linked to energy, mood, libido and recovery' : 'linked to energy, mood, libido and cycles',
+      performance: 'linked to training, recovery and body composition', thyroid: 'covering thyroid hormones and thyroid antibodies', vitamins: 'for the nutrients most often low in Australians',
+      sexual: 'for the most common STIs', longevity: 'for a detailed picture of your long-term health' };
+    var lead = n && LEAD[A.goal] ? n + (n === 1 ? ' test ' : ' tests ') + LEAD[A.goal] + '.' : '';
     var assure = [
       'No referral or GP visit. Your request form is issued with your order',
       'Reviewed by an Australian doctor, emailed with reference ranges',
@@ -288,11 +293,11 @@
           inc ? el('span', { class: 'rs-pill', text: 'Nurse home visit included' }) : null
         ]),
         el('h3', { text: t.title, class: 'rs-title' }),
-        el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
+        lead ? el('p', { text: lead, style: 'margin: 0; color: #F7F4EF; font-size: 20px; font-weight: 600; line-height: 1.3' }) : el('p', { text: why, style: 'margin: 0; color: #C5D1CA; font-size: 17px' }),
         el('div', { class: 'rs-price' }, [
           el('strong', { text: money(tot) }),
           save ? el('s', { text: money(t.single + (tot - t.price)), 'aria-label': 'Usually ' + money(t.single + (tot - t.price)) + ' as single tests', style: 'font-size: 24px; color: #9DB0A6; text-decoration-thickness: 2px' }) : null,
-          el('span', { text: (n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
+          el('span', { text: (lead ? 'One blood collection' : n ? n + (n === 1 ? ' test' : ' tests') + ' from one collection' : '') + (home && !inc && homeAdd(t) ? ', including ' + money(homeAdd(t)) + ' home visit' : '') , style: save ? 'flex: 1 1 100%' : '' })
         ]),
         save ? el('span', { class: 'rs-save', text: 'You save ' + money(save) + '. The same tests cost ' + money(t.single) + ' bought one at a time.' }) : null,
         el('a', { href: href(h), class: 'rs-cta', id: 'tf-cta' }, [document.createTextNode('Book this test'), el('span', { 'aria-hidden': 'true', text: '→' })]),
