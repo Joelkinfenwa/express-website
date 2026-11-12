@@ -187,7 +187,7 @@ export default async function handler(req, res) {
     if (!att) return res.status(400).json({ error: 'Please attach the referral form.' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email || '')) return res.status(400).json({ error: 'Please enter a valid email address for the booking confirmation.' });
     d.submitter = d.email;
-    try { d.reference = '#' + await referralNumber(match[0]); } catch (e) { console.error('referral number failed:', e.message); }
+    try { d.reference = '#' + await referralNumber(match[0], d.patient_name, d.email); } catch (e) { console.error('referral number failed:', e.message); }
     d.collection = 'Home visit';
     d.name = d.company || match[0];
     d.partner = match[0];

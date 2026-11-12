@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Orders tracker | Express Pathology</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--forest:#17302A;--ink:#1C2420;--ivory:#F7F4EF;--sand:#EFEBE3;--peach:#F2A981;--clay:#A4502E;--muted:#4B5650;--soft:#5A645E;--line:#DCE0D8}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;font-size:15px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;background:var(--forest);color:var(--ivory)}
+.logo{font-family:'Instrument Sans',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.04em}
+.logo i{font-style:normal;color:var(--peach)}
+.logo small{font-family:'Figtree',sans-serif;font-weight:500;font-size:14px;letter-spacing:0;color:#C5D1CA;margin-left:10px}
+.top .who{font-size:13px;color:#C5D1CA;display:flex;gap:14px;align-items:center}
+.top button{background:none;border:1px solid rgba(255,255,255,.3);color:var(--ivory);border-radius:999px;padding:6px 14px;cursor:pointer}
+main{max-width:1280px;margin:0 auto;padding:24px}
+.login{max-width:420px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:14px}
+.login h1{margin:0;font-family:'Instrument Sans',sans-serif;font-size:28px;letter-spacing:-.03em}
+.login input{min-height:48px;border:1px solid var(--line);border-radius:12px;padding:0 14px;background:#fff}
+.btn{min-height:46px;border:0;border-radius:12px;background:var(--forest);color:var(--ivory);font-weight:700;cursor:pointer;padding:0 20px}
+.msg{font-size:14px;color:var(--soft);margin:0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:14px}
+.tab b{font-weight:700;background:var(--sand);border-radius:999px;padding:1px 8px;font-size:12px}
+.tab[aria-pressed="true"]{background:var(--forest);border-color:var(--forest);color:var(--ivory)}
+.tab[aria-pressed="true"] b{background:rgba(255,255,255,.18)}
+.bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.bar input{flex:1;min-width:220px;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 14px;background:#fff}
+.bar .count{font-size:14px;color:var(--soft)}
+.bar button{min-height:44px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 14px;cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);font-weight:700;padding:12px 14px;background:var(--sand);border-bottom:1px solid var(--line)}
+td{padding:14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.ord{font-weight:700;font-family:'Instrument Sans',sans-serif;font-size:16px}
+.sub{font-size:13px;color:var(--soft)}
+.pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--sand);margin-top:4px}
+.pill.warn{background:#FBE3DA;color:#8A3B1E}
+select.stage{min-height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;font-weight:600;cursor:pointer;width:100%}
+select.stage[data-s="paid"]{background:#FFF4E5}
+select.stage[data-s="form_sent"]{background:#EEF3FB}
+select.stage[data-s="collected"]{background:#F1ECFA}
+select.stage[data-s="results_in"]{background:#E8F4EE}
+select.stage[data-s="review"]{background:#FDECE3}
+select.stage[data-s="sent"]{background:#E4EFE9;color:#1F5A3F}
+textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;resize:vertical;background:#fff;font-size:14px}
+.saved{font-size:12px;color:var(--soft);margin-top:4px;min-height:16px}
+.empty{padding:48px;text-align:center;color:var(--soft);background:#fff;border:1px solid var(--line);border-radius:18px}
+@media (max-width:860px){
+  main{padding:16px}
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  table{border:0;background:none}
+  tr{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:12px;padding:6px 0}
+  td{border:0;padding:8px 16px}
+  td[data-l]::before{content:attr(data-l);display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);font-weight:700;margin-bottom:2px}
+  .top{padding:14px 16px}.logo small{display:none}#who-email{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo">express<i>.</i> <small>Orders tracker</small></div><div class="who" id="who" hidden><span id="who-email"></span><button type="button" id="signout">Sign out</button></div></header>
+<main id="app">
+<form class="login" id="login" hidden>
+<h1>Orders tracker</h1>
+<p class="msg">Enter your Express email address and we will send you a sign-in link.</p>
+<input type="email" name="email" required placeholder="you@expresspathology.com.au" autocomplete="email" aria-label="Email address">
+<button class="btn" type="submit">Email me a sign-in link</button>
+<p class="msg" id="login-msg" role="status"></p>
+</form>
+<section id="board" hidden>
+<div class="tabs" id="tabs"></div>
+<div class="bar"><input type="search" id="q" placeholder="Search by order number, name, email, phone or test" aria-label="Search orders"><span class="count" id="count"></span><button type="button" id="refresh">Refresh</button></div>
+<div id="list"></div>
+</section>
+</main>
+<script>
+(function () {
+  var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['collected', 'Collected'], ['results_in', 'Results in'], ['review', 'Under review (Jai)'], ['sent', 'Sent to patient']];
+  var label = {}; STAGES.forEach(function (s) { label[s[0]] = s[1]; });
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'ep-admin-token', token = '', orders = [], filter = 'open', q = '';
+  function store(t) { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (e) {} }
+  try { token = localStorage.getItem(KEY) || ''; } catch (e) {}
+  var u = new URLSearchParams(location.search);
+  if (u.get('t')) { token = u.get('t'); store(token); history.replaceState(null, '', '/admin'); }
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+  var dfmt = new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+  function api(method, body) {
+    return fetch('/api/admin/orders', { method: method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
+  }
+  function signOut() { store(''); token = ''; show(); }
+  function show() {
+    $('login').hidden = !!token; $('board').hidden = !token; $('who').hidden = !token;
+    if (token) load();
+  }
+  function load() {
+    $('list').innerHTML = '<div class="empty">Loading orders…</div>';
+    api('GET').then(function (j) { orders = j.orders; $('who-email').textContent = j.user; render(); })
+      .catch(function (e) { if (e.message !== 'auth') $('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
+  }
+  function matches(o) {
+    if (filter === 'open' && o.stage === 'sent') return false;
+    if (filter !== 'open' && filter !== 'all' && o.stage !== filter) return false;
+    if (!q) return true;
+    return [o.order, o.name, o.email, o.phone, o.items].join(' ').toLowerCase().indexOf(q) !== -1;
+  }
+  function render() {
+    var counts = { all: orders.length, open: 0 };
+    orders.forEach(function (o) { counts[o.stage] = (counts[o.stage] || 0) + 1; if (o.stage !== 'sent') counts.open++; });
+    var tabs = [['open', 'Not finished'], ['all', 'All']].concat(STAGES);
+    $('tabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="tab" data-f="' + t[0] + '" aria-pressed="' + (filter === t[0]) + '">' + esc(t[1]) + ' <b>' + (counts[t[0]] || 0) + '</b></button>'; }).join('');
+    var rows = orders.filter(matches);
+    $('count').textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's');
+    if (!rows.length) { $('list').innerHTML = '<div class="empty">No orders here.</div>'; return; }
+    $('list').innerHTML = '<table><thead><tr><th>Order</th><th>Patient</th><th>Tests</th><th style="width:215px">Stage</th><th style="width:260px">Notes</th></tr></thead><tbody>' + rows.map(function (o) {
+      var days = Math.floor((Date.now() / 1000 - o.date) / 86400);
+      return '<tr data-id="' + esc(o.id) + '">' +
+        '<td data-l="Order"><div class="ord">' + esc(o.order) + '</div><div class="sub">' + dfmt.format(new Date(o.date * 1000)) + (o.total ? ' · ' + money.format(o.total) : '') + '</div>' +
+          (o.refunded ? '<span class="pill warn">Refunded</span>' : '') + (o.addto ? '<span class="pill">Add-on to #' + esc(o.addto) + '</span>' : '') +
+          (o.stage !== 'sent' && days >= 7 ? '<span class="pill warn">' + days + ' days open</span>' : '') + '</td>' +
+        '<td data-l="Patient"><div style="font-weight:600">' + esc(o.name || '—') + '</div><div class="sub">' + esc(o.email) + (o.phone ? '<br>' + esc(o.phone) : '') + '</div></td>' +
+        '<td data-l="Tests"><div>' + esc(String(o.items).split('; ').join(', ')) + '</div><div class="sub">' + esc(o.collection) + (o.preferred ? ' · ' + esc(o.preferred) : '') + '</div></td>' +
+        '<td data-l="Stage"><select class="stage" data-s="' + o.stage + '" aria-label="Stage for ' + esc(o.order) + '">' + STAGES.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+          '<div class="saved">' + (o.updated ? 'Updated ' + dfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></td>' +
+        '<td data-l="Notes"><textarea class="note" placeholder="Add a note" aria-label="Notes for ' + esc(o.order) + '">' + esc(o.note) + '</textarea><div class="saved"></div></td></tr>';
+    }).join('') + '</tbody></table>';
+  }
+  function save(id, patch, el) {
+    var o = orders.find(function (x) { return x.id === id; }); if (!o) return;
+    var hint = el.parentNode.querySelector('.saved'); hint.textContent = 'Saving…';
+    api('POST', Object.assign({ id: o.id, kind: o.kind }, patch)).then(function (j) {
+      Object.assign(o, patch, { updated: j.updated, by: j.by });
+      hint.textContent = 'Saved ' + dfmt.format(new Date(j.updated));
+      if (patch.stage) setTimeout(render, 600);
+    }).catch(function (e) { hint.textContent = e.message === 'auth' ? '' : 'Not saved: ' + e.message; });
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.matches('select.stage')) { e.target.setAttribute('data-s', e.target.value); save(e.target.closest('tr').getAttribute('data-id'), { stage: e.target.value }, e.target); }
+  });
+  document.addEventListener('focusout', function (e) {
+    if (!e.target.matches('textarea.note')) return;
+    var id = e.target.closest('tr').getAttribute('data-id'), o = orders.find(function (x) { return x.id === id; });
+    if (o && o.note !== e.target.value) save(id, { note: e.target.value }, e.target);
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('.tab'); if (t) { filter = t.getAttribute('data-f'); render(); }
+  });
+  $('q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); render(); });
+  $('refresh').addEventListener('click', load);
+  $('signout').addEventListener('click', signOut);
+  $('login').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = new FormData(this).get('email');
+    $('login-msg').textContent = 'Sending…';
+    fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
+      .then(function () { $('login-msg').textContent = 'If that address has access, a sign-in link is on its way. Check your inbox.'; })
+      .catch(function () { $('login-msg').textContent = 'Could not send the link. Try again.'; });
+  });
+  show();
+})();
+</script>
+</body>
+</html>

@@ -673,8 +673,10 @@ if (problems.length) {
 
 const site = config.siteUrl.replace(/\/$/, '');
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.sort().map((p) => `  <url><loc>${site}${p === '/' ? '/' : p}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>`).join('\n')}\n</urlset>\n`);
-writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nDisallow: /partner-referral\nSitemap: ${site}/sitemap.xml\n`);
+writeFileSync(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /checkout\nDisallow: /order-confirmed\nDisallow: /partner-referral\nDisallow: /admin\nSitemap: ${site}/sitemap.xml\n`);
 copyFileSync(join(SRC, 'assets/img/favicon.ico'), join(OUT, 'favicon.ico'));
+// Internal orders tracker (not indexed, no analytics)
+copyFileSync(join(SRC, '_admin.html'), join(OUT, 'admin.html'));
 // llms.txt: a plain summary for AI assistants and answer engines
 {
   const areasJ = JSON.parse(readFileSync(join(ROOT, 'data/areas.json'), 'utf8')).areas;
