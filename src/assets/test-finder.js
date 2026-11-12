@@ -112,9 +112,9 @@
   // Timed result-page offer: $25 off tests of $200 or more if checkout starts within 15 minutes of the result.
   // The deadline comes signed from the server and is checked again at checkout. Half of visitors see it (group a),
   // so its effect on orders can be compared with the other half (group b).
-  var NOW_OFF = 25, NOW_MIN = 200, nowOffer = null, nowGroup = 'b';
+  var NOW_OFF = 25, NOW_MIN = 200, nowOffer = null, nowGroup = 'a';
   try {
-    nowGroup = localStorage.getItem('ep-now-ab') || (Math.random() < 0.5 ? 'a' : 'b'); localStorage.setItem('ep-now-ab', nowGroup);
+    nowGroup = 'a'; // shown to everyone (the half-and-half comparison was switched off on 12 Nov)
     nowOffer = JSON.parse(localStorage.getItem('ep-now') || 'null');
     if (nowOffer && Date.now() - nowOffer.t > 864e5) nowOffer = null; // one window per day
   } catch (e) {}
@@ -550,7 +550,6 @@
       el('h2', { id: 'tf-h', tabindex: '-1', text: 'We found your match.', style: "margin: 0; font-family: var(--display, 'Instrument Sans', sans-serif); font-weight: 600; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em" }),
       teaser(p),
       el('p', { text: 'Where should we send it?', style: 'margin: 4px 0 0; color: #4B5650; font-size: 17px' }),
-      el('label', { for: 'tf-name', class: 'sr-only', text: 'First name' }), el('input', { id: 'tf-name', name: 'name', required: '', autocomplete: 'given-name', placeholder: 'First name', style: inp }),
       el('label', { for: 'tf-email', class: 'sr-only', text: 'Email' }), el('input', { id: 'tf-email', name: 'email', type: 'email', required: '', autocomplete: 'email', inputmode: 'email', placeholder: 'Email', style: inp }),
       el('input', { name: 'company_website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true', style: 'position: absolute; left: -9999px; width: 1px; height: 1px' }),
       el('button', { type: 'submit', class: 'btn btn-dark', text: 'Show my match', style: 'min-height: 56px; font-size: 17px' }),
@@ -564,7 +563,7 @@
       e.preventDefault();
       if (!form.checkValidity()) { form.reportValidity(); return; }
       var btn = form.querySelector('button'); btn.disabled = true; btn.textContent = 'One moment…';
-      lead = { name: form.name.value.trim(), email: form.email.value.trim() };
+      lead = { name: '', email: form.email.value.trim() }; // email only: one field converts better than two
       var done = false, go = function () { if (done) return; done = true; show(); };
       setTimeout(go, 4000); // never hold the result back if the request is slow
       fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
@@ -577,7 +576,7 @@
         if (!r.ok) throw new Error();
         // Lead events carry no answers or test names
         lead.sent = true;
-        try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
+        try { localStorage.setItem('ep-lead-email', lead.email); if (lead.name) localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
         if (window.epStep) window.epStep('3 Email given (lead)');

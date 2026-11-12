@@ -194,7 +194,7 @@ export default async function handler(req, res) {
     d.partner = match[0];
     delete d.partner_code;
   }
-  if (d.kind !== 'referral' && (!d.name || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))) return res.status(400).json({ error: 'Name and a valid email are required' });
+  if (d.kind !== 'referral' && ((!d.name && d.kind !== 'quiz') || !d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))) return res.status(400).json({ error: 'Name and a valid email are required' });
   const emailReady = process.env.RESEND_API_KEY && process.env.ENQUIRY_TO && process.env.ENQUIRY_FROM;
   const hubspotReady = process.env.HUBSPOT_PORTAL_ID && process.env.HUBSPOT_FORM_ID;
   const SITE = (process.env.SITE_URL || 'https://expresspathology.com.au').replace(/\/$/, '');
