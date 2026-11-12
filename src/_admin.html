@@ -43,6 +43,9 @@ tr:last-child td{border-bottom:0}
 .sub{font-size:13px;color:var(--soft)}
 .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--sand);margin-top:4px}
 .pill.warn{background:#FBE3DA;color:#8A3B1E}
+.type{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:3px 9px;margin-bottom:6px;letter-spacing:.01em}
+.type.pvt{background:#17302A;color:#F7F4EF}.type.gp{background:#F2A981;color:#3A1D10}.type.ref{background:#DDE6F4;color:#1F3A66}
+.bar select{min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff;font-weight:600}
 select.stage{min-height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;font-weight:600;cursor:pointer;width:100%}
 select.stage[data-s="paid"]{background:#FFF4E5}
 select.stage[data-s="form_sent"]{background:#EEF3FB}
@@ -77,7 +80,7 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
 </form>
 <section id="board" hidden>
 <div class="tabs" id="tabs"></div>
-<div class="bar"><input type="search" id="q" placeholder="Search by order number, name, email, phone or test" aria-label="Search orders"><span class="count" id="count"></span><button type="button" id="refresh">Refresh</button></div>
+<div class="bar"><input type="search" id="q" placeholder="Search by order number, name, email, phone or test" aria-label="Search orders"><select id="type" aria-label="Order type"><option value="all">All order types</option><option value="pvt">Private tests (our request form)</option><option value="gp">Home visits with own GP form</option><option value="ref">Partner referrals</option></select><span class="count" id="count"></span><button type="button" id="refresh">Refresh</button></div>
 <div id="list"></div>
 </section>
 </main>
@@ -86,7 +89,9 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
   var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['collected', 'Collected'], ['results_in', 'Results in'], ['review', 'Under review (Jai)'], ['sent', 'Sent to patient']];
   var label = {}; STAGES.forEach(function (s) { label[s[0]] = s[1]; });
   var $ = function (id) { return document.getElementById(id); };
-  var KEY = 'ep-admin-token', token = '', orders = [], filter = 'open', q = '';
+  var KEY = 'ep-admin-token', token = '', orders = [], filter = 'open', q = '', type = 'all';
+  function kind(o) { return o.type === 'own-form' ? 'gp' : o.type === 'referral' ? 'ref' : 'pvt'; }
+  function typeLabel(o) { var k = kind(o); return k === 'gp' ? 'Home visit · own GP form' : k === 'ref' ? 'Partner referral' : 'Private test' + (/home/i.test(o.collection) ? ' · nurse home visit' : ' · collection centre'); }
   function store(t) { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (e) {} }
   try { token = localStorage.getItem(KEY) || ''; } catch (e) {}
   var u = new URLSearchParams(location.search);
@@ -112,12 +117,14 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
   function matches(o) {
     if (filter === 'open' && o.stage === 'sent') return false;
     if (filter !== 'open' && filter !== 'all' && o.stage !== filter) return false;
+    if (type !== 'all' && kind(o) !== type) return false;
     if (!q) return true;
     return [o.order, o.name, o.email, o.phone, o.items].join(' ').toLowerCase().indexOf(q) !== -1;
   }
   function render() {
     var counts = { all: orders.length, open: 0 };
-    orders.forEach(function (o) { counts[o.stage] = (counts[o.stage] || 0) + 1; if (o.stage !== 'sent') counts.open++; });
+    var pool = orders.filter(function (o) { return type === 'all' || kind(o) === type; }); counts.all = pool.length;
+    pool.forEach(function (o) { counts[o.stage] = (counts[o.stage] || 0) + 1; if (o.stage !== 'sent') counts.open++; });
     var tabs = [['open', 'Not finished'], ['all', 'All']].concat(STAGES);
     $('tabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="tab" data-f="' + t[0] + '" aria-pressed="' + (filter === t[0]) + '">' + esc(t[1]) + ' <b>' + (counts[t[0]] || 0) + '</b></button>'; }).join('');
     var rows = orders.filter(matches);
@@ -130,7 +137,7 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
           (o.refunded ? '<span class="pill warn">Refunded</span>' : '') + (o.addto ? '<span class="pill">Add-on to #' + esc(o.addto) + '</span>' : '') +
           (o.stage !== 'sent' && days >= 7 ? '<span class="pill warn">' + days + ' days open</span>' : '') + '</td>' +
         '<td data-l="Patient"><div style="font-weight:600">' + esc(o.name || '—') + '</div><div class="sub">' + esc(o.email) + (o.phone ? '<br>' + esc(o.phone) : '') + '</div></td>' +
-        '<td data-l="Tests"><div>' + esc(String(o.items).split('; ').join(', ')) + '</div><div class="sub">' + esc(o.collection) + (o.preferred ? ' · ' + esc(o.preferred) : '') + '</div></td>' +
+        '<td data-l="Tests"><span class="type ' + kind(o) + '">' + esc(typeLabel(o)) + '</span><div>' + esc(String(o.items).split('; ').join(', ')) + '</div><div class="sub">' + esc(o.collection) + (o.preferred ? ' · ' + esc(o.preferred) : '') + '</div></td>' +
         '<td data-l="Stage"><select class="stage" data-s="' + o.stage + '" aria-label="Stage for ' + esc(o.order) + '">' + STAGES.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
           '<div class="saved">' + (o.updated ? 'Updated ' + dfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></td>' +
         '<td data-l="Notes"><textarea class="note" placeholder="Add a note" aria-label="Notes for ' + esc(o.order) + '">' + esc(o.note) + '</textarea><div class="saved"></div></td></tr>';
@@ -157,6 +164,7 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
     var t = e.target.closest('.tab'); if (t) { filter = t.getAttribute('data-f'); render(); }
   });
   $('q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); render(); });
+  $('type').addEventListener('change', function () { type = this.value; render(); });
   $('refresh').addEventListener('click', load);
   $('signout').addEventListener('click', signOut);
   $('login').addEventListener('submit', function (e) {
