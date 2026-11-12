@@ -480,6 +480,14 @@
         el('a', { href: href(p[0]), class: 'btn btn-dark', text: 'Book this test', style: 'flex: none' })])]);
     document.body.appendChild(barEl);
     if (cta && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { barEl.hidden = es[0].isIntersecting || resEl.hidden; }).observe(cta);
+    if (window.epStep && !showFunnel.sent) { showFunnel.sent = true; window.epStep('4 Result viewed', { offer: nowOff(p[0]) ? 'yes' : 'no', group: nowGroup }); }
+    if (!showFunnel.bound) {
+      showFunnel.bound = true;
+      document.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest ? e.target.closest('a[href^="/checkout"]') : null;
+        if (a && window.epStep && (resEl.contains(a) || a.closest('#tf-sticky'))) window.epStep('5 Book button tapped', { offer: /offer=now/.test(a.getAttribute('href')) ? 'yes' : 'no' });
+      });
+    }
     // Countdown for the timed offer. When it ends the page is redrawn at the standard price.
     clearInterval(nowTick);
     if (nowOff(p[0])) {
@@ -531,6 +539,7 @@
     ]);
   }
   function gate() {
+    if (window.epStep && !gate.sent) { gate.sent = true; window.epStep('2 Quiz answered, email step shown'); }
     step = Q.length;
     bar.style.width = '100%'; stepEl.textContent = 'Done'; back.hidden = false;
     qEl.innerHTML = '';
@@ -571,6 +580,7 @@
         try { localStorage.setItem('ep-lead-email', lead.email); localStorage.setItem('ep-lead-name', lead.name.split(' ')[0]); } catch (e) {}
         if (window.epTrack) window.epTrack('test_finder_lead', {});
         if (window.fbq) window.fbq('track', 'Lead');
+        if (window.epStep) window.epStep('3 Email given (lead)');
         return r.json().then(function (j) {
           if (j && j.kl) klaviyoClient(j.kl, lead);
           if (j && nowTake(j.now) && done) reshow(); // the result was already on screen: redraw it with the offer
@@ -636,6 +646,7 @@
   // Funnel: a landing screen first; the quiz starts from any "Start the quiz" control (?start=1 skips it)
   var landing = document.getElementById('quiz-landing'), stickyStart = document.getElementById('quiz-sticky');
   function startQuiz(e) {
+    if (window.epStep && !startQuiz.sent) { startQuiz.sent = true; window.epStep('1 Quiz started'); }
     var g = e && e.currentTarget && e.currentTarget.getAttribute && e.currentTarget.getAttribute('data-goal');
     if (g) { A.goal = g; presetGoal = true; if (Q[0].id === 'goal') { step = 1; presetGoal = false; } }
     if (landing) landing.hidden = true;

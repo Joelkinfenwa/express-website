@@ -72,6 +72,7 @@
     fetch('/assets/coverage.json').then(function (r) { return r.json(); }).catch(function () { return null; })
   ]).then(function (res) {
     cat = res[0]; cov = res[1]; render();
+    if (window.epStep) { var tot0 = lines().reduce(function (a, l) { return a + l[1]; }, 0); window.epStep('6 Checkout page viewed', { offer: offer || 'none' }, 'InitiateCheckout', { value: tot0, currency: 'AUD' }); }
     // When the timed offer runs out on this page, drop it and show the standard price straight away
     if (offer === 'now') {
       var endNow = function () { offer = ''; render(); $('co-status').removeAttribute('data-state'); $('co-status').textContent = 'The 15-minute offer has ended. The price shown is now the standard price.'; };
@@ -90,6 +91,7 @@
     ['firstName', 'lastName', 'dob', 'sex', 'email', 'phone', 'address', 'suburb', 'state', 'postcode'].forEach(function (k) { patient[k] = String(f.get(k) || ''); });
     var body = { type: order.type, panel: order.panel, tests: order.tests, home: home(), offer: offer, addto: addTo, patient: patient, preferredDate: home() ? f.get('preferredDate') : '', preferredTime: home() ? f.get('preferredTime') : '', notes: f.get('notes'), src: window.epSrc ? window.epSrc() : '', x: offer === 'now' ? nowX : undefined, s: offer === 'now' ? nowS : undefined };
     btn.disabled = true; btn.textContent = 'Opening secure payment…'; status.removeAttribute('data-state'); status.textContent = '';
+    if (window.epStep) window.epStep('7 Details entered, sent to payment', {}, 'AddPaymentInfo', { value: lines().reduce(function (a, l) { return a + l[1]; }, 0), currency: 'AUD' });
     if (window.epTrack) window.epTrack('begin_checkout', { currency: 'AUD', value: lines().reduce(function (a, l) { return a + l[1]; }, 0) });
     fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })

@@ -18,6 +18,13 @@
     window.epSrc = function () { return cur ? cur.s : ''; };
   })();
 
+  // Funnel steps, counted in Vercel Analytics (Events) and, where Meta has a matching event, in the Meta pixel.
+  // Names and yes/no flags only: no answers, test names or personal details.
+  window.epStep = function (name, data, meta, metaData) {
+    try { if (window.va) window.va('event', { name: name, data: data || {} }); } catch (e) {}
+    try { if (meta && window.fbq) window.fbq('track', meta, metaData || {}); } catch (e) {}
+  };
+
   var toggle = document.querySelector('.nav-toggle');
   var links = document.getElementById('nav-links');
   if (toggle && links) {
