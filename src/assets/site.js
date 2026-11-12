@@ -1,6 +1,23 @@
 /* Shared behaviour: mobile menu and enquiry forms. */
 (function () {
   'use strict';
+  // Where the visitor came from: kept for 30 days so a paid order can be traced back to its ad or channel.
+  // Holds campaign tags only, never personal details.
+  (function () {
+    var KEY = 'ep-src', q = new URLSearchParams(location.search), cur = null, now = Date.now();
+    try { cur = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (cur && now - cur.t > 30 * 864e5) cur = null;
+    var clean = function (v) { return String(v || '').replace(/[^A-Za-z0-9 _.\-]/g, '').slice(0, 40); };
+    var tagged = [q.get('utm_source'), q.get('utm_medium'), q.get('utm_campaign'), q.get('utm_content')].map(clean).filter(Boolean).join(' / ');
+    var next = tagged || (q.get('gclid') ? 'google ads' : q.get('fbclid') ? 'facebook (untagged)' : '');
+    if (!next && !cur) {
+      var host = ''; try { host = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '') : ''; } catch (e) {}
+      next = host && host.indexOf('expresspathology.com.au') < 0 && host.indexOf('stripe.com') < 0 ? 'referral: ' + clean(host) : 'direct';
+    }
+    if (next) { cur = { s: next, t: now }; try { localStorage.setItem(KEY, JSON.stringify(cur)); } catch (e) {} }
+    window.epSrc = function () { return cur ? cur.s : ''; };
+  })();
+
   var toggle = document.querySelector('.nav-toggle');
   var links = document.getElementById('nav-links');
   if (toggle && links) {
@@ -99,6 +116,7 @@
             if (typeof pay === 'string') { location.href = pay; return; }
             var checkout = pay.checkout;
             var startPay = function (attempt) {
+              if (checkout && window.epSrc) checkout.src = window.epSrc();
               return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(checkout) })
                 .then(function (r) { return r.json().catch(function () { return { error: '', detail: 'HTTP ' + r.status }; }); }, function () { return { error: '', detail: 'network' }; })
                 .then(function (j) {

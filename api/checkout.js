@@ -101,6 +101,8 @@ export default async function handler(req, res) {
     address: p.address, suburb: p.suburb, state: p.state, postcode: p.postcode,
     preferred_date: str(body.preferredDate, 10), preferred_time: str(body.preferredTime, 40), notes: str(body.notes, 480)
   };
+  // Channel or ad the visitor arrived from (campaign tags only)
+  if (str(body.src, 180)) metadata.source = str(body.src, 180);
   // What to print on the pathology request form (Stripe metadata values are limited to 500 characters)
   if (type === 'panel') metadata.panel = str(body.panel, 80);
   if (offerNote) metadata.offer = offerNote;

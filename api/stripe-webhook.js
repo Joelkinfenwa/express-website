@@ -69,7 +69,7 @@ export function emails(s, form = null, formError = '') {
     ['Order', m.reference], ['Checkout reference', m.checkout_ref !== m.reference ? m.checkout_ref : ''], ['Items', items.join(', ')], ['Total paid', total], ['Collection', m.collection],
     ['Name', name], ['Date of birth', m.dob], ['Sex', m.sex], ['Email', s.customer_details && s.customer_details.email || s.customer_email],
     ['Phone', m.phone], ['Address', [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ')],
-    ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Stripe session', s.id]
+    ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Came from', m.source || 'Not recorded'], ['Stripe session', s.id]
   ].filter(([, v]) => v);
   const toPatient = !!form; // the request form is always attached to the patient's confirmation email
   const team = {
