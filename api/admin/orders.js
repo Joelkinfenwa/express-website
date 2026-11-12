@@ -4,7 +4,7 @@
 import { stripe } from '../../lib/stripe.js';
 import { verify } from '../../lib/admin-auth.js';
 
-export const STAGES = ['paid', 'form_sent', 'collected', 'results_in', 'review', 'sent'];
+export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'results_in', 'review', 'sent'];
 
 async function sessions() {
   const out = [];
@@ -31,7 +31,7 @@ function fromSession(s) {
     phone: m.phone || '', items: m.items || '', type: m.order_type, collection: m.collection || '', total: (s.amount_total || 0) / 100,
     preferred: [m.preferred_date, m.preferred_time].filter(Boolean).join(', '), addto: m.addto || '',
     stage: STAGES.includes(pm.ops_stage) ? pm.ops_stage : (m.order_type === 'own-form' ? 'paid' : 'form_sent'),
-    note: pm.ops_note || '', updated: updated || '', by: by || '', refunded: !!(charge && typeof charge === 'object' && (charge.refunded || charge.amount_refunded > 0))
+    note: pm.ops_note || '', appt: pm.ops_appt || '', nurse: pm.ops_nurse || '', address: [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', '), updated: updated || '', by: by || '', refunded: !!(charge && typeof charge === 'object' && (charge.refunded || charge.amount_refunded > 0))
   };
 }
 
@@ -43,7 +43,7 @@ async function referrals() {
     return {
       id: c.id, kind: 'cus', order: '#' + m.order_number, date: c.created, name: m.patient || '', email: m.submitter || '', phone: '',
       items: `Partner referral (${m.partner || ''})`, type: 'referral', collection: 'Home visit', total: 0, preferred: '', addto: '',
-      stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'paid', note: m.ops_note || '', updated: updated || '', by: by || ''
+      stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'paid', note: m.ops_note || '', appt: m.ops_appt || '', nurse: m.ops_nurse || '', address: '', updated: updated || '', by: by || ''
     };
   });
 }
@@ -67,6 +67,8 @@ export default async function handler(req, res) {
       const metadata = { ops_updated: `${new Date().toISOString()}|${who}` };
       if (b.stage !== undefined) { if (!STAGES.includes(b.stage)) return res.status(400).json({ error: 'Unknown stage.' }); metadata.ops_stage = b.stage; }
       if (b.note !== undefined) metadata.ops_note = String(b.note).slice(0, 480);
+      if (b.nurse !== undefined) metadata.ops_nurse = String(b.nurse).trim().slice(0, 60);
+      if (b.appt !== undefined) { const a = String(b.appt).slice(0, 16); if (a && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(a)) return res.status(400).json({ error: 'Invalid appointment time.' }); metadata.ops_appt = a; }
       await stripe('POST', path, { metadata });
       return res.status(200).json({ ok: true, updated: metadata.ops_updated.split('|')[0], by: who });
     }

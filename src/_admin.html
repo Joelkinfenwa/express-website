@@ -49,6 +49,10 @@ tr:last-child td{border-bottom:0}
 select.stage{min-height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;font-weight:600;cursor:pointer;width:100%}
 select.stage[data-s="paid"]{background:#FFF4E5}
 select.stage[data-s="form_sent"]{background:#EEF3FB}
+select.stage[data-s="booked"]{background:#FFF0D6}
+.appt{display:flex;flex-direction:column;gap:2px;margin-top:8px;font-size:12px;color:var(--soft);font-weight:600}
+.appt input{min-height:36px;border:1px solid var(--line);border-radius:10px;padding:0 8px;background:#fff;font-size:14px;color:var(--ink)}
+.appt-show{font-size:13px;font-weight:700;color:var(--forest);margin-top:4px}
 select.stage[data-s="collected"]{background:#F1ECFA}
 select.stage[data-s="results_in"]{background:#E8F4EE}
 select.stage[data-s="review"]{background:#FDECE3}
@@ -80,17 +84,20 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
 </form>
 <section id="board" hidden>
 <div class="tabs" id="tabs"></div>
-<div class="bar"><input type="search" id="q" placeholder="Search by order number, name, email, phone or test" aria-label="Search orders"><select id="type" aria-label="Order type"><option value="all">All order types</option><option value="pvt">Private tests (our request form)</option><option value="gp">Home visits with own GP form</option><option value="ref">Partner referrals</option></select><span class="count" id="count"></span><button type="button" id="refresh">Refresh</button></div>
+<div class="bar"><input type="search" id="q" placeholder="Search by order number, name, phone, test, suburb or nurse" aria-label="Search orders"><select id="type" aria-label="Order type"><option value="all">All order types</option><option value="pvt">Private tests (our request form)</option><option value="gp">Home visits with own GP form</option><option value="ref">Partner referrals</option></select><span class="count" id="count"></span><button type="button" id="refresh">Refresh</button></div>
 <div id="list"></div>
+<datalist id="nurses"></datalist>
 </section>
 </main>
 <script>
 (function () {
-  var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['collected', 'Collected'], ['results_in', 'Results in'], ['review', 'Under review (Jai)'], ['sent', 'Sent to patient']];
+  var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['booked', 'Booked'], ['collected', 'Collected'], ['results_in', 'Results in'], ['review', 'Under review (Jai)'], ['sent', 'Sent to patient']];
   var label = {}; STAGES.forEach(function (s) { label[s[0]] = s[1]; });
   var $ = function (id) { return document.getElementById(id); };
   var KEY = 'ep-admin-token', token = '', orders = [], filter = 'open', q = '', type = 'all';
   function kind(o) { return o.type === 'own-form' ? 'gp' : o.type === 'referral' ? 'ref' : 'pvt'; }
+  function isHome(o) { return o.type === 'own-form' || o.type === 'referral' || /home/i.test(o.collection); }
+  function stagesFor(o) { return STAGES.filter(function (st) { return isHome(o) ? st[0] !== 'form_sent' || o.stage === 'form_sent' : st[0] !== 'booked'; }); }
   function typeLabel(o) { var k = kind(o); return k === 'gp' ? 'Home visit · own GP form' : k === 'ref' ? 'Partner referral' : 'Private test' + (/home/i.test(o.collection) ? ' · nurse home visit' : ' · collection centre'); }
   function store(t) { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (e) {} }
   try { token = localStorage.getItem(KEY) || ''; } catch (e) {}
@@ -98,6 +105,8 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
   if (u.get('t')) { token = u.get('t'); store(token); history.replaceState(null, '', '/admin'); }
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+  var afmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  function apptFmt(a) { var d = new Date(a); return isNaN(d) ? a : afmt.format(d); }
   var dfmt = new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
   function api(method, body) {
@@ -116,17 +125,20 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
   }
   function matches(o) {
     if (filter === 'open' && o.stage === 'sent') return false;
-    if (filter !== 'open' && filter !== 'all' && o.stage !== filter) return false;
+    if (filter === 'tobook') { if (!(isHome(o) && (o.stage === 'paid' || o.stage === 'form_sent'))) return false; }
+    else if (filter !== 'open' && filter !== 'all' && o.stage !== filter) return false;
     if (type !== 'all' && kind(o) !== type) return false;
     if (!q) return true;
-    return [o.order, o.name, o.email, o.phone, o.items].join(' ').toLowerCase().indexOf(q) !== -1;
+    return [o.order, o.name, o.email, o.phone, o.items, o.nurse, o.address].join(' ').toLowerCase().indexOf(q) !== -1;
   }
   function render() {
     var counts = { all: orders.length, open: 0 };
     var pool = orders.filter(function (o) { return type === 'all' || kind(o) === type; }); counts.all = pool.length;
-    pool.forEach(function (o) { counts[o.stage] = (counts[o.stage] || 0) + 1; if (o.stage !== 'sent') counts.open++; });
-    var tabs = [['open', 'Not finished'], ['all', 'All']].concat(STAGES);
+    pool.forEach(function (o) { counts[o.stage] = (counts[o.stage] || 0) + 1; if (o.stage !== 'sent') counts.open++; if (isHome(o) && (o.stage === 'paid' || o.stage === 'form_sent')) counts.tobook = (counts.tobook || 0) + 1; });
+    var tabs = [['open', 'Not finished'], ['tobook', 'Home visits to book'], ['all', 'All']].concat(STAGES);
     $('tabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="tab" data-f="' + t[0] + '" aria-pressed="' + (filter === t[0]) + '">' + esc(t[1]) + ' <b>' + (counts[t[0]] || 0) + '</b></button>'; }).join('');
+    var names = {}; orders.forEach(function (o) { if (o.nurse) names[o.nurse] = 1; });
+    $('nurses').innerHTML = Object.keys(names).sort().map(function (n) { return '<option value="' + esc(n) + '">'; }).join('');
     var rows = orders.filter(matches);
     $('count').textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's');
     if (!rows.length) { $('list').innerHTML = '<div class="empty">No orders here.</div>'; return; }
@@ -136,10 +148,10 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
         '<td data-l="Order"><div class="ord">' + esc(o.order) + '</div><div class="sub">' + dfmt.format(new Date(o.date * 1000)) + (o.total ? ' · ' + money.format(o.total) : '') + '</div>' +
           (o.refunded ? '<span class="pill warn">Refunded</span>' : '') + (o.addto ? '<span class="pill">Add-on to #' + esc(o.addto) + '</span>' : '') +
           (o.stage !== 'sent' && days >= 7 ? '<span class="pill warn">' + days + ' days open</span>' : '') + '</td>' +
-        '<td data-l="Patient"><div style="font-weight:600">' + esc(o.name || '—') + '</div><div class="sub">' + esc(o.email) + (o.phone ? '<br>' + esc(o.phone) : '') + '</div></td>' +
+        '<td data-l="Patient"><div style="font-weight:600">' + esc(o.name || '—') + '</div><div class="sub">' + esc(o.email) + (o.phone ? '<br>' + esc(o.phone) : '') + (isHome(o) && o.address ? '<br>' + esc(o.address) : '') + '</div></td>' +
         '<td data-l="Tests"><span class="type ' + kind(o) + '">' + esc(typeLabel(o)) + '</span><div>' + esc(String(o.items).split('; ').join(', ')) + '</div><div class="sub">' + esc(o.collection) + (o.preferred ? ' · ' + esc(o.preferred) : '') + '</div></td>' +
-        '<td data-l="Stage"><select class="stage" data-s="' + o.stage + '" aria-label="Stage for ' + esc(o.order) + '">' + STAGES.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
-          '<div class="saved">' + (o.updated ? 'Updated ' + dfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></td>' +
+        '<td data-l="Stage"><select class="stage" data-s="' + o.stage + '" aria-label="Stage for ' + esc(o.order) + '">' + stagesFor(o).map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+          (isHome(o) ? '<label class="appt"><span>Nurse</span><input type="text" class="nurse-in" list="nurses" value="' + esc(o.nurse) + '" placeholder="Assign a nurse" aria-label="Nurse for ' + esc(o.order) + '"></label>' + '<label class="appt"><span>Appointment</span><input type="datetime-local" class="appt-in" value="' + esc(o.appt) + '" aria-label="Appointment for ' + esc(o.order) + '"></label>' + (o.appt ? '<div class="appt-show">' + esc(apptFmt(o.appt)) + '</div>' : '') : '') + '<div class="saved">' + (o.updated ? 'Updated ' + dfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></td>' +
         '<td data-l="Notes"><textarea class="note" placeholder="Add a note" aria-label="Notes for ' + esc(o.order) + '">' + esc(o.note) + '</textarea><div class="saved"></div></td></tr>';
     }).join('') + '</tbody></table>';
   }
@@ -149,10 +161,18 @@ textarea.note{width:100%;min-height:38px;border:1px solid var(--line);border-rad
     api('POST', Object.assign({ id: o.id, kind: o.kind }, patch)).then(function (j) {
       Object.assign(o, patch, { updated: j.updated, by: j.by });
       hint.textContent = 'Saved ' + dfmt.format(new Date(j.updated));
-      if (patch.stage) setTimeout(render, 600);
+      if (patch.stage || patch.appt !== undefined) setTimeout(render, 600);
     }).catch(function (e) { hint.textContent = e.message === 'auth' ? '' : 'Not saved: ' + e.message; });
   }
   document.addEventListener('change', function (e) {
+    if (e.target.matches('input.nurse-in')) { save(e.target.closest('tr').getAttribute('data-id'), { nurse: e.target.value.trim() }, e.target.closest('td').querySelector('select')); return; }
+    if (e.target.matches('input.appt-in')) {
+      var id = e.target.closest('tr').getAttribute('data-id'), o = orders.find(function (x) { return x.id === id; });
+      var patch = { appt: e.target.value };
+      if (e.target.value && (o.stage === 'paid' || o.stage === 'form_sent')) patch.stage = 'booked';
+      save(id, patch, e.target.closest('td').querySelector('select'));
+      return;
+    }
     if (e.target.matches('select.stage')) { e.target.setAttribute('data-s', e.target.value); save(e.target.closest('tr').getAttribute('data-id'), { stage: e.target.value }, e.target); }
   });
   document.addEventListener('focusout', function (e) {
