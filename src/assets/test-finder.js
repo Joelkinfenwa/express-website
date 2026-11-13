@@ -308,7 +308,8 @@
     var LEAD = { general: 'covering your core organs, blood and metabolism', hormones: A.sex === 'male' ? 'linked to energy, mood, libido and recovery' : 'linked to energy, mood, libido and cycles',
       performance: 'linked to training, recovery and body composition', thyroid: 'covering thyroid hormones and thyroid antibodies', vitamins: 'for the nutrients most often low in Australians',
       sexual: 'for the most common STIs', longevity: 'for a detailed picture of your long-term health' };
-    var lead = n && LEAD[A.goal] ? LEAD[A.goal] + '.' : '';
+    // The widest panel is described as what it is, whatever goal was picked, so the line never overstates it
+    var lead = n && h === 'complete-wellness-panel' ? LEAD.longevity + '.' : n && LEAD[A.goal] ? LEAD[A.goal] + '.' : '';
     var assure = [
       'No referral or GP visit. Your request form is issued with your order',
       'Reviewed by an Australian doctor, emailed with reference ranges',
