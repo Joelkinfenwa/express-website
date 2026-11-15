@@ -3,6 +3,8 @@
 // there is no separate database: website orders on the PaymentIntent, referrals on their Stripe customer.
 import { stripe } from '../../lib/stripe.js';
 import { verify } from '../../lib/admin-auth.js';
+import PRICES from '../../lib/price-index.mjs';
+import { orderFromSession } from '../../lib/request-form.js';
 
 export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'results_in', 'review', 'sent'];
 
@@ -25,7 +27,11 @@ function fromSession(s) {
   const pm = pi.metadata || {};
   const charge = pi.latest_charge;
   const [updated, by] = String(pm.ops_updated || '').split('|');
+  // Results checklist: the same test lines printed on the pathology request form
+  let lines = [];
+  if (m.order_type === 'panel' || m.order_type === 'builder') { try { lines = [...new Set(orderFromSession(s, PRICES).items.flatMap((i) => i.lines || []).map((l) => String(l).trim()).filter(Boolean))]; } catch {} }
   return {
+    lines, ticks: String(pm.ops_ticks || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number),
     id: pi.id, kind: 'pi', order: pm.order_number ? '#' + pm.order_number : m.reference, date: s.created,
     name: [m.first_name, m.last_name].filter(Boolean).join(' '), email: (s.customer_details && s.customer_details.email) || s.customer_email || '',
     phone: m.phone || '', items: m.items || '', type: m.order_type, collection: m.collection || '', total: (s.amount_total || 0) / 100,
@@ -67,6 +73,7 @@ export default async function handler(req, res) {
       const metadata = { ops_updated: `${new Date().toISOString()}|${who}` };
       if (b.stage !== undefined) { if (!STAGES.includes(b.stage)) return res.status(400).json({ error: 'Unknown stage.' }); metadata.ops_stage = b.stage; }
       if (b.note !== undefined) metadata.ops_note = String(b.note).slice(0, 480);
+      if (b.ticks !== undefined) { if (!Array.isArray(b.ticks) || b.ticks.some((x) => !Number.isInteger(x) || x < 0 || x > 200)) return res.status(400).json({ error: 'Invalid checklist.' }); metadata.ops_ticks = [...new Set(b.ticks)].sort((a, c) => a - c).join(',').slice(0, 480); }
       if (b.nurse !== undefined) metadata.ops_nurse = String(b.nurse).trim().slice(0, 60);
       if (b.appt !== undefined) { const a = String(b.appt).slice(0, 16); if (a && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(a)) return res.status(400).json({ error: 'Invalid appointment time.' }); metadata.ops_appt = a; }
       await stripe('POST', path, { metadata });
