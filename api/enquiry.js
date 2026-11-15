@@ -8,7 +8,7 @@ import { mint as mintNowOffer, NOW_OFF, NOW_MIN } from '../lib/now-offer.js';
 // Delivery: email via Resend (RESEND_API_KEY + ENQUIRY_TO + ENQUIRY_FROM), which carries uploaded
 // request forms as attachments. HubSpot Forms (HUBSPOT_PORTAL_ID + HUBSPOT_FORM_ID) also logs leads when set.
 
-const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'timing', 'offer', 'tests', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message'];
+const FIELDS = ['company', 'partner_code', 'partner', 'submitter', 'patient_name', 'patient_dob', 'patient_phone', 'address', 'state', 'collection', 'kind', 'page', 'name', 'email', 'phone', 'suburb', 'postcode', 'preferred_date', 'preferred_time', 'has_referral', 'reference', 'payment', 'session_id', 'recommendation', 'timing', 'offer', 'tests', 'organisation', 'organisation_type', 'monthly_volume', 'interest', 'topic', 'message', 'instagram', 'tiktok', 'followers', 'niche'];
 const MAX = 4000;
 
 function clean(body) {
@@ -49,7 +49,7 @@ function attachment(body) {
 }
 
 async function toEmail(d, att) {
-  const subject = d.kind === 'referral' ? `Partner referral ${d.reference ? d.reference + ' ' : ''}(${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/Stripe|choose tests/i.test(d.payment) ? 'NOT PAID YET: sent to online payment, a separate paid-order email confirms payment' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
+  const subject = d.kind === 'referral' ? `Partner referral ${d.reference ? d.reference + ' ' : ''}(${d.company || d.partner}, invoice monthly): ${d.patient_name} (home visit)` : d.kind === 'partner' ? `Partner enquiry: ${d.organisation || d.name}` : d.kind === 'creator' ? `Creator application: ${d.name} (${d.instagram || d.tiktok || 'no handle'}, ${d.followers || 'followers not given'})` : d.kind === 'booking' ? 'Home visit request' + (d.reference ? ` ${d.reference}` : '') + ': ' + [d.suburb, d.postcode].filter(Boolean).join(' ') + (d.payment ? ` (${/Stripe|choose tests/i.test(d.payment) ? 'NOT PAID YET: sent to online payment, a separate paid-order email confirms payment' : 'payment to arrange'})` : '') : `Website enquiry: ${d.topic || 'General'}`;
   const rows = Object.entries(d).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#66706A">${escapeHtml(k)}</td><td style="padding:4px 0">${escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`).join('');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

@@ -16,6 +16,13 @@
     }
     if (next) { cur = { s: next, t: now }; try { localStorage.setItem(KEY, JSON.stringify(cur)); } catch (e) {} }
     window.epSrc = function () { return cur ? cur.s : ''; };
+    // Creator program: ?ref=CODE on any page credits that creator's code for 90 days (code only, no personal details)
+    var RKEY = 'ep-ref', ref = null;
+    try { ref = JSON.parse(localStorage.getItem(RKEY) || 'null'); } catch (e) {}
+    if (ref && now - ref.t > 90 * 864e5) ref = null;
+    var rq = String(q.get('ref') || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 24).toUpperCase();
+    if (rq) { ref = { c: rq, t: now }; try { localStorage.setItem(RKEY, JSON.stringify(ref)); } catch (e) {} }
+    window.epRef = function () { return ref ? ref.c : ''; };
   })();
 
   // Funnel steps, counted in Vercel Analytics (Events) and, where Meta has a matching event, in the Meta pixel.
@@ -126,6 +133,7 @@
             var checkout = pay.checkout;
             var startPay = function (attempt) {
               if (checkout && window.epSrc) checkout.src = window.epSrc();
+              if (checkout && window.epRef && window.epRef()) checkout.ref = window.epRef();
               return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(checkout) })
                 .then(function (r) { return r.json().catch(function () { return { error: '', detail: 'HTTP ' + r.status }; }); }, function () { return { error: '', detail: 'network' }; })
                 .then(function (j) {

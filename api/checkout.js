@@ -113,6 +113,9 @@ export default async function handler(req, res) {
   };
   // Channel or ad the visitor arrived from (campaign tags only)
   if (str(body.src, 180)) metadata.source = str(body.src, 180);
+  // Creator program: the creator code that referred this order (set by ?ref=CODE on any page)
+  const creatorRef = str(body.ref, 24).toUpperCase();
+  if (/^[A-Z0-9-]{3,24}$/.test(creatorRef)) metadata.creator = creatorRef;
   // What to print on the pathology request form (Stripe metadata values are limited to 500 characters)
   if (type === 'panel') metadata.panel = str(body.panel, 80);
   if (offerNote) metadata.offer = offerNote;

@@ -67,6 +67,7 @@ function finalizeBase(html, rel) {
   html = html.replace('<!--analytics-->', analytics());
   html = html.replace('<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/img/icon-96.png" type="image/png" sizes="96x96"><link rel="icon" href="/assets/img/icon-192.png" type="image/png" sizes="192x192"><link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">');
   html = html.replace('<a href="/collection-centres">Collection centres</a></div>', '<a href="/collection-centres">Collection centres</a><a href="/guides">Guides</a></div>');
+  html = html.replace('<a href="/careers">Nurse careers</a><a href="/contact">', '<a href="/careers">Nurse careers</a><a href="/creators">Creator program</a><a href="/contact">');
   // data-if="key": keep the element (minus the marker) when key has a value, drop it entirely when empty
   html = html.replace(/<(\w+)([^>]*?) data-if="(\w+)"([^>]*)>([\s\S]*?)<\/\1>/g, (m, tag, a, key, b, inner) =>
     config[key] && String(config[key]).trim() ? `<${tag}${a}${b}>${inner}</${tag}>` : '');
