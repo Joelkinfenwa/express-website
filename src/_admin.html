@@ -111,18 +111,20 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var KEY = 'ep-admin-token', token = '', orders = [], view = 'book', q = '', openId = '', undo = null, toastT;
-  var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['booked', 'Booked'], ['collected', 'Collected'], ['results_in', 'Results in'], ['review', 'With Jai'], ['sent', 'Sent to patient']];
+  var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['booked', 'Booked'], ['collected', 'Collected'], ['dropped', 'Dropped at lab'], ['results_in', 'Results in'], ['review', 'With Jai'], ['sent', 'Sent to patient']];
+  var GP_STAGES = ['paid', 'booked', 'dropped'];
   // Work queues: what needs doing next
   var QUEUES = [
     ['book', 'To book', 'Home visits paid and waiting for a booking.'],
     ['collect', 'Awaiting collection', 'Booked visits, and patients who still need to visit a centre.'],
     ['results', 'Awaiting results', 'Collected and waiting for the lab.'],
     ['jai', 'With Jai', 'Results in, or being reviewed by Jai.'],
-    ['done', 'Done', 'Results sent to the patient.']
+    ['done', 'Done', 'Results sent to the patient, or GP-form bloods dropped at the lab.']
   ];
   function isHome(o) { return o.type === 'own-form' || o.type === 'referral' || /home/i.test(o.collection); }
   function queueOf(o) {
-    if (o.stage === 'sent') return 'done';
+    if (o.stage === 'sent' || o.stage === 'dropped') return 'done';
+    if (o.type === 'own-form') return o.stage === 'paid' || o.stage === 'form_sent' ? 'book' : 'collect'; // results go to their own doctor
     if (o.stage === 'results_in' || o.stage === 'review') return 'jai';
     if (o.stage === 'collected') return 'results';
     if (o.stage === 'booked') return 'collect';
@@ -132,6 +134,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   function nextStep(o) {
     var qu = queueOf(o);
     if (qu === 'book') return { label: 'Book visit', open: true };
+    if (qu === 'collect' && o.type === 'own-form') return { label: 'Dropped at lab', stage: 'dropped' };
     if (qu === 'collect') return { label: 'Mark collected', stage: 'collected' };
     if (qu === 'results') return { label: 'Results in', stage: 'results_in' };
     if (o.stage === 'results_in') return { label: 'Send to Jai', stage: 'review' };
@@ -192,6 +195,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var days = Math.floor((Date.now() / 1000 - o.date) / 86400);
     var status = o.stage === 'booked' && o.appt ? 'Booked for <strong>' + esc(appt(o.appt)) + '</strong>' + (o.nurse ? ' with ' + esc(o.nurse) : '')
       : o.stage === 'review' ? '<strong>With Jai for review</strong>' : o.stage === 'results_in' ? '<strong>Results in</strong>, not yet with Jai'
+      : o.stage === 'dropped' ? 'Bloods dropped at lab · results go to their doctor' + (o.updated ? ' · ' + dfmt.format(new Date(o.updated)) : '')
+      : o.type === 'own-form' && o.stage === 'collected' ? '<strong>Collected</strong>, not yet dropped at the lab'
       : o.stage === 'sent' ? 'Sent to patient' + (o.updated ? ' ' + dfmt.format(new Date(o.updated)) : '') : '';
     var prog = (o.lines || []).length && ['results', 'jai', 'done'].indexOf(queueOf(o)) !== -1 ? '<div class="l3">Results ticked: <strong>' + (o.ticks || []).length + ' of ' + o.lines.length + '</strong></div>' : '';
     return '<article class="card' + (open ? ' open' : '') + '" data-id="' + esc(o.id) + '">' +
@@ -215,7 +220,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       '<form class="form" data-form>' +
       (isHome(o) ? '<div class="row2"><label>Appointment<input type="datetime-local" name="appt" value="' + esc(o.appt) + '"></label><label>Nurse<input type="text" name="nurse" list="nurses" value="' + esc(o.nurse) + '" placeholder="Name"></label></div>' : '') +
       '<label>Note<textarea name="note" placeholder="Anything the team should know">' + esc(o.note) + '</textarea></label>' +
-      '<label>Stage<select name="stage">' + STAGES.filter(function (s) { return isHome(o) || s[0] !== 'booked'; }).map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></label>' +
+      '<label>Stage<select name="stage">' + STAGES.filter(function (s) { return o.type === 'own-form' ? GP_STAGES.indexOf(s[0]) !== -1 || s[0] === o.stage : s[0] !== 'dropped' && (isHome(o) || s[0] !== 'booked'); }).map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></label>' +
       '<div class="row2"><button class="btn" type="submit">' + (queueOf(o) === 'book' ? 'Save booking' : 'Save') + '</button><button class="btn light" type="button" data-toggle>Close</button></div>' +
       '<div class="meta">' + (o.updated ? 'Last updated ' + tfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></form></div>';
   }
@@ -232,7 +237,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     $('toast-msg').textContent = msg; $('undo').hidden = !onUndo; $('toast').hidden = false;
     toastT = setTimeout(function () { $('toast').hidden = true; undo = null; }, 6000);
   }
-  var NAMES = { collected: 'collected', results_in: 'results in', review: 'with Jai', sent: 'sent to patient', booked: 'booked' };
+  var NAMES = { dropped: 'dropped at lab', collected: 'collected', results_in: 'results in', review: 'with Jai', sent: 'sent to patient', booked: 'booked' };
   document.addEventListener('click', function (e) {
     var qb = e.target.closest('.q');
     if (qb) { view = qb.getAttribute('data-v'); q = ''; $('q').value = ''; openId = ''; try { localStorage.setItem('ep-admin-view', view); } catch (x) {} render(); return; }

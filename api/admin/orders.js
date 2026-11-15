@@ -6,7 +6,8 @@ import { verify } from '../../lib/admin-auth.js';
 import PRICES from '../../lib/price-index.mjs';
 import { orderFromSession } from '../../lib/request-form.js';
 
-export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'results_in', 'review', 'sent'];
+// 'dropped' (bloods dropped at the lab) completes a home visit on the patient's own GP form: results go to their doctor
+export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'dropped', 'results_in', 'review', 'sent'];
 
 async function sessions() {
   const out = [];
