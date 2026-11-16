@@ -46,7 +46,7 @@
 <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
 <h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -0.03em">Your deal, in one minute</h2>
 <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px">
-<li style="padding: 20px 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #DCE0D8"><strong>$25 per 1,000 views</strong> — counted 30 days after each video is posted, up to 200,000 views per video. A video that runs earns up to $5,000 on views alone.</li>
+<li style="padding: 20px 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #DCE0D8"><strong>$15 per 1,000 views</strong> — counted 30 days after each video is posted, up to 200,000 views per video. A video that runs earns up to $3,000 on views alone.</li>
 <li style="padding: 20px 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #DCE0D8"><strong>15% of every order</strong> — any order placed through your link or with your code is yours, automatically.</li>
 <li style="padding: 20px 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #DCE0D8"><strong>A free blood test</strong> — so the experience you share is your own. Book it below before you film.</li>
 <li style="padding: 20px 24px; border-radius: 18px; background: #FFFFFF; border: 1px solid #DCE0D8"><strong>Paid monthly</strong> — views and commissions together, with a statement listing each video and each tracked order. Post as often as you like; there is no exclusivity and no lock-in.</li>
@@ -58,7 +58,7 @@
 <input id="ch-views" type="range" min="1000" max="200000" step="1000" value="25000" style="width: 100%; accent-color: #17302A">
 <div style="background: #F7F4EF; border-radius: 18px; padding: 22px 26px; display: flex; flex-direction: column; gap: 4px">
 <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #A4502E">View earnings</span>
-<span data-ch-payout style="font-family: 'Instrument Sans', sans-serif; font-size: 40px; font-weight: 600; letter-spacing: -0.02em">$625</span>
+<span data-ch-payout style="font-family: 'Instrument Sans', sans-serif; font-size: 40px; font-weight: 600; letter-spacing: -0.02em">$375</span>
 <span style="color: #4B5650; font-size: 14px">plus 15% of every order it brings in — on our $319 Ultimate Performance Screen that is $47.85 per order, on the $99 Core Health Check $14.85.</span>
 </div>
 <p style="margin: 0; color: #4B5650; font-size: 13px">Views counted at day 30 per video, capped at 200,000. Earnings across videos add up — there is no cap on how many you post.</p>
@@ -192,7 +192,7 @@
       copy.textContent = 'Copied'; setTimeout(function () { copy.textContent = 'Copy link'; }, 2000);
     }).catch(function () { window.prompt('Copy your link:', full); });
   });
-  // Earnings calculator: $25 per 1,000 views, capped at 200,000 views
+  // Earnings calculator: $15 per 1,000 views, capped at 200,000 views
   var slider = document.getElementById('ch-views');
   var viewsOut = document.querySelector('[data-ch-views]');
   var payoutOut = document.querySelector('[data-ch-payout]');
@@ -200,7 +200,7 @@
   function update() {
     var v = Math.min(Number(slider.value) || 0, 200000);
     if (viewsOut) viewsOut.textContent = fmt(v);
-    if (payoutOut) payoutOut.textContent = '$' + fmt(Math.round(v / 1000 * 25));
+    if (payoutOut) payoutOut.textContent = '$' + fmt(Math.round(v / 1000 * 15));
   }
   if (slider) { slider.addEventListener('input', update); update(); }
 })();</script>
