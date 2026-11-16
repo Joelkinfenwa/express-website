@@ -181,7 +181,21 @@ function singleTests(t) {
   const sum = [...used].reduce((a, x) => a + bySlug[x], 0) + catalog.base.price;
   return { slugs: [...used], sum: sum > t.price ? sum : null };
 }
+// Creator hub: the live panel menu as selectable cards, price struck through, free for creators
+const CREATOR_COPY = JSON.parse(readFileSync(join(ROOT, 'data/panel-content.json'), 'utf8'));
+const creatorPanels = () => catalog.tests.slice().sort((a, b) => a.price - b.price).map((t) => {
+  const names = displayNames(t);
+  const lead = (CREATOR_COPY[t.handle] || {}).lead || summary(t, 4);
+  return `<label data-cp style="position: relative; display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 18px; background: #FFFFFF; border: 2px solid #DCE0D8; cursor: pointer; box-sizing: border-box">
+<input type="radio" name="tests" value="${esc(t.title)}" required style="position: absolute; opacity: 0; pointer-events: none">
+<span style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline"><strong style="font-size: 17px">${esc(t.title)}</strong><span style="white-space: nowrap"><s style="color: #8A948E">${money(t.price)}</s> <strong style="color: #A4502E">Free</strong></span></span>
+<span style="color: #4B5650; font-size: 14px">${esc(lead)}</span>
+<span style="color: #5A645E; font-size: 13px">${names.length} markers: ${esc(names.slice(0, 5).join(', '))}${names.length > 5 ? ' + ' + (names.length - 5) + ' more' : ''}</span>
+</label>`;
+}).join('\n');
+
 const fragments = {
+  CREATOR_PANELS: creatorPanels(),
   FEATURED: featured.map((t, i) => card(t, i === 0)).join('\n'),
   CATEGORY_BUTTONS: catButtons,
   ALL_TESTS: sorted.map(row).join('\n'),

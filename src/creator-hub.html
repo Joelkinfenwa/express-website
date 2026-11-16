@@ -22,7 +22,7 @@
 <header class="site-header">
 <nav aria-label="Main" class="nav">
 <a href="/" class="logo" aria-label="Express Pathology home"><b>express</b><i></i><span>pathology</span></a>
-<div class="nav-links" id="nav-links"><a href="#deal">Your deal</a><a href="#test">Your free test</a><a href="#brief">Creative brief</a><a href="#tracking">Tracking</a><a href="#payment">Getting paid</a></div>
+<div class="nav-links" id="nav-links"><a href="#deal">Your deal</a><a href="#test">Order your test</a><a href="#learn">Know the product</a><a href="#brief">Creative brief</a><a href="#payment">Getting paid</a></div>
 <div class="nav-actions"><a href="mailto:express@expresspathology.com.au" class="btn btn-dark">Email the team</a><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div>
 </nav>
 </header>
@@ -65,26 +65,54 @@
 </div>
 </section>
 
-<!-- Free test -->
+<!-- Free test ordering -->
 <section id="test" style="background: #E8EDE6">
-<div style="max-width: 1320px; margin: 0 auto; padding: 80px 24px; display: flex; flex-wrap: wrap; gap: 48px">
-<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
-<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -0.03em">Book your free test</h2>
-<p style="margin: 0; font-size: 17px; color: #33403A; max-width: 520px">Film the real thing. Choose a collection centre near you (2,000+ across Australia) or a nurse visit at home, arranged with our team. Tell us what suits and we confirm within one business day.</p>
-<p style="margin: 0; color: #4B5650; font-size: 14px">Not sure which test? Take the <a href="/quiz" style="color: #1C2420; font-weight: 600">two-minute quiz</a> first and tell us what it recommended.</p>
+<div style="max-width: 1320px; margin: 0 auto; padding: 80px 24px; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 760px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -0.03em">Order your free test</h2>
+<p style="margin: 0; font-size: 17px; color: #33403A">Pick any panel below — it is on us. Choose how you want it collected and the team confirms your booking within one business day (bookings are matched against the creator roster by your code). Not sure which? Take the <a href="/quiz" style="color: #1C2420; font-weight: 600">two-minute quiz</a> — it is the exact funnel your audience will go through.</p>
 </div>
-<form data-enquiry="creator-test" action="/api/enquiry" method="post" style="flex: 1 1 480px; min-width: 0; background: #F7F4EF; border-radius: 28px; padding: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; box-sizing: border-box">
+<form data-enquiry="creator-test" action="/api/enquiry" method="post" style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px">
+<!--@CREATOR_PANELS-->
+</div>
+<div style="background: #F7F4EF; border-radius: 28px; padding: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; box-sizing: border-box">
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-name" style="font-size: 14px; font-weight: 600">Full name</label><input id="t-name" name="name" required type="text" autocomplete="name" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-email" style="font-size: 14px; font-weight: 600">Email</label><input id="t-email" name="email" required type="email" autocomplete="email" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-phone" style="font-size: 14px; font-weight: 600">Phone</label><input id="t-phone" name="phone" required type="tel" autocomplete="tel" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-code" style="font-size: 14px; font-weight: 600">Your creator code</label><input id="t-code" name="partner_code" required type="text" data-ch-code-input placeholder="YOURCODE" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF; font-family: 'JetBrains Mono', monospace"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-suburb" style="font-size: 14px; font-weight: 600">Suburb</label><input id="t-suburb" name="suburb" required type="text" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 14px; font: inherit; background: #FFFFFF"></div>
 <div style="display: flex; flex-direction: column; gap: 6px"><label for="t-collection" style="font-size: 14px; font-weight: 600">Collection</label><select id="t-collection" name="collection" style="min-height: 50px; border: 1px solid #D3D8D0; border-radius: 14px; padding: 0 12px; font: inherit; background: #FFFFFF; color: #1C2420"><option>Collection centre near me</option><option>Nurse home visit</option><option>Either — whatever films best</option></select></div>
-<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="t-msg" style="font-size: 14px; font-weight: 600">Which test, and when suits? <span style="font-weight: 400; color: #5A645E">(optional)</span></label><textarea id="t-msg" name="message" rows="2" placeholder="e.g. Ultimate Performance Screen, weekday mornings" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
+<div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px"><label for="t-msg" style="font-size: 14px; font-weight: 600">When suits you? <span style="font-weight: 400; color: #5A645E">(optional)</span></label><textarea id="t-msg" name="message" rows="2" placeholder="e.g. weekday mornings, any day after 4pm" style="border: 1px solid #D3D8D0; border-radius: 14px; padding: 12px 14px; font: inherit; background: #FFFFFF; resize: vertical"></textarea></div>
 <div class="sr-only" aria-hidden="true"><label>Leave this empty<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></div>
 <p class="form-status" role="status" aria-live="polite"></p>
-<button type="submit" style="grid-column: 1 / -1; min-height: 54px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer">Request my free test</button>
+<button type="submit" style="grid-column: 1 / -1; min-height: 54px; border: 0; border-radius: 999px; background: #17302A; color: #F7F4EF; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer">Order my free test</button>
+</div>
 </form>
+</div>
+</section>
+
+<!-- Know the product -->
+<section id="learn" style="max-width: 1320px; margin: 0 auto; padding: 88px 24px 0; display: flex; flex-direction: column; gap: 36px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 760px">
+<h2 style="margin: 0; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -0.03em">Know the product</h2>
+<p style="margin: 0; font-size: 17px; color: #33403A">Five minutes here and you can answer anything your audience asks in the comments.</p>
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px">
+<li style="display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 22px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">01</span><span style="font-weight: 700; font-size: 19px">Order online</span><span style="color: #4B5650">No GP referral needed. The pathology request form is issued with the order, doctor review included.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 22px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">02</span><span style="font-weight: 700; font-size: 19px">Collect anywhere</span><span style="color: #4B5650">2,000+ partner collection centres across Australia, or a registered nurse comes to your home or work. The draw itself takes seconds.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 22px; background: #FFFFFF; border: 1px solid #DCE0D8"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #A4502E">03</span><span style="font-weight: 700; font-size: 19px">Accredited labs</span><span style="color: #4B5650">Samples are tested in NATA-accredited Australian laboratories — the same labs doctors use.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 22px; background: #17302A; color: #F7F4EF"><span style="font-family: 'Instrument Sans', sans-serif; font-weight: 600; color: #F2A981">04</span><span style="font-weight: 700; font-size: 19px">A report you own</span><span style="color: #C5D1CA">A clear results report, yours to keep and share with any doctor. Express has tested more than 5,000 people.</span></li>
+</ol>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<div style="padding: 24px 26px; border-radius: 18px; background: #E8EDE6; display: flex; flex-direction: column; gap: 6px"><strong>Energy and recovery</strong><span style="color: #33403A; font-size: 15px">Iron studies and ferritin (iron stores), vitamin B12 and vitamin D — the markers people look at first for fatigue, training load and recovery.</span></div>
+<div style="padding: 24px 26px; border-radius: 18px; background: #E8EDE6; display: flex; flex-direction: column; gap: 6px"><strong>Hormones</strong><span style="color: #33403A; font-size: 15px">Testosterone, oestradiol, SHBG, cortisol and thyroid function (TSH, T3, T4) — involved in energy, mood, sleep and how the body responds to training.</span></div>
+<div style="padding: 24px 26px; border-radius: 18px; background: #E8EDE6; display: flex; flex-direction: column; gap: 6px"><strong>Metabolism</strong><span style="color: #33403A; font-size: 15px">HbA1c (a three-month average of blood sugar), fasting insulin, cholesterol and lipids — the long-term metabolic health picture.</span></div>
+<div style="padding: 24px 26px; border-radius: 18px; background: #E8EDE6; display: flex; flex-direction: column; gap: 6px"><strong>Organs, blood and inflammation</strong><span style="color: #33403A; font-size: 15px">Liver and kidney function, full blood count and inflammation markers (ESR/CRP) — the general screen of how everything is running.</span></div>
+</div>
+<div style="padding: 28px 32px; border-radius: 22px; background: #FFFFFF; border: 1px solid #DCE0D8; display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+<strong style="font-size: 17px">Talking about results on camera</strong>
+<p style="margin: 0; color: #4B5650">Your report shows your levels against standard reference ranges. It is information about your body, not a diagnosis — say it that way. If something sits outside range, the report flags it, and the right line is always "worth discussing with your doctor". That framing is accurate, it keeps you inside the health-advertising rules, and it is what a responsible creator sounds like.</p>
 </div>
 </section>
 
@@ -203,6 +231,16 @@
     if (payoutOut) payoutOut.textContent = '$' + fmt(Math.round(v / 1000 * 15));
   }
   if (slider) { slider.addEventListener('input', update); update(); }
+  // Panel picker: highlight the selected card
+  var cards = Array.prototype.slice.call(document.querySelectorAll('[data-cp]'));
+  cards.forEach(function (card) {
+    var input = card.querySelector('input');
+    if (!input) return;
+    input.addEventListener('change', function () {
+      cards.forEach(function (c) { c.style.borderColor = '#DCE0D8'; c.style.background = '#FFFFFF'; });
+      card.style.borderColor = '#17302A'; card.style.background = '#FDFBF7';
+    });
+  });
 })();</script>
 </body>
 </html>
