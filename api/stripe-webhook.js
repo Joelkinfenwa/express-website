@@ -69,7 +69,7 @@ export function emails(s, form = null, formError = '') {
     ['Order', m.reference], ['Checkout reference', m.checkout_ref !== m.reference ? m.checkout_ref : ''], ['Items', items.join(', ')], ['Total paid', total], ['Collection', m.collection],
     ['Name', name], ['Date of birth', m.dob], ['Sex', m.sex], ['Email', s.customer_details && s.customer_details.email || s.customer_email],
     ['Phone', m.phone], ['Address', [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ')],
-    ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Came from', m.source || 'Not recorded'], ['Stripe session', s.id]
+    ['Preferred date', m.preferred_date], ['Preferred time', m.preferred_time], ['Notes', m.notes], ['Came from', m.source || 'Not recorded'], ['Creator code', m.creator], ['Stripe session', s.id]
   ].filter(([, v]) => v);
   const toPatient = !!form; // the request form is always attached to the patient's confirmation email
   const team = {
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
     if (patient.to[0]) await send(patient).catch((e) => console.error('patient email failed:', e.message));
     // Tell Klaviyo the order is paid so follow-up flows stop (no-op without KLAVIYO_PRIVATE_KEY)
     await klaviyoEvent('Placed Website Order', { email: patient.to[0], firstName: m.first_name, lastName: m.last_name },
-      { reference: m.reference, order_type: m.order_type, panel: m.panel || '', collection: m.collection || '', offer: m.offer || '' }, (s.amount_total || 0) / 100)
+      { reference: m.reference, order_type: m.order_type, panel: m.panel || '', collection: m.collection || '', offer: m.offer || '', creator: m.creator || '' }, (s.amount_total || 0) / 100)
       .catch((e) => console.error('klaviyo order failed:', e.message));
     return res.status(200).json({ received: true });
   } catch (e) {
