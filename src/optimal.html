@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimal Health Clinic — Pathology Ordering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#080B37;--sky:#1DACFF;--sky-light:#9ED9FF;--ink:#10142e;--slate:#4B5069;--line:#E0E5F0;--bg:#FFFFFF;--bg-soft:#F4F7FB;--ok:#1E9E6A}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Poppins",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .ribbon{background:var(--navy);color:var(--sky-light);font-size:12.5px;text-align:center;padding:7px 16px;border-bottom:1px solid rgba(158,217,255,.18)}
+  .ribbon strong{color:#fff;font-weight:600}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(8,11,55,.94);backdrop-filter:blur(10px);color:#fff}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{display:flex;align-items:center;gap:9px;line-height:1;text-decoration:none}
+  .logo svg{flex:none;display:block}
+  .logo .wm{display:flex;flex-direction:column;gap:3px}
+  .logo .wm .top{font-size:16px;font-weight:700;letter-spacing:.03em;color:#fff}
+  .logo .wm .sub{font-size:8px;font-weight:500;letter-spacing:.3em;color:rgba(255,255,255,.75)}
+  .btn{display:inline-block;text-decoration:none;font-family:inherit;font-weight:600;cursor:pointer;border:0;transition:background .12s;border-radius:999px;text-align:center}
+  .btn-primary{background:var(--sky);color:#fff;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:12px 26px}
+  .btn-primary:hover{background:#0b93e6}
+  .btn-dark{background:var(--navy);color:#fff;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:12px 26px}
+  .btn-dark:hover{background:#111756}
+  .btn-sm{font-size:12px;padding:9px 18px}
+  .hero{position:relative;background:var(--navy);color:#fff;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(42% 60% at 70% 38%, rgba(29,172,255,.38), rgba(29,172,255,0) 70%),radial-gradient(48% 62% at 12% 85%, rgba(29,172,255,.16), rgba(29,172,255,0) 70%);pointer-events:none}
+  .hero-inner{position:relative;max-width:1120px;margin:0 auto;padding:56px 24px 62px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sky-light);background:rgba(158,217,255,.14);border:1px solid rgba(158,217,255,.28);padding:6px 16px;border-radius:999px;margin-bottom:20px}
+  .hero h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;line-height:1.12;letter-spacing:-.02em;max-width:660px}
+  .hero h1 .accent{color:var(--sky)}
+  .hero p{margin-top:16px;font-size:16.5px;color:rgba(255,255,255,.78);max-width:560px}
+  section{padding:56px 0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .kicker{font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sky);margin-bottom:10px}
+  h2.sec{font-size:clamp(23px,3vw,32px);font-weight:600;letter-spacing:-.015em}
+  p.sub{margin-top:10px;color:var(--slate);font-size:15.5px;max-width:580px}
+  .panels{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .panel{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;transition:border .12s,box-shadow .12s}
+  .panel:hover{border-color:var(--sky)}
+  .panel.sel{border-color:var(--sky);box-shadow:0 0 0 3px rgba(29,172,255,.16)}
+  .panel h3{font-size:17px;font-weight:600;line-height:1.3}
+  .panel .price{font-size:23px;font-weight:700;margin:8px 0 2px}
+  .panel .price span{font-size:12px;font-weight:500;color:var(--slate)}
+  .panel .count{font-size:12.5px;color:var(--slate);margin-bottom:12px}
+  .mtoggle{background:none;border:0;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--sky);text-align:left;padding:0;margin-bottom:10px}
+  .mtoggle:hover{text-decoration:underline}
+  .mlist{list-style:none;margin:0 0 16px;flex:1}
+  .mlist.hidden{display:none}
+  .mlist li{font-size:13px;color:var(--slate);padding:4px 0 4px 18px;position:relative;border-bottom:1px dashed var(--line)}
+  .mlist li:last-child{border-bottom:0}
+  .mlist li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--sky);opacity:.6}
+  .mnote{font-size:11.5px;color:#8A94A6;margin:-8px 0 14px}
+  .panel.addon{border-style:dashed}
+  .addon-flag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--sky);background:rgba(29,172,255,.1);border-radius:999px;padding:3px 11px;margin-bottom:8px;align-self:flex-start}
+  .book-sec{background:var(--bg-soft);border-top:1px solid var(--line)}
+  .book-grid{margin-top:34px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
+  .fstep{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .fstep:last-child{border:0;margin:0;padding:0}
+  .fstep-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .fstep-head .num{width:28px;height:28px;flex:none;border-radius:999px;background:var(--navy);color:var(--sky-light);font-weight:600;font-size:13.5px;display:flex;align-items:center;justify-content:center}
+  .fstep-head h3{font-size:16.5px;font-weight:600}
+  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(29,172,255,.07);border:1.5px solid rgba(29,172,255,.35);border-radius:12px;padding:13px 17px;margin-bottom:10px}
+  .selected-test .st-name{font-weight:600;font-size:14.5px}
+  .selected-test .st-price{font-weight:700;white-space:nowrap}
+  .selected-test button{background:none;border:0;cursor:pointer;color:var(--slate);font-size:12.5px;font-family:inherit;text-decoration:underline}
+  .no-test{font-size:14px;color:var(--slate)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .field input,.field select{width:100%;font-family:inherit;font-size:14.5px;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;outline:none;background:#fff;color:var(--ink)}
+  .field input:focus,.field select:focus{border-color:var(--sky)}
+  .field input.err{border-color:#E05C5C}
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;background:#fff}
+  .choice input{position:absolute;opacity:0}
+  .choice .c-title{font-size:14px;font-weight:600;padding-right:70px}
+  .choice .c-desc{font-size:12.5px;color:var(--slate);margin-top:3px}
+  .choice .c-fee{position:absolute;top:12px;right:14px;font-size:11.5px;font-weight:600;color:var(--sky);background:rgba(29,172,255,.1);border-radius:999px;padding:2px 10px}
+  .choice.sel{border-color:var(--sky);background:rgba(29,172,255,.06)}
+  .summary{position:sticky;top:84px}
+  .summary h3{font-size:16px;font-weight:600;margin-bottom:14px}
+  .srow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;color:var(--slate);gap:10px}
+  .srow .sv{color:var(--ink);font-weight:500;text-align:right}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:15.5px}
+  .srow.total .sv{font-weight:700;font-size:19px}
+  .incl{font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:10px;padding:10px 14px;margin:12px 0 16px}
+  .paybtn{width:100%;font-size:14px;padding:15px 20px}
+  .secure{text-align:center;font-size:12px;color:#8A94A6;margin-top:10px}
+  .demo-tag{font-size:11.5px;color:#8A94A6;text-align:center;margin-top:8px}
+  .confirm{display:none}
+  .confirm.show{display:block}
+  .conf-icon{width:52px;height:52px;border-radius:999px;background:rgba(30,158,106,.12);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+  .confirm h3{font-size:22px;font-weight:600}
+  .ref{display:inline-block;font-size:13px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 16px}
+  .conf-chip{display:inline-flex;align-items:center;background:rgba(29,172,255,.1);border:1px solid rgba(29,172,255,.35);border-radius:12px;padding:10px 18px;font-weight:600;font-size:14.5px}
+  .conf-list{margin:20px 0;display:grid;gap:11px}
+  .conf-item{display:flex;gap:11px;font-size:14px;color:var(--slate)}
+  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:50%;background:rgba(29,172,255,.18);display:inline-flex;align-items:center;justify-content:center}
+  .overlay{position:fixed;inset:0;background:rgba(8,11,55,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:20px;max-width:580px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(8,11,55,.35)}
+  .modal-head{background:var(--navy);color:#fff;padding:20px 26px;display:flex;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
+  .modal-head::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 120% at 90% 0%, rgba(29,172,255,.35), rgba(29,172,255,0) 70%);pointer-events:none}
+  .modal-head h4{font-size:17px;font-weight:600;position:relative}
+  .modal-head p{font-size:12.5px;color:rgba(255,255,255,.65);margin-top:3px;position:relative}
+  .modal-head button{position:relative;background:none;border:0;color:rgba(255,255,255,.7);font-size:12.5px;cursor:pointer;font-family:inherit;text-decoration:underline;white-space:nowrap}
+  .cal-dates{display:flex;gap:8px;overflow-x:auto;padding:18px 26px 6px;flex:none}
+  .dchip{flex:none;border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer;text-align:center;background:#fff;font-family:inherit}
+  .dchip .dw{font-size:10.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .dchip .dd{font-size:14.5px;font-weight:600;margin-top:2px}
+  .dchip.sel{border-color:var(--sky);background:rgba(29,172,255,.08)}
+  .cal-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 26px 18px;overflow-y:auto}
+  .slot{border:1.5px solid var(--line);border-radius:10px;padding:10px 6px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;background:#fff;font-family:inherit}
+  .slot.sel{border-color:var(--sky);background:rgba(29,172,255,.1);font-weight:600}
+  .slot:disabled{opacity:.32;cursor:default}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 26px;border-top:1px solid var(--line);flex:none}
+  .modal-foot .pb{font-size:12px;color:#8A94A6}
+  footer{border-top:1px solid var(--line);padding:28px 0}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12.5px;color:var(--slate)}
+  .foot .pby{font-weight:600;color:var(--ink)}
+  @media(max-width:900px){.panels{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){
+    .panels{grid-template-columns:1fr}
+    .book-grid{grid-template-columns:1fr}
+    .summary{position:static}
+    .grid2,.choice-row{grid-template-columns:1fr}
+    .cal-slots{grid-template-columns:repeat(3,1fr)}
+    .hero-inner{padding:44px 20px 50px}
+    section{padding:44px 0}
+    .card{padding:22px 18px}
+  }
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="ribbon"><strong>Demo environment</strong> — prepared by Express Pathology for Optimal Health Clinic. No real orders are processed.</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top" aria-label="Optimal Health Clinic">
+      <svg width="34" height="28" viewBox="0 0 36 30" fill="none" aria-hidden="true">
+        <path d="M8 3h6v6h6v6h-6v6H8v-6H2V9h6V3z" stroke="#1DACFF" stroke-width="2.2"/>
+        <path d="M16 6h6v6h6v6h-6v6h-6v-6h-6v-6h6V6z" stroke="#FFFFFF" stroke-width="2.2"/>
+      </svg>
+      <span class="wm"><span class="top">OPTIMAL</span><span class="sub">HEALTH CLINIC</span></span>
+    </a>
+    <a class="btn btn-primary btn-sm" href="#tests">Order bloods</a>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <span class="eyebrow">Optimal Health Clinic — Pathology Ordering</span>
+    <h1>Order your patient's bloods.<br>Collected <span class="accent">their way</span>.</h1>
+    <p>Pick the panel, enter the patient's details once, and choose collection — a mobile nurse at their door, or any of 2,000+ collection centres nationally.</p>
+  </div>
+</div>
+
+<section id="tests">
+  <div class="wrap">
+    <div class="kicker">Choose the panel</div>
+    <h2 class="sec">Your panels, as they run today</h2>
+    <p class="sub">Replicated exactly from your current panel library, at the same prices. All prices include GST.</p>
+    <div class="panels">
+
+      <div class="panel" id="pan-male">
+        <h3>Male Initial</h3>
+        <div class="price">$184 <span>incl. GST</span></div>
+        <div class="count">13 tests</div>
+        <button type="button" class="mtoggle" data-list="ml-male">Hide markers</button>
+        <ul class="mlist" id="ml-male">
+          <li>Testosterone — Total, Free + SHBG</li>
+          <li>E2 (Oestradiol)</li>
+          <li>Full Blood Count</li>
+          <li>Cortisol</li>
+          <li>CRP (high sensitivity)</li>
+          <li>DHEAS</li>
+          <li>FSH / LH</li>
+          <li>Progesterone</li>
+          <li>Prolactin</li>
+          <li>MBA20 biochemistry</li>
+          <li>IGF-1</li>
+          <li>PSA</li>
+          <li>Growth Hormone</li>
+        </ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="male">Select this panel</button>
+      </div>
+
+      <div class="panel" id="pan-female">
+        <h3>Female Initial</h3>
+        <div class="price">$194 <span>incl. GST</span></div>
+        <div class="count">12 tests</div>
+        <button type="button" class="mtoggle" data-list="ml-female">Hide markers</button>
+        <ul class="mlist" id="ml-female">
+          <li>Testosterone — Total, Free + SHBG</li>
+          <li>E2 (Oestradiol)</li>
+          <li>Full Blood Count</li>
+          <li>Cortisol</li>
+          <li>CRP (high sensitivity)</li>
+          <li>DHEAS</li>
+          <li>FSH / LH</li>
+          <li>Progesterone</li>
+          <li>Prolactin</li>
+          <li>MBA20 biochemistry</li>
+          <li>Ferritin</li>
+          <li>TSH</li>
+        </ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="female">Select this panel</button>
+      </div>
+
+      <div class="panel" id="pan-followup">
+        <h3>OHC Follow Up</h3>
+        <div class="price">$139 <span>incl. GST</span></div>
+        <div class="count">6 tests — ongoing monitoring</div>
+        <button type="button" class="mtoggle" data-list="ml-follow">Hide markers</button>
+        <ul class="mlist" id="ml-follow">
+          <li>Testosterone — Total, Free + SHBG</li>
+          <li>E2 (Oestradiol)</li>
+          <li>Full Blood Count</li>
+          <li>E/LFT (kidney + liver)</li>
+          <li>IGF-1</li>
+          <li>PSA</li>
+        </ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="followup">Select this panel</button>
+      </div>
+
+      <div class="panel addon" id="pan-addon">
+        <span class="addon-flag">Optional add-on</span>
+        <h3>Additional Markers</h3>
+        <div class="price">$232 <span>incl. GST</span></div>
+        <div class="count">6 tests — can be added to any panel</div>
+        <button type="button" class="mtoggle" data-list="ml-addon">Hide markers</button>
+        <ul class="mlist" id="ml-addon">
+          <li>Copper</li>
+          <li>Zinc</li>
+          <li>Vitamin B12</li>
+          <li>Iron studies</li>
+          <li>Thyroid function — TSH, FT3, FT4</li>
+          <li>Urine iodine / creatinine (spot)</li>
+        </ul>
+        <div class="mnote">Requires a urine specimen — the collection kit includes a container when added.</div>
+        <button class="btn btn-dark btn-sm" type="button" id="addonBtn">Add to order</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="book-sec" id="checkout">
+  <div class="wrap">
+    <div class="kicker">Place the order</div>
+    <h2 class="sec">Complete the order</h2>
+    <div class="book-grid">
+      <div class="card" id="formCard">
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">1</span><h3>The test</h3></div>
+          <div class="no-test" id="noTest">Select a panel above to begin.</div>
+          <div class="selected-test" id="selTest" style="display:none">
+            <div><div class="st-name" id="stName"></div></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
+          </div>
+          <div class="selected-test" id="selAddon" style="display:none">
+            <div><div class="st-name">Additional Markers</div></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price">$232.00</span><button type="button" id="addonRemove">Remove</button></div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">2</span><h3>How will the bloods be collected?</h3></div>
+          <div class="choice-row">
+            <label class="choice sel" id="chHome">
+              <input type="radio" name="cmode" value="home" checked>
+              <div class="c-title">At-home nurse visit</div>
+              <div class="c-desc">A qualified nurse visits the patient — exact time chosen at booking</div>
+              <span class="c-fee">+ $75</span>
+            </label>
+            <label class="choice" id="chClinic">
+              <input type="radio" name="cmode" value="clinic">
+              <div class="c-title">Collection centre</div>
+              <div class="c-desc">The patient walks into any of 2,000+ centres — no appointment needed</div>
+              <span class="c-fee">Included</span>
+            </label>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label for="postcode">Patient postcode</label>
+            <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 4217">
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">3</span><h3>Patient details</h3></div>
+          <div class="grid2">
+            <div class="field"><label for="fname">First name</label><input id="fname"></div>
+            <div class="field"><label for="lname">Last name</label><input id="lname"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="email">Email</label><input id="email" type="email"></div>
+            <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
+            <div class="field"><label for="sex">Sex</label>
+              <select id="sex"><option value="">Select</option><option>Male</option><option>Female</option></select>
+            </div>
+          </div>
+          <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+        </div>
+      </div>
+
+      <div class="card confirm" id="confirmCard">
+        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#1E9E6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 id="confHead">Order confirmed</h3>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <span class="conf-chip" id="confTime">—</span>
+          <span class="ref" id="bookingRef">Order reference —</span>
+        </div>
+        <div class="conf-list" id="confList"></div>
+        <a class="btn btn-dark btn-sm" href="https://devbookings.expresspathology.com.au/book/demo" id="timeLink">Open the live booking sandbox</a>
+      </div>
+
+      <div class="card summary" id="summaryCard">
+        <h3>Order summary</h3>
+        <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
+        <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
+        <div class="srow" id="sAddonRow" style="display:none"><span>Additional Markers</span><span class="sv">$232.00</span></div>
+        <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
+        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
+        <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
+        <div class="incl" id="sNote">No payment at the point of order — all orders are billed to Optimal Health Clinic on one consolidated monthly invoice. The pathology request form is issued by Express Pathology and travels with the order.</div>
+        <button class="btn btn-primary paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
+        <div class="secure">Results are reviewed and returned to Optimal Health Clinic</div>
+        <div class="demo-tag">Demo — orders are not transmitted.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" id="calOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h4>Choose the visit time</h4><p id="calSub">Live availability in the patient's area</p></div>
+      <button type="button" id="calLater">Choose later</button>
+    </div>
+    <div class="cal-dates" id="calDates"></div>
+    <div class="cal-slots" id="calSlots"></div>
+    <div class="modal-foot">
+      <span class="pb">Powered by Express Pathology</span>
+      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <span class="pby">Powered by Express Pathology</span>
+    <span>Demo page for Optimal Health Clinic · express@expresspathology.com.au · 02 9545 2940</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var PANELS = {
+    male:    {n:'Male Initial',   p:184},
+    female:  {n:'Female Initial', p:194},
+    followup:{n:'OHC Follow Up',  p:139}
+  };
+  var ADDON_PRICE = 232, HOME_FEE = 75;
+  var selPanel = null, addon = false;
+
+  /* marker show/hide — visible by default */
+  document.querySelectorAll('.mtoggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var list = $(btn.dataset.list);
+      var hidden = list.classList.toggle('hidden');
+      btn.textContent = hidden ? 'Show markers' : 'Hide markers';
+    });
+  });
+
+  function money(v){ return '$' + v.toFixed(2); }
+
+  document.querySelectorAll('[data-pick]').forEach(function(btn){
+    btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
+  });
+  function pick(key){
+    selPanel = key;
+    ['male','female','followup'].forEach(function(k){
+      $('pan-' + (k==='followup'?'followup':k)).classList.toggle('sel', k === key);
+    });
+    $('noTest').style.display = 'none';
+    $('selTest').style.display = 'flex';
+    $('stName').textContent = PANELS[key].n;
+    $('stPrice').textContent = money(PANELS[key].p);
+    updateSummary();
+    $('checkout').scrollIntoView({behavior:'smooth'});
+  }
+  $('stChange').addEventListener('click', function(){ document.getElementById('tests').scrollIntoView({behavior:'smooth'}); });
+
+  /* add-on */
+  function setAddon(on){
+    addon = on;
+    $('pan-addon').classList.toggle('sel', on);
+    $('addonBtn').textContent = on ? 'Added — remove' : 'Add to order';
+    $('selAddon').style.display = on ? 'flex' : 'none';
+    $('sAddonRow').style.display = on ? 'flex' : 'none';
+    updateSummary();
+  }
+  $('addonBtn').addEventListener('click', function(){ setAddon(!addon); });
+  $('addonRemove').addEventListener('click', function(){ setAddon(false); });
+
+  var chHome = $('chHome'), chClinic = $('chClinic');
+  function setMode(home){
+    chHome.classList.toggle('sel', home);
+    chClinic.classList.toggle('sel', !home);
+    updateSummary();
+  }
+  chHome.addEventListener('click', function(){ setMode(true); });
+  chClinic.addEventListener('click', function(){ setMode(false); });
+  function isHome(){ return document.querySelector('input[name="cmode"]:checked').value === 'home'; }
+
+  function updateSummary(){
+    var home = isHome();
+    $('sMode').textContent = home ? 'At-home nurse visit' : 'Collection centre';
+    $('sFeeRow').style.display = home ? 'flex' : 'none';
+    if (selPanel){
+      var t = PANELS[selPanel];
+      $('sPanel').textContent = t.n;
+      $('sPanelPrice').textContent = money(t.p);
+      var total = t.p + (addon ? ADDON_PRICE : 0) + (home ? HOME_FEE : 0);
+      $('sTotal').textContent = money(total);
+      $('payBtn').disabled = false;
+      $('payBtn').textContent = 'Submit order — ' + money(total);
+    }
+  }
+  $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+
+  $('payBtn').addEventListener('click', function(){
+    var required = ['postcode','fname','lname','email','mobile','dob','sex','addr'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1);
+      el.classList.toggle('err', bad);
+      if (bad){ ok = false; if (!firstBad) firstBad = el; }
+    });
+    if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    var btn = this;
+    btn.textContent = 'Processing…'; btn.disabled = true;
+    setTimeout(function(){
+      var ref = 'OHC-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      $('bookingRef').textContent = 'Order reference ' + ref;
+      $('timeLink').href = 'https://devbookings.expresspathology.com.au/book/demo?postcode=' + encodeURIComponent($('postcode').value) + '&ref=' + encodeURIComponent(ref);
+      if (isHome()){ openCalendar(); } else { finishClinic(); }
+    }, 900);
+  });
+
+  function confItem(text){
+    return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#1DACFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
+  }
+  function showConfirm(){
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function finishClinic(){
+    $('confHead').textContent = 'Order confirmed';
+    $('confTime').textContent = 'Collection centre';
+    $('confList').innerHTML =
+      confItem('Confirmation is on its way to your team and the patient by email — nothing to re-key or print.') +
+      confItem('The pathology request form is issued electronically — the patient walks into any of 2,000+ partner centres, no appointment needed.') +
+      confItem('Results are reviewed and returned to Optimal Health Clinic, with completion visible to your team.') +
+      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
+    showConfirm();
+  }
+
+  /* calendar */
+  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var SLOTS=['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am','12:00 pm','1:00 pm','1:30 pm','2:00 pm','3:00 pm','3:30 pm','4:00 pm'];
+  var calDates=[], selDate=0, selSlot=-1;
+  function slotFree(d, i){ return ((d.getDate()*31 + i*17 + d.getMonth()*7) % 10) > 2; }
+  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+  function openCalendar(){
+    calDates=[]; var s=new Date(); s.setDate(s.getDate()+1);
+    for(var i=0;i<10;i++){ var d=new Date(s); d.setDate(s.getDate()+i); calDates.push(d); }
+    selDate=0; selSlot=-1;
+    $('calSub').textContent='Live availability for postcode ' + $('postcode').value;
+    renderDates(); renderSlots();
+    $('calOverlay').classList.add('show');
+  }
+  function renderDates(){
+    var w=$('calDates'); w.innerHTML='';
+    calDates.forEach(function(d,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='dchip'+(i===selDate?' sel':'');
+      b.innerHTML='<div class="dw">'+DAYS[d.getDay()]+'</div><div class="dd">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>';
+      b.addEventListener('click',function(){ selDate=i; selSlot=-1; updC(); renderDates(); renderSlots(); });
+      w.appendChild(b);
+    });
+  }
+  function renderSlots(){
+    var w=$('calSlots'); w.innerHTML='';
+    var d=calDates[selDate];
+    SLOTS.forEach(function(t,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='slot'+(i===selSlot?' sel':''); b.textContent=t;
+      if(!slotFree(d,i)){ b.disabled=true; }
+      else{ b.addEventListener('click',function(){ selSlot=i; updC(); renderSlots(); }); }
+      w.appendChild(b);
+    });
+  }
+  function updC(){
+    var c=$('calConfirm');
+    if(selSlot<0){ c.disabled=true; c.textContent='Select a time'; }
+    else{ c.disabled=false; c.textContent='Confirm '+dateLabel(calDates[selDate])+', '+SLOTS[selSlot]; }
+  }
+  $('calConfirm').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Home collection booked';
+    $('confTime').textContent=dateLabel(calDates[selDate])+' · '+SLOTS[selSlot];
+    $('confList').innerHTML=
+      confItem('Confirmation is on its way to your team and the patient, with a reminder to the patient 24 hours before the visit.') +
+      confItem('The pathology request form is issued electronically and travels with the booking — nothing to re-key or print.') +
+      confItem('A qualified nurse in the patient\'s area has been matched to the booking.') +
+      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
+    showConfirm();
+  });
+  $('calLater').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Order confirmed';
+    $('confTime').textContent='Visit time to be arranged';
+    $('confList').innerHTML=
+      confItem('Confirmation is on its way to your team and the patient by email.') +
+      confItem('The Express team will be in touch to arrange the visit time.') +
+      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
+    showConfirm();
+  });
+})();
+</script>
+</body>
+</html>
