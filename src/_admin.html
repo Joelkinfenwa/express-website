@@ -31,6 +31,11 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .btn.light{background:#fff;color:var(--forest);border:1px solid var(--line)}
 .msg{font-size:14px;color:var(--soft);margin:0}
 /* Queues */
+.sections{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
+.sec{border:0;background:none;border-radius:10px;padding:10px 18px;font-weight:700;font-size:15px;color:var(--soft);display:flex;gap:8px;align-items:center}
+.sec b{font-size:12px;background:var(--sand);color:var(--ink);border-radius:999px;padding:1px 8px}
+.sec[aria-selected="true"]{background:var(--forest);color:var(--ivory)}
+.sec[aria-selected="true"] b{background:rgba(255,255,255,.18);color:var(--ivory)}
 .queues{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:22px}
 .q{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:#fff;text-align:left}
 .q b{font-family:'Instrument Sans',sans-serif;font-size:30px;line-height:1;letter-spacing:-.03em}
@@ -103,6 +108,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <p class="msg" id="login-msg" role="status"></p>
 </form>
 <section id="board" hidden>
+<div class="sections" id="sections" role="tablist" aria-label="Business"></div>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
 <p class="shopnote" id="shopnote" hidden></p>
 <div class="head"><h2 id="title"></h2><p id="hint"></p></div>
@@ -114,7 +120,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var shopNote = '', KEY = 'ep-admin-token', token = '', orders = [], view = 'book', q = '', openId = '', undo = null, toastT;
+  var section = 'ep', shopNote = '', KEY = 'ep-admin-token', token = '', orders = [], view = 'book', q = '', openId = '', undo = null, toastT;
   var STAGES = [['paid', 'Paid'], ['form_sent', 'Form sent'], ['booked', 'Booked'], ['collected', 'Collected'], ['dropped', 'Dropped at lab'], ['results_in', 'Results in'], ['review', 'With Jai'], ['sent', 'Sent to patient']];
   var GP_STAGES = ['paid', 'booked', 'dropped'];
   // Work queues: what needs doing next
@@ -154,7 +160,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   var afmt = new Intl.DateTimeFormat('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   var appt = function (a) { var d = new Date(a); return isNaN(d) ? a : afmt.format(d); };
   function store(t) { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch (e) {} }
-  try { token = localStorage.getItem(KEY) || ''; view = localStorage.getItem('ep-admin-view') || 'book'; } catch (e) {}
+  try { token = localStorage.getItem(KEY) || ''; view = localStorage.getItem('ep-admin-view') || 'book'; section = localStorage.getItem('ep-admin-section') || 'ep'; } catch (e) {}
   var u = new URLSearchParams(location.search);
   if (u.get('t')) { token = u.get('t'); store(token); history.replaceState(null, '', '/admin'); }
 
@@ -173,9 +179,14 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       .catch(function (e) { if (e.message !== 'auth') $('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
   }
   function overdue(o) { return queueOf(o) !== 'done' && (Date.now() / 1000 - o.date) / 86400 >= 7; }
+  function inSection(o) { return section === 'pz' ? kind(o) === 'pz' : kind(o) !== 'pz'; }
   function render() {
+    var open = { ep: 0, pz: 0 };
+    orders.forEach(function (o) { if (queueOf(o) !== 'done') open[kind(o) === 'pz' ? 'pz' : 'ep']++; });
+    $('sections').innerHTML = [['ep', 'Express'], ['pz', 'Primal Zone']].map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
+    var pool = orders.filter(inSection);
     var counts = {}, late = {};
-    orders.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
+    pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
     $('queues').innerHTML = QUEUES.map(function (x) {
       return '<button type="button" class="q' + (late[x[0]] && x[0] !== 'done' ? ' alert' : '') + '" data-v="' + x[0] + '" aria-pressed="' + (!q && view === x[0]) + '"><b>' + (counts[x[0]] || 0) + '</b><span>' + x[1] + '</span></button>';
     }).join('');
@@ -187,7 +198,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       $('title').textContent = 'Search results'; $('hint').textContent = rows.length + ' found';
     } else {
       var qq = QUEUES.find(function (x) { return x[0] === view; }) || QUEUES[0];
-      rows = orders.filter(function (o) { return queueOf(o) === qq[0]; });
+      rows = pool.filter(function (o) { return queueOf(o) === qq[0]; });
       if (qq[0] !== 'done') rows.sort(function (a, b) { return a.date - b.date; }); // oldest first: most urgent at the top
       $('title').textContent = qq[1]; $('hint').textContent = qq[2];
     }
@@ -244,6 +255,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   }
   var NAMES = { dropped: 'dropped at lab', collected: 'collected', results_in: 'results in', review: 'with Jai', sent: 'sent to patient', booked: 'booked' };
   document.addEventListener('click', function (e) {
+    var sb = e.target.closest('.sec');
+    if (sb) { section = sb.getAttribute('data-sec'); openId = ''; q = ''; $('q').value = ''; try { localStorage.setItem('ep-admin-section', section); } catch (x) {} render(); return; }
     var qb = e.target.closest('.q');
     if (qb) { view = qb.getAttribute('data-v'); q = ''; $('q').value = ''; openId = ''; try { localStorage.setItem('ep-admin-view', view); } catch (x) {} render(); return; }
     var c = e.target.closest('.card'); if (!c) return;
