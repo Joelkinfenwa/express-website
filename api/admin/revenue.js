@@ -5,6 +5,12 @@ import crypto from 'node:crypto';
 import { verify } from '../../lib/admin-auth.js';
 import { sessions } from './orders.js';
 import { shopifyConfigured, shopifyGraphQL } from '../../lib/shopify-admin.js';
+import INVOICE from '../../lib/partner-prices.mjs';
+function listPrice(partner, title, original) {
+  const table = INVOICE[partner] || {};
+  const hit = Object.keys(table).find((k) => title.toLowerCase().includes(k.toLowerCase()));
+  return hit ? Number(table[hit]) : original;
+}
 
 const PIN_HASH = '0c5bae363ba974dffd32c31b0660672f674235ffc59aedfb7cd48aa591536571';
 const pinOk = (pin) => { const h = crypto.createHash('sha256').update('ep-rev:' + String(pin || '')).digest(); return crypto.timingSafeEqual(h, Buffer.from(PIN_HASH, 'hex')); };
@@ -25,10 +31,14 @@ async function stripeSales() {
 }
 
 async function shopifySales() {
-  if (!shopifyConfigured()) return [];
+  const invoices = [];
+  if (!shopifyConfigured()) return { out: [], invoices };
   const q = `query($after: String) { orders(first: 250, after: $after, sortKey: CREATED_AT, reverse: true, query: "created_at:>=2026-01-01 -status:cancelled") {
     pageInfo { hasNextPage endCursor }
-    nodes { createdAt tags sourceName note displayFinancialStatus currentTotalPriceSet { shopMoney { amount } } lineItems(first: 5) { nodes { title } } } } }`;
+    nodes { name createdAt tags sourceName note displayFinancialStatus discountCodes
+      currentTotalPriceSet { shopMoney { amount } } totalDiscountsSet { shopMoney { amount } }
+      shippingAddress { firstName lastName } billingAddress { firstName lastName }
+      lineItems(first: 20) { nodes { title variantTitle quantity originalUnitPriceSet { shopMoney { amount } } } } } } }`;
   const out = [];
   let after = null;
   for (let i = 0; i < 12; i++) {
@@ -36,13 +46,21 @@ async function shopifySales() {
     for (const o of d.orders.nodes) {
       if (/VOIDED|PENDING|AUTHORIZED|EXPIRED/.test(o.displayFinancialStatus || '')) continue;
       const pz = /primal/i.test([o.tags.join(' '), o.sourceName, o.note, o.lineItems.nodes.map((l) => l.title).join(' ')].join(' '));
-      if (Number(o.currentTotalPriceSet.shopMoney.amount || 0) <= 0) continue;
-      out.push({ biz: pz ? 'pz' : 'ep', date: day(Date.parse(o.createdAt)), amount: Number(o.currentTotalPriceSet.shopMoney.amount || 0) });
+      const paid = Number(o.currentTotalPriceSet.shopMoney.amount || 0);
+      if (paid > 0) { out.push({ biz: pz ? 'pz' : 'ep', date: day(Date.parse(o.createdAt)), amount: paid }); continue; }
+      if (!pz) continue;
+      // $0 Primal Zone order: invoiced to Primal Zone at month end
+      const items = o.lineItems.nodes.map((l) => ({ title: l.title + (l.variantTitle && l.variantTitle !== 'Default Title' ? ` (${l.variantTitle})` : ''), qty: l.quantity || 1, value: listPrice('Primal Zone', l.title, Number(l.originalUnitPriceSet.shopMoney.amount || 0)) }));
+      const value = items.reduce((t, i) => t + i.value * i.qty, 0);
+      const discounted = (o.discountCodes || []).length > 0 || Number(o.totalDiscountsSet.shopMoney.amount || 0) > 0;
+      const a = o.shippingAddress || o.billingAddress || {};
+      invoices.push({ date: day(Date.parse(o.createdAt)), order: o.name, patient: [a.firstName, a.lastName].filter(Boolean).join(' '), items: items.map((i) => (i.qty > 1 ? i.qty + ' x ' : '') + i.title).join(', '), value, reason: discounted ? 'Secondary panel (100% discount)' : 'Ordering API ($0)', check: value <= 0 });
+      out.push({ biz: 'pzinv', date: day(Date.parse(o.createdAt)), amount: value });
     }
     if (!d.orders.pageInfo.hasNextPage) break;
     after = d.orders.pageInfo.endCursor;
   }
-  return out;
+  return { out, invoices };
 }
 
 export default async function handler(req, res) {
@@ -51,11 +69,11 @@ export default async function handler(req, res) {
   try {
     const [a, b] = await Promise.all([stripeSales(), shopifySales().catch((e) => { console.error('shopify revenue failed:', e.message); return null; })]);
     const byDay = {};
-    for (const x of a.concat(b || [])) {
-      const d = byDay[x.date] || (byDay[x.date] = { ep: 0, pz: 0, epN: 0, pzN: 0 });
+    for (const x of a.concat(b ? b.out : [])) {
+      const d = byDay[x.date] || (byDay[x.date] = { ep: 0, pz: 0, pzinv: 0, epN: 0, pzN: 0, pzinvN: 0 });
       d[x.biz] += x.amount; d[x.biz + 'N'] += 1;
     }
-    return res.status(200).json({ days: byDay, today: day(Date.now()), shopify: b ? 'ok' : (shopifyConfigured() ? 'error' : 'not_configured') });
+    return res.status(200).json({ days: byDay, invoices: (b ? b.invoices : []).sort((x, y) => (x.date < y.date ? 1 : -1)), today: day(Date.now()), shopify: b ? 'ok' : (shopifyConfigured() ? 'error' : 'not_configured') });
   } catch (e) {
     console.error('revenue failed:', e.message);
     return res.status(500).json({ error: 'Could not load revenue. Try again.' });
