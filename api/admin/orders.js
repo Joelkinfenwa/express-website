@@ -135,13 +135,21 @@ export default async function handler(req, res) {
       if (b.action === 'create_job') {
         const partner = String(b.partner || '');
         if (!JOB_PARTNERS[partner]) return res.status(400).json({ error: 'Unknown partner.' });
-        const patient = String(b.patient || '').trim().slice(0, 120);
-        if (!patient) return res.status(400).json({ error: 'Enter the patient or worker name.' });
+        // One job per worker: either workers [{ name, phone }] pasted as a list, or a single patient
+        const list = (Array.isArray(b.workers) ? b.workers : [{ name: b.patient, phone: b.phone }])
+          .map((w) => ({ name: String((w && w.name) || '').trim().slice(0, 120), phone: String((w && w.phone) || '').trim().slice(0, 40) })).filter((w) => w.name);
+        if (!list.length) return res.status(400).json({ error: 'Enter at least one worker name.' });
+        if (list.length > 60) return res.status(400).json({ error: 'Add up to 60 workers at a time.' });
         const qty = Math.max(1, Math.min(50, parseInt(b.qty, 10) || 1));
         const jd = String(b.job_date || '').slice(0, 10);
         if (jd && !/^\d{4}-\d{2}-\d{2}$/.test(jd)) return res.status(400).json({ error: 'Invalid date.' });
-        const n = await jobNumber({ partner, patient, qty: String(qty), job_date: jd, phone: String(b.phone || '').slice(0, 40), email: String(b.email || '').slice(0, 120), address: String(b.address || '').slice(0, 200), ops_note: String(b.note || '').slice(0, 480), ops_updated: `${new Date().toISOString()}|${who}` });
-        return res.status(200).json({ ok: true, order: '#' + n });
+        const orders = [];
+        let last = 0;
+        for (const w of list) {
+          last = await jobNumber({ partner, patient: w.name, qty: String(qty), job_date: jd, phone: w.phone || String(b.phone || '').slice(0, 40), email: String(b.email || '').slice(0, 120), address: String(b.address || '').slice(0, 200), ops_note: String(b.note || '').slice(0, 480), ops_updated: `${new Date().toISOString()}|${who}` }, last);
+          orders.push('#' + last);
+        }
+        return res.status(200).json({ ok: true, order: orders[0], orders });
       }
       const id = String(b.id || '');
       const isShop = b.kind === 'shop' && /^gid:\/\/shopify\/Order\/\d+$/.test(id);

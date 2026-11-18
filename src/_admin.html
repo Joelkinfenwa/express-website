@@ -134,8 +134,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 </form>
 <section id="board" hidden>
 <div class="sections" id="sections" role="tablist" aria-label="Business"></div>
-<button type="button" class="addjob" id="addjob">+ Add MIRAIT job</button>
-<form class="jobform" id="jobform" hidden><h3>Add a MIRAIT job</h3><div class="form"><div class="row2"><label>Worker name<input name="patient" required></label><label>Number of tests<input name="qty" type="number" min="1" max="50" value="1" required></label></div><div class="row2"><label>Date of the job<input name="job_date" type="date"></label><label>Phone<input name="phone" type="tel"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit">Add job</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
+<button type="button" class="addjob" id="addjob">+ Add MIRAIT jobs</button>
+<form class="jobform" id="jobform" hidden><h3>Add MIRAIT jobs</h3><div class="form"><label>Workers<textarea name="workers" id="jobworkers" rows="6" required placeholder="Paste the names from the email, one per line. A phone number on the same line is picked up too."></textarea></label><p class="msg" id="jobcount"></p><div class="row2"><label>Tests per worker<input name="qty" type="number" min="1" max="50" value="1" required></label><label>Date of the job<input name="job_date" type="date"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit" id="jobsubmit">Add jobs</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
 <p class="shopnote" id="shopnote" hidden></p>
 <div class="head"><h2 id="title"></h2><p id="hint"></p></div>
@@ -385,14 +385,29 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   $('revbtn').addEventListener('click', openRevenue);
   $('revback').addEventListener('click', closeRevenue);
   $('pinform').addEventListener('submit', function (e) { e.preventDefault(); pin = String(new FormData(this).get('pin') || ''); try { sessionStorage.setItem('ep-rev-pin', pin); } catch (x) {} $('pinmsg').textContent = ''; this.reset(); loadRevenue(); });
-  $('addjob').addEventListener('click', function () { $('jobform').hidden = false; $('jobmsg').textContent = ''; $('jobform').querySelector('input').focus(); });
+  // Turns pasted email text into workers: one per line (or comma separated on a single line), strips numbering,
+  // bullets and headings, and picks up an Australian phone number on the same line
+  function parseWorkers(txt) {
+    var lines = String(txt || '').split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    if (lines.length === 1 && lines[0].indexOf(',') > -1 && !/\d{6}/.test(lines[0])) lines = lines[0].split(',');
+    var seen = {};
+    return lines.map(function (l) {
+      var ph = (l.match(/(\+?61\s?|0)4(?:[\s-]?\d){8}/) || [''])[0];
+      var name = l.replace(ph, '').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '').replace(/^\s*(?:\d+[.)]|[-*•·]|\(\d+\))\s*/, '').replace(/\t+/g, ' ').replace(/[,;:|–-]+\s*$/, '').replace(/^[,;:|–-]+\s*/, '').replace(/\s{2,}/g, ' ').trim();
+      return { name: name, phone: ph.replace(/[\s-]/g, '') };
+    }).filter(function (w) { var k = w.name.toLowerCase(); if (!w.name || w.name.length < 2 || /^(name|names|worker|workers|employee|employees|hi|hello|thanks|thank you|regards|cheers)\b/i.test(w.name) || seen[k]) return false; seen[k] = 1; return true; });
+  }
+  $('jobworkers').addEventListener('input', function () { var n = parseWorkers(this.value).length, q = Number($('jobform').qty.value) || 1; $('jobcount').textContent = n ? n + ' worker' + (n === 1 ? '' : 's') + ' · ' + n + ' job' + (n === 1 ? '' : 's') + ' · ' + aud2.format(n * q * 258.5) + ' incl. GST' : ''; });
+  $('addjob').addEventListener('click', function () { $('jobform').hidden = false; $('jobmsg').textContent = ''; $('jobworkers').focus(); });
   $('jobcancel').addEventListener('click', function () { $('jobform').hidden = true; });
   $('jobform').addEventListener('submit', function (e) {
     e.preventDefault();
-    var d = Object.fromEntries(new FormData(this).entries()); d.action = 'create_job'; d.partner = 'MIRAIT';
-    $('jobmsg').textContent = 'Adding…';
+    var d = Object.fromEntries(new FormData(this).entries()), ws = parseWorkers(d.workers); delete d.workers;
+    if (!ws.length) { $('jobmsg').textContent = 'Paste at least one worker name.'; return; }
+    d.action = 'create_job'; d.partner = 'MIRAIT'; d.workers = ws;
+    $('jobmsg').textContent = 'Adding ' + ws.length + ' job' + (ws.length === 1 ? '' : 's') + '…'; $('jobsubmit').disabled = true;
     var f = this;
-    api('POST', d).then(function (j) { f.reset(); f.hidden = true; toast('MIRAIT job ' + j.order + ' added'); load(); }).catch(function (er) { if (er.message !== 'auth') $('jobmsg').textContent = er.message; });
+    api('POST', d).then(function (j) { $('jobsubmit').disabled = false; f.reset(); $('jobcount').textContent = ''; f.hidden = true; var o = j.orders || [j.order]; toast(o.length + ' MIRAIT job' + (o.length === 1 ? '' : 's') + ' added (' + o[0] + (o.length > 1 ? ' to ' + o[o.length - 1] : '') + ')'); load(); }).catch(function (er) { $('jobsubmit').disabled = false; if (er.message !== 'auth') $('jobmsg').textContent = er.message; });
   });
   $('undo').addEventListener('click', function () { if (undo) undo(); $('toast').hidden = true; });
   $('q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); openId = ''; render(); });
