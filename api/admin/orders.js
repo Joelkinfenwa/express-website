@@ -10,7 +10,7 @@ import { shopifyConfigured, shopifyGraphQL } from '../../lib/shopify-admin.js';
 // 'dropped' (bloods dropped at the lab) completes a home visit on the patient's own GP form: results go to their doctor
 export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'dropped', 'results_in', 'review', 'sent'];
 
-async function sessions() {
+export async function sessions() {
   const out = [];
   let after = '';
   for (let page = 0; page < 5; page++) {
@@ -22,7 +22,7 @@ async function sessions() {
   return out;
 }
 
-function fromSession(s) {
+export function fromSession(s) {
   const m = s.metadata || {};
   const pi = s.payment_intent && typeof s.payment_intent === 'object' ? s.payment_intent : null;
   if (s.payment_status !== 'paid' || !m.order_type || !pi) return null;

@@ -80,6 +80,26 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .meta{font-size:12px;color:var(--soft)}
 .shopnote{background:#FBE3DA;color:#8A3B1E;border-radius:12px;padding:10px 14px;font-size:14px;margin:0 0 14px}
+#revbtn{margin-left:auto}
+.search:not([hidden])+#revbtn{margin-left:0}
+.panel{overflow-x:auto}
+.linkbtn{background:none;border:0;color:var(--forest);font-weight:700;text-decoration:underline;padding:0}
+.pinbox{margin:6vh auto}
+.periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.per{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.per h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft)}
+.per .tot{font-family:'Instrument Sans',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.per .split{margin-top:8px;font-size:13px;color:var(--soft);display:flex;flex-direction:column;gap:2px}
+.per .split b{color:var(--ink);font-weight:700}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:20px}
+.panel h3{margin:0 0 12px;font-size:16px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--soft);margin-bottom:10px}
+.mtable{width:100%;border-collapse:collapse;font-size:15px}
+.mtable th,.mtable td{text-align:right;padding:10px 8px;border-bottom:1px solid var(--line)}
+.mtable th:first-child,.mtable td:first-child{text-align:left}
+.mtable th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--soft)}
+@media (max-width:760px){.mtable{font-size:13px}.mtable th,.mtable td{padding:8px 4px}.per .tot{font-size:22px}.periods{grid-template-columns:repeat(2,minmax(0,1fr))}.periods .per:last-child{grid-column:1/-1}}
 .empty{padding:56px 20px;text-align:center;color:var(--soft);background:#fff;border:1px dashed var(--line);border-radius:18px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;display:flex;gap:16px;align-items:center;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:9}
 .toast button{background:none;border:0;color:var(--peach);font-weight:700}
@@ -98,7 +118,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <body>
 <header class="top"><div class="logo">express<i>.</i></div>
 <div class="search" id="search-wrap" hidden><input type="search" id="q" placeholder="Search name, order, phone or suburb" aria-label="Search orders"></div>
-<button type="button" class="out" id="signout" hidden>Sign out</button></header>
+<button type="button" class="out" id="revbtn" hidden>Revenue</button><button type="button" class="out" id="signout" hidden>Sign out</button></header>
 <main>
 <form class="login" id="login" hidden>
 <h1>Orders tracker</h1>
@@ -114,6 +134,11 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <div class="head"><h2 id="title"></h2><p id="hint"></p></div>
 <div id="list"></div>
 <datalist id="nurses"></datalist>
+</section>
+<section id="revenue" hidden>
+<div class="head"><h2>Revenue</h2><p><button type="button" class="linkbtn" id="revback">Back to orders</button></p></div>
+<form class="login pinbox" id="pinform"><h1>Enter PIN</h1><p class="msg">Revenue is locked. Enter the PIN to view it.</p><input type="password" inputmode="numeric" autocomplete="off" name="pin" required aria-label="PIN" maxlength="12"><button class="btn" type="submit">Unlock</button><p class="msg" id="pinmsg" role="status"></p></form>
+<div id="revbody" hidden></div>
 </section>
 </main>
 <div class="toast" id="toast" hidden role="status"><span id="toast-msg"></span><button type="button" id="undo">Undo</button></div>
@@ -170,7 +195,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   }
   function signOut() { store(''); token = ''; show(); }
   function show() {
-    $('login').hidden = !!token; $('board').hidden = !token; $('search-wrap').hidden = !token; $('signout').hidden = !token;
+    $('login').hidden = !!token; $('board').hidden = !token; $('search-wrap').hidden = !token; $('signout').hidden = !token; $('revbtn').hidden = !token; $('revenue').hidden = true;
     if (token) load();
   }
   function load() {
@@ -292,6 +317,49 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (patch.stage) { save(o, patch, 'All results in for ' + (o.name || o.order) + '. Moved to With Jai queue.'); return; }
     api('POST', { id: o.id, kind: o.kind, ticks: ticks }).catch(function (er) { if (er.message !== 'auth') toast('Not saved: ' + er.message); });
   });
+  // ---- Revenue (PIN locked) ----
+  var pin = '';
+  try { pin = sessionStorage.getItem('ep-rev-pin') || ''; } catch (x) {}
+  var aud = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+  var aud2 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+  function openRevenue() { $('board').hidden = true; $('search-wrap').hidden = true; $('revenue').hidden = false; if (pin) loadRevenue(); else { $('pinform').hidden = false; $('revbody').hidden = true; } }
+  function closeRevenue() { $('revenue').hidden = true; $('board').hidden = false; $('search-wrap').hidden = false; }
+  function loadRevenue() {
+    $('pinform').hidden = true; $('revbody').hidden = false; $('revbody').innerHTML = '<div class="empty">Adding up sales…</div>';
+    fetch('/api/admin/revenue', { headers: { Authorization: 'Bearer ' + token, 'x-revenue-pin': pin } }).then(function (r) {
+      if (r.status === 401) { signOut(); throw new Error('auth'); }
+      if (r.status === 403) { pin = ''; try { sessionStorage.removeItem('ep-rev-pin'); } catch (x) {} $('pinform').hidden = false; $('revbody').hidden = true; $('pinmsg').textContent = 'Incorrect PIN.'; throw new Error('pin'); }
+      return r.json();
+    }).then(drawRevenue).catch(function (e) { if (e.message !== 'auth' && e.message !== 'pin') $('revbody').innerHTML = '<div class="empty">Could not load revenue. Try again.</div>'; });
+  }
+  function ymd(d) { return d.toISOString().slice(0, 10); }
+  function drawRevenue(j) {
+    var days = j.days || {}, t = new Date(j.today + 'T00:00:00Z');
+    function sum(from, to) { var r = { ep: 0, pz: 0, n: 0 }; Object.keys(days).forEach(function (k) { if (k >= from && k <= to) { var d = days[k]; r.ep += d.ep; r.pz += d.pz; r.n += d.epN + d.pzN; } }); return r; }
+    var dow = (t.getUTCDay() + 6) % 7, wk = new Date(t); wk.setUTCDate(t.getUTCDate() - dow);
+    var mStart = j.today.slice(0, 8) + '01', lmEnd = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 0)), lmStart = ymd(lmEnd).slice(0, 8) + '01';
+    var y = new Date(t); y.setUTCDate(t.getUTCDate() - 1);
+    var P = [['Today', j.today, j.today], ['Yesterday', ymd(y), ymd(y)], ['This week', ymd(wk), j.today], ['This month', mStart, j.today], ['Last month', lmStart, ymd(lmEnd)]];
+    var html = '<div class="periods">' + P.map(function (p) { var r = sum(p[1], p[2]); return '<div class="per"><h3>' + p[0] + '</h3><div class="tot">' + aud.format(r.ep + r.pz) + '</div><div class="split"><span><i class="dot" style="background:#17302A"></i>Express <b>' + aud.format(r.ep) + '</b></span><span><i class="dot" style="background:#F2A981"></i>Primal Zone <b>' + aud.format(r.pz) + '</b></span><span>' + r.n + ' order' + (r.n === 1 ? '' : 's') + '</span></div></div>'; }).join('') + '</div>';
+    // Last 30 days chart
+    var bars = [], max = 1;
+    for (var i = 29; i >= 0; i--) { var d = new Date(t); d.setUTCDate(t.getUTCDate() - i); var k = ymd(d), v = days[k] || { ep: 0, pz: 0 }; bars.push([k, v.ep, v.pz]); max = Math.max(max, v.ep + v.pz); }
+    var W = 900, H = 220, bw = W / 30;
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 24) + '" width="100%" role="img" aria-label="Daily sales, last 30 days">' + bars.map(function (b, i) {
+      var he = b[1] / max * H, hp = b[2] / max * H, x = i * bw + 3, w = bw - 6;
+      return '<g><title>' + b[0] + ': Express ' + aud2.format(b[1]) + ', Primal Zone ' + aud2.format(b[2]) + '</title><rect x="' + x + '" y="' + (H - he) + '" width="' + w + '" height="' + he + '" rx="2" fill="#17302A"/><rect x="' + x + '" y="' + (H - he - hp) + '" width="' + w + '" height="' + hp + '" rx="2" fill="#F2A981"/>' + (i % 5 === 4 || i === 29 ? '<text x="' + (x + w / 2) + '" y="' + (H + 16) + '" font-size="11" text-anchor="middle" fill="#5A645E">' + Number(b[0].slice(8)) + '/' + Number(b[0].slice(5, 7)) + '</text>' : '') + '</g>';
+    }).join('') + '</svg>';
+    html += '<div class="panel"><h3>Daily sales, last 30 days</h3><div class="legend"><span><i class="dot" style="background:#17302A"></i>Express</span><span><i class="dot" style="background:#F2A981"></i>Primal Zone</span><span>Highest day ' + aud.format(max) + '</span></div>' + svg + '</div>';
+    // By month
+    var months = {}; Object.keys(days).forEach(function (k) { var m = k.slice(0, 7), d = days[k], r = months[m] || (months[m] = { ep: 0, pz: 0, n: 0 }); r.ep += d.ep; r.pz += d.pz; r.n += d.epN + d.pzN; });
+    var mf = new Intl.DateTimeFormat('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    html += '<div class="panel"><h3>By month</h3><table class="mtable"><thead><tr><th>Month</th><th>Express</th><th>Primal Zone</th><th>Total</th><th>Orders</th></tr></thead><tbody>' + Object.keys(months).sort().reverse().map(function (m) { var r = months[m]; return '<tr><td>' + mf.format(new Date(m + '-01T00:00:00Z')) + '</td><td>' + aud2.format(r.ep) + '</td><td>' + aud2.format(r.pz) + '</td><td><b>' + aud2.format(r.ep + r.pz) + '</b></td><td>' + r.n + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    html += '<p class="msg">Sales totals as paid by customers, including GST, less refunds. Express covers website orders and any other Shopify orders; Primal Zone covers Primal Zone Shopify orders. Partner referrals invoiced monthly, such as LSG, are not included.' + (j.shopify !== 'ok' ? ' Shopify could not be reached, so Primal Zone figures are missing.' : '') + '</p>';
+    $('revbody').innerHTML = html;
+  }
+  $('revbtn').addEventListener('click', openRevenue);
+  $('revback').addEventListener('click', closeRevenue);
+  $('pinform').addEventListener('submit', function (e) { e.preventDefault(); pin = String(new FormData(this).get('pin') || ''); try { sessionStorage.setItem('ep-rev-pin', pin); } catch (x) {} $('pinmsg').textContent = ''; this.reset(); loadRevenue(); });
   $('undo').addEventListener('click', function () { if (undo) undo(); $('toast').hidden = true; });
   $('q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); openId = ''; render(); });
   $('signout').addEventListener('click', signOut);
