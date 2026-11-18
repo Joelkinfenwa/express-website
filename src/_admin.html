@@ -33,7 +33,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 /* Queues */
 .addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
 .jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
-.sections{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
+.sections{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
 .sec{border:0;background:none;border-radius:10px;padding:10px 18px;font-weight:700;font-size:15px;color:var(--soft);display:flex;gap:8px;align-items:center}
 .sec b{font-size:12px;background:var(--sand);color:var(--ink);border-radius:999px;padding:1px 8px}
 .sec[aria-selected="true"]{background:var(--forest);color:var(--ivory)}
@@ -104,7 +104,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .mtable th,.mtable td{text-align:right;padding:10px 8px;border-bottom:1px solid var(--line)}
 .mtable th:first-child,.mtable td:first-child{text-align:left}
 .mtable th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--soft)}
-@media (max-width:760px){.mtable{font-size:13px}.mtable th,.mtable td{padding:8px 4px}.per .tot{font-size:22px}.periods{grid-template-columns:repeat(2,minmax(0,1fr))}.periods .per:last-child{grid-column:1/-1}}
+@media (max-width:760px){.addjob{float:none;display:block;width:100%;margin-bottom:12px}.mtable{font-size:13px}.mtable th,.mtable td{padding:8px 4px}.per .tot{font-size:22px}.periods{grid-template-columns:repeat(2,minmax(0,1fr))}.periods .per:last-child{grid-column:1/-1}}
 .empty{padding:56px 20px;text-align:center;color:var(--soft);background:#fff;border:1px dashed var(--line);border-radius:18px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;display:flex;gap:16px;align-items:center;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:9}
 .toast button{background:none;border:0;color:var(--peach);font-weight:700}
@@ -179,6 +179,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (qu === 'collect' && o.type === 'own-form') return { label: 'Dropped at lab', stage: 'dropped' };
     if (qu === 'collect') return { label: 'Mark collected', stage: 'collected' };
     if (qu === 'results') return { label: 'Results in', stage: 'results_in' };
+    if (o.type === 'job' && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Sent to ' + (o.partner || 'partner'), stage: 'sent' };
     if (o.stage === 'results_in') return { label: 'Send to Jai', stage: 'review' };
     if (o.stage === 'review') return { label: 'Mark sent', stage: 'sent' };
     return null;
@@ -211,17 +212,22 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       .catch(function (e) { if (e.message !== 'auth') $('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
   }
   function overdue(o) { return queueOf(o) !== 'done' && (Date.now() / 1000 - o.date) / 86400 >= 7; }
-  function inSection(o) { return section === 'pz' ? kind(o) === 'pz' : kind(o) !== 'pz'; }
+  // Sections: Express, Primal Zone, MIRAIT jobs and LSG (partner referrals) each run as their own flow
+  var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG']];
+  function secOf(o) { var k = kind(o); return k === 'pz' ? 'pz' : k === 'job' ? 'mirait' : k === 'ref' ? 'lsg' : 'ep'; }
+  function inSection(o) { return secOf(o) === section; }
   function render() {
-    var open = { ep: 0, pz: 0 };
-    orders.forEach(function (o) { if (queueOf(o) !== 'done') open[kind(o) === 'pz' ? 'pz' : 'ep']++; });
-    $('sections').innerHTML = [['ep', 'Express'], ['pz', 'Primal Zone']].map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
-    $('addjob').hidden = section === 'pz' || !!q;
+    var open = { ep: 0, pz: 0, mirait: 0, lsg: 0 };
+    if (!SECTIONS.some(function (x) { return x[0] === section; })) section = 'ep';
+    orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
+    $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
+    $('addjob').hidden = section !== 'mirait' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
+    var QL = section === 'mirait' ? { jai: ['Results in', 'Results back, ready to send to MIRAIT.'], done: ['Done', 'Results sent to MIRAIT.'] } : {};
     $('queues').innerHTML = QUEUES.map(function (x) {
-      return '<button type="button" class="q' + (late[x[0]] && x[0] !== 'done' ? ' alert' : '') + '" data-v="' + x[0] + '" aria-pressed="' + (!q && view === x[0]) + '"><b>' + (counts[x[0]] || 0) + '</b><span>' + x[1] + '</span></button>';
+      return '<button type="button" class="q' + (late[x[0]] && x[0] !== 'done' ? ' alert' : '') + '" data-v="' + x[0] + '" aria-pressed="' + (!q && view === x[0]) + '"><b>' + (counts[x[0]] || 0) + '</b><span>' + (QL[x[0]] ? QL[x[0]][0] : x[1]) + '</span></button>';
     }).join('');
     var names = {}; orders.forEach(function (o) { if (o.nurse) names[o.nurse] = 1; });
     $('nurses').innerHTML = Object.keys(names).sort().map(function (n) { return '<option value="' + esc(n) + '">'; }).join('');
@@ -231,6 +237,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       $('title').textContent = 'Search results'; $('hint').textContent = rows.length + ' found';
     } else {
       var qq = QUEUES.find(function (x) { return x[0] === view; }) || QUEUES[0];
+      if (QL[qq[0]]) qq = [qq[0], QL[qq[0]][0], QL[qq[0]][1]];
       rows = pool.filter(function (o) { return queueOf(o) === qq[0]; });
       if (qq[0] !== 'done') rows.sort(function (a, b) { return a.date - b.date; }); // oldest first: most urgent at the top
       $('title').textContent = qq[1]; $('hint').textContent = qq[2];
@@ -243,10 +250,10 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var n = nextStep(o), open = openId === o.id;
     var days = Math.floor((Date.now() / 1000 - o.date) / 86400);
     var status = o.stage === 'booked' && o.appt ? 'Booked for <strong>' + esc(appt(o.appt)) + '</strong>' + (o.nurse ? ' with ' + esc(o.nurse) : '')
-      : o.stage === 'review' ? '<strong>With Jai for review</strong>' : o.stage === 'results_in' ? '<strong>Results in</strong>, not yet with Jai'
+      : o.stage === 'review' ? '<strong>With Jai for review</strong>' : o.stage === 'results_in' ? (o.type === 'job' ? '<strong>Results in</strong>, ready to send to ' + esc(o.partner || 'partner') : '<strong>Results in</strong>, not yet with Jai')
       : o.stage === 'dropped' ? 'Bloods dropped at lab · results go to their doctor' + (o.updated ? ' · ' + dfmt.format(new Date(o.updated)) : '')
       : o.type === 'own-form' && o.stage === 'collected' ? '<strong>Collected</strong>, not yet dropped at the lab'
-      : o.stage === 'sent' ? 'Sent to patient' + (o.updated ? ' ' + dfmt.format(new Date(o.updated)) : '') : '';
+      : o.stage === 'sent' ? (o.type === 'job' ? 'Results sent to ' + (o.partner || 'partner') : 'Sent to patient') + (o.updated ? ' ' + dfmt.format(new Date(o.updated)) : '') : '';
     var prog = (o.lines || []).length && ['results', 'jai', 'done'].indexOf(queueOf(o)) !== -1 ? '<div class="l3">Results ticked: <strong>' + (o.ticks || []).length + ' of ' + o.lines.length + '</strong></div>' : '';
     return '<article class="card' + (open ? ' open' : '') + '" data-id="' + esc(o.id) + '">' +
       '<div class="who" data-toggle><div class="l1"><span class="name">' + esc(o.name || 'No name') + '</span><span class="num">' + esc(o.order) + '</span><span class="tag ' + kind(o) + '">' + esc(kindLabel(o)) + '</span>' +
