@@ -66,7 +66,6 @@ async function shopifyOrders() {
     pageInfo { hasNextPage endCursor }
     nodes { id name createdAt displayFinancialStatus tags note sourceName email phone
       totalPriceSet { shopMoney { amount } }
-      customer { firstName lastName email phone }
       shippingAddress { firstName lastName address1 address2 city provinceCode zip phone }
       billingAddress { firstName lastName address1 city provinceCode zip phone }
       lineItems(first: 40) { nodes { title variantTitle quantity } }
@@ -81,7 +80,7 @@ async function shopifyOrders() {
   }
   const orders = nodes.filter((o) => !/REFUNDED|VOIDED/.test(o.displayFinancialStatus || '')).map((o) => {
     const mf = Object.fromEntries((o.metafields.nodes || []).map((x) => [x.key, x.value]));
-    const c = o.customer || {}, a = o.shippingAddress || o.billingAddress || {};
+    const c = {}, a = o.shippingAddress || o.billingAddress || {};
     const titles = o.lineItems.nodes.map((l) => l.title + (l.variantTitle && l.variantTitle !== 'Default Title' ? ` (${l.variantTitle})` : ''));
     const home = titles.some((t) => /nurse|home visit|mobile/i.test(t));
     const partner = /primal/i.test([o.tags.join(' '), o.sourceName, titles.join(' '), o.note].join(' ')) ? 'Primal Zone' : 'Shopify';
