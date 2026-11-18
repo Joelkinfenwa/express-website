@@ -91,6 +91,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .pinbox{margin:6vh auto}
 .periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
 .per{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.rr{font-size:13px;color:var(--soft);margin:2px 0 8px}.rr b{color:var(--ink,#1C2420)}.rr .up{color:#1F7A4D;font-weight:700}.rr .down{color:#A4502E;font-weight:700}
 .per h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft)}
 .per .tot{font-family:'Instrument Sans',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
 .per .split{margin-top:8px;font-size:13px;color:var(--soft);display:flex;flex-direction:column;gap:2px}
@@ -348,7 +349,9 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var mStart = j.today.slice(0, 8) + '01', lmEnd = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 0)), lmStart = ymd(lmEnd).slice(0, 8) + '01';
     var y = new Date(t); y.setUTCDate(t.getUTCDate() - 1);
     var P = [['Today', j.today, j.today], ['Yesterday', ymd(y), ymd(y)], ['This week', ymd(wk), j.today], ['This month', mStart, j.today], ['Last month', lmStart, ymd(lmEnd)]];
-    var html = '<div class="periods">' + P.map(function (p) { var r = sum(p[1], p[2]); return '<div class="per"><h3>' + p[0] + '</h3><div class="tot">' + aud.format(r.ep + r.pz + r.inv + r.par) + '</div><div class="split"><span><i class="dot" style="background:#17302A"></i>Express <b>' + aud.format(r.ep) + '</b></span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid <b>' + aud.format(r.pz) + '</b></span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone <b>' + aud.format(r.inv) + '</b></span><span><i class="dot" style="background:#7FB59A"></i>MIRAIT and partners <b>' + aud.format(r.par) + '</b></span><span>' + r.n + ' order' + (r.n === 1 ? '' : 's') + '</span></div></div>'; }).join('') + '</div>';
+    var lm = sum(lmStart, ymd(lmEnd)), lmTot = lm.ep + lm.pz + lm.inv + lm.par;
+    function runRate(tot) { var dd = Number(j.today.slice(8)), dim = new Date(Number(j.today.slice(0, 4)), Number(j.today.slice(5, 7)), 0).getDate(), rr = tot / dd * dim, pc = lmTot ? Math.round((rr / lmTot - 1) * 100) : null; return '<div class="rr">Run rate <b>' + aud.format(rr) + '</b>' + (pc === null ? '' : ' <span class="' + (pc >= 0 ? 'up' : 'down') + '">' + (pc >= 0 ? '+' : '') + pc + '% vs last month</span>') + '</div>'; }
+    var html = '<div class="periods">' + P.map(function (p) { var r = sum(p[1], p[2]); return '<div class="per"><h3>' + p[0] + '</h3><div class="tot">' + aud.format(r.ep + r.pz + r.inv + r.par) + '</div>' + (p[0] === 'This month' ? runRate(r.ep + r.pz + r.inv + r.par) : '') + '<div class="split"><span><i class="dot" style="background:#17302A"></i>Express <b>' + aud.format(r.ep) + '</b></span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid <b>' + aud.format(r.pz) + '</b></span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone <b>' + aud.format(r.inv) + '</b></span><span><i class="dot" style="background:#7FB59A"></i>MIRAIT and partners <b>' + aud.format(r.par) + '</b></span><span>' + r.n + ' order' + (r.n === 1 ? '' : 's') + '</span></div></div>'; }).join('') + '</div>';
     // Last 30 days chart
     var bars = [], max = 1;
     for (var i = 29; i >= 0; i--) { var d = new Date(t); d.setUTCDate(t.getUTCDate() - i); var k = ymd(d), v = days[k] || { ep: 0, pz: 0, pzinv: 0, partner: 0 }; bars.push([k, v.ep, v.pz, v.pzinv || 0, v.partner || 0]); max = Math.max(max, v.ep + v.pz + (v.pzinv || 0) + (v.partner || 0)); }
