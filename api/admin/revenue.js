@@ -3,9 +3,9 @@
 // net of refunds, grouped by Sydney date.
 import crypto from 'node:crypto';
 import { verify } from '../../lib/admin-auth.js';
-import { sessions } from './orders.js';
+import { sessions, referrals } from './orders.js';
 import { shopifyConfigured, shopifyGraphQL } from '../../lib/shopify-admin.js';
-import INVOICE from '../../lib/partner-prices.mjs';
+import INVOICE, { JOB_PARTNERS } from '../../lib/partner-prices.mjs';
 function listPrice(partner, title, original) {
   const table = INVOICE[partner] || {};
   const hit = Object.keys(table).find((k) => title.toLowerCase().includes(k.toLowerCase()));
@@ -63,17 +63,30 @@ async function shopifySales() {
   return { out, invoices };
 }
 
+// Partner jobs added by hand (for example MIRAIT), valued at the partner's unit price, GST included where it applies
+async function jobSales() {
+  const out = [], invoices = [];
+  for (const o of await referrals()) {
+    if (o.type !== 'job') continue;
+    const p = JOB_PARTNERS[o.partner] || {}, value = Math.round((o.qty || 1) * (p.unit || 0) * (p.gst ? 110 : 100)) / 100;
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(o.preferred) ? o.preferred : day(o.date * 1000);
+    out.push({ biz: 'partner', date, amount: value });
+    invoices.push({ partner: o.partner, date, order: o.order, patient: o.name, items: o.items, value, reason: p.gst ? `${o.qty} x $${p.unit} + GST` : `${o.qty} x $${p.unit}`, check: !p.unit });
+  }
+  return { out, invoices };
+}
+
 export default async function handler(req, res) {
   if (!verify(req)) return res.status(401).json({ error: 'Please sign in again.' });
   if (!pinOk(req.headers['x-revenue-pin'])) return res.status(403).json({ error: 'Incorrect PIN.' });
   try {
-    const [a, b] = await Promise.all([stripeSales(), shopifySales().catch((e) => { console.error('shopify revenue failed:', e.message); return null; })]);
+    const [a, jobs, b] = await Promise.all([stripeSales(), jobSales().catch((e) => { console.error('job revenue failed:', e.message); return { out: [], invoices: [] }; }), shopifySales().catch((e) => { console.error('shopify revenue failed:', e.message); return null; })]);
     const byDay = {};
-    for (const x of a.concat(b ? b.out : [])) {
-      const d = byDay[x.date] || (byDay[x.date] = { ep: 0, pz: 0, pzinv: 0, epN: 0, pzN: 0, pzinvN: 0 });
+    for (const x of a.concat(b ? b.out : [], jobs.out)) {
+      const d = byDay[x.date] || (byDay[x.date] = { ep: 0, pz: 0, pzinv: 0, partner: 0, epN: 0, pzN: 0, pzinvN: 0, partnerN: 0 });
       d[x.biz] += x.amount; d[x.biz + 'N'] += 1;
     }
-    return res.status(200).json({ days: byDay, invoices: (b ? b.invoices : []).sort((x, y) => (x.date < y.date ? 1 : -1)), today: day(Date.now()), shopify: b ? 'ok' : (shopifyConfigured() ? 'error' : 'not_configured') });
+    return res.status(200).json({ days: byDay, invoices: (b ? b.invoices.map((x) => ({ ...x, partner: 'Primal Zone' })) : []).concat(jobs.invoices).sort((x, y) => (x.date < y.date ? 1 : -1)), today: day(Date.now()), shopify: b ? 'ok' : (shopifyConfigured() ? 'error' : 'not_configured') });
   } catch (e) {
     console.error('revenue failed:', e.message);
     return res.status(500).json({ error: 'Could not load revenue. Try again.' });

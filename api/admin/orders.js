@@ -6,6 +6,8 @@ import { verify } from '../../lib/admin-auth.js';
 import PRICES from '../../lib/price-index.mjs';
 import { orderFromSession } from '../../lib/request-form.js';
 import { shopifyConfigured, shopifyGraphQL } from '../../lib/shopify-admin.js';
+import { allCustomers, jobNumber } from '../../lib/order-number.js';
+import { JOB_PARTNERS } from '../../lib/partner-prices.mjs';
 
 // 'dropped' (bloods dropped at the lab) completes a home visit on the patient's own GP form: results go to their doctor
 export const STAGES = ['paid', 'form_sent', 'booked', 'collected', 'dropped', 'results_in', 'review', 'sent'];
@@ -43,11 +45,19 @@ export function fromSession(s) {
   };
 }
 
-async function referrals() {
-  const r = await stripe('GET', '/customers?limit=100');
-  return (r.data || []).filter((c) => (c.metadata || {}).type === 'partner_referral').map((c) => {
+export async function referrals() {
+  const all = await allCustomers();
+  return all.filter((c) => ['partner_referral', 'partner_job'].includes((c.metadata || {}).type) && (c.metadata || {}).deleted !== '1').map((c) => {
     const m = c.metadata;
     const [updated, by] = String(m.ops_updated || '').split('|');
+    if (m.type === 'partner_job') {
+      const qty = Number(m.qty) || 1, p = JOB_PARTNERS[m.partner] || {};
+      return {
+        id: c.id, kind: 'cus', order: '#' + m.order_number, date: c.created, name: m.patient || '', email: m.email || '', phone: m.phone || '',
+        items: `${qty} x ${p.item || 'Test'} (${m.partner})`, type: 'job', partner: m.partner, qty, collection: 'Home visit', total: 0, preferred: m.job_date || '', addto: '',
+        stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'paid', note: m.ops_note || '', appt: m.ops_appt || '', nurse: m.ops_nurse || '', address: m.address || '', updated: updated || '', by: by || ''
+      };
+    }
     return {
       id: c.id, kind: 'cus', order: '#' + m.order_number, date: c.created, name: m.patient || '', email: m.submitter || '', phone: '',
       items: `Partner referral (${m.partner || ''})`, type: 'referral', collection: 'Home visit', total: 0, preferred: '', addto: '',
@@ -122,6 +132,17 @@ export default async function handler(req, res) {
       let b = req.body;
       if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
       b = b || {};
+      if (b.action === 'create_job') {
+        const partner = String(b.partner || '');
+        if (!JOB_PARTNERS[partner]) return res.status(400).json({ error: 'Unknown partner.' });
+        const patient = String(b.patient || '').trim().slice(0, 120);
+        if (!patient) return res.status(400).json({ error: 'Enter the patient or worker name.' });
+        const qty = Math.max(1, Math.min(50, parseInt(b.qty, 10) || 1));
+        const jd = String(b.job_date || '').slice(0, 10);
+        if (jd && !/^\d{4}-\d{2}-\d{2}$/.test(jd)) return res.status(400).json({ error: 'Invalid date.' });
+        const n = await jobNumber({ partner, patient, qty: String(qty), job_date: jd, phone: String(b.phone || '').slice(0, 40), email: String(b.email || '').slice(0, 120), address: String(b.address || '').slice(0, 200), ops_note: String(b.note || '').slice(0, 480), ops_updated: `${new Date().toISOString()}|${who}` });
+        return res.status(200).json({ ok: true, order: '#' + n });
+      }
       const id = String(b.id || '');
       const isShop = b.kind === 'shop' && /^gid:\/\/shopify\/Order\/\d+$/.test(id);
       const path = isShop ? 'shop' : b.kind === 'cus' && /^cus_\w+$/.test(id) ? `/customers/${id}` : /^pi_\w+$/.test(id) ? `/payment_intents/${id}` : '';

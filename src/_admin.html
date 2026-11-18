@@ -31,6 +31,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .btn.light{background:#fff;color:var(--forest);border:1px solid var(--line)}
 .msg{font-size:14px;color:var(--soft);margin:0}
 /* Queues */
+.addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
+.jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
 .sections{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
 .sec{border:0;background:none;border-radius:10px;padding:10px 18px;font-weight:700;font-size:15px;color:var(--soft);display:flex;gap:8px;align-items:center}
 .sec b{font-size:12px;background:var(--sand);color:var(--ink);border-radius:999px;padding:1px 8px}
@@ -56,6 +58,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .tag{font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px}
 .tag.pvt{background:#E5ECE8;color:var(--forest)}.tag.gp{background:#FBE1D3;color:#7A3A1B}.tag.ref{background:#DDE6F4;color:#1F3A66}
 .tag.pz{background:#1F2B26;color:#F2A981}
+.tag.job{background:#DCEBE3;color:#1F5A3F}
 .tag.inv{background:#EDE4F7;color:#4A2E7A}
 .tag.fast{background:#FFF0D6;color:#7A4A00}
 .tag.warn{background:#FBE3DA;color:#8A3B1E}
@@ -130,6 +133,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 </form>
 <section id="board" hidden>
 <div class="sections" id="sections" role="tablist" aria-label="Business"></div>
+<button type="button" class="addjob" id="addjob">+ Add MIRAIT job</button>
+<form class="jobform" id="jobform" hidden><h3>Add a MIRAIT job</h3><div class="form"><div class="row2"><label>Worker name<input name="patient" required></label><label>Number of tests<input name="qty" type="number" min="1" max="50" value="1" required></label></div><div class="row2"><label>Date of the job<input name="job_date" type="date"></label><label>Phone<input name="phone" type="tel"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit">Add job</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
 <p class="shopnote" id="shopnote" hidden></p>
 <div class="head"><h2 id="title"></h2><p id="hint"></p></div>
@@ -157,7 +162,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     ['jai', 'With Jai', 'Results in, or being reviewed by Jai.'],
     ['done', 'Done', 'Results sent to the patient, or GP-form bloods dropped at the lab.']
   ];
-  function isHome(o) { return o.type === 'own-form' || o.type === 'referral' || /home/i.test(o.collection); }
+  function isHome(o) { return o.type === 'own-form' || o.type === 'referral' || o.type === 'job' || /home/i.test(o.collection); }
   function queueOf(o) {
     if (o.stage === 'sent' || o.stage === 'dropped') return 'done';
     if (o.type === 'own-form') return o.stage === 'paid' || o.stage === 'form_sent' ? 'book' : 'collect'; // results go to their own doctor
@@ -177,8 +182,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (o.stage === 'review') return { label: 'Mark sent', stage: 'sent' };
     return null;
   }
-  function kind(o) { return o.type === 'own-form' ? 'gp' : o.type === 'referral' ? 'ref' : o.type === 'shopify' ? 'pz' : 'pvt'; }
-  function kindLabel(o) { var k = kind(o); return k === 'gp' ? 'Home visit · own GP form' : k === 'ref' ? 'Partner referral' : k === 'pz' ? (o.partner || 'Shopify') + (isHome(o) ? ' · home visit' : ' · centre') : (isHome(o) ? 'Private test · home visit' : 'Private test · centre'); }
+  function kind(o) { return o.type === 'own-form' ? 'gp' : o.type === 'referral' ? 'ref' : o.type === 'job' ? 'job' : o.type === 'shopify' ? 'pz' : 'pvt'; }
+  function kindLabel(o) { var k = kind(o); return k === 'gp' ? 'Home visit · own GP form' : k === 'ref' ? 'Partner referral' : k === 'job' ? (o.partner || 'Partner') + ' job' : k === 'pz' ? (o.partner || 'Shopify') + (isHome(o) ? ' · home visit' : ' · centre') : (isHome(o) ? 'Private test · home visit' : 'Private test · centre'); }
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
   var dfmt = new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short' });
@@ -210,6 +215,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var open = { ep: 0, pz: 0 };
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[kind(o) === 'pz' ? 'pz' : 'ep']++; });
     $('sections').innerHTML = [['ep', 'Express'], ['pz', 'Primal Zone']].map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
+    $('addjob').hidden = section === 'pz' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
@@ -319,7 +325,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     api('POST', { id: o.id, kind: o.kind, ticks: ticks }).catch(function (er) { if (er.message !== 'auth') toast('Not saved: ' + er.message); });
   });
   // ---- Revenue (PIN locked) ----
-  var pin = '', invMonth = '', lastInv = [], lastRev = null;
+  var pin = '', invPartner = 'Primal Zone', invMonth = '', lastInv = [], lastRev = null;
   try { pin = sessionStorage.getItem('ep-rev-pin') || ''; } catch (x) {}
   var aud = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
   var aud2 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
@@ -337,44 +343,54 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   function drawRevenue(j) {
     lastRev = j;
     var days = j.days || {}, t = new Date(j.today + 'T00:00:00Z');
-    function sum(from, to) { var r = { ep: 0, pz: 0, inv: 0, n: 0 }; Object.keys(days).forEach(function (k) { if (k >= from && k <= to) { var d = days[k]; r.ep += d.ep; r.pz += d.pz; r.inv += d.pzinv || 0; r.n += d.epN + d.pzN + (d.pzinvN || 0); } }); return r; }
+    function sum(from, to) { var r = { ep: 0, pz: 0, inv: 0, par: 0, n: 0 }; Object.keys(days).forEach(function (k) { if (k >= from && k <= to) { var d = days[k]; r.ep += d.ep; r.pz += d.pz; r.inv += d.pzinv || 0; r.par += d.partner || 0; r.n += d.epN + d.pzN + (d.pzinvN || 0) + (d.partnerN || 0); } }); return r; }
     var dow = (t.getUTCDay() + 6) % 7, wk = new Date(t); wk.setUTCDate(t.getUTCDate() - dow);
     var mStart = j.today.slice(0, 8) + '01', lmEnd = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 0)), lmStart = ymd(lmEnd).slice(0, 8) + '01';
     var y = new Date(t); y.setUTCDate(t.getUTCDate() - 1);
     var P = [['Today', j.today, j.today], ['Yesterday', ymd(y), ymd(y)], ['This week', ymd(wk), j.today], ['This month', mStart, j.today], ['Last month', lmStart, ymd(lmEnd)]];
-    var html = '<div class="periods">' + P.map(function (p) { var r = sum(p[1], p[2]); return '<div class="per"><h3>' + p[0] + '</h3><div class="tot">' + aud.format(r.ep + r.pz + r.inv) + '</div><div class="split"><span><i class="dot" style="background:#17302A"></i>Express <b>' + aud.format(r.ep) + '</b></span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid <b>' + aud.format(r.pz) + '</b></span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone <b>' + aud.format(r.inv) + '</b></span><span>' + r.n + ' order' + (r.n === 1 ? '' : 's') + '</span></div></div>'; }).join('') + '</div>';
+    var html = '<div class="periods">' + P.map(function (p) { var r = sum(p[1], p[2]); return '<div class="per"><h3>' + p[0] + '</h3><div class="tot">' + aud.format(r.ep + r.pz + r.inv + r.par) + '</div><div class="split"><span><i class="dot" style="background:#17302A"></i>Express <b>' + aud.format(r.ep) + '</b></span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid <b>' + aud.format(r.pz) + '</b></span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone <b>' + aud.format(r.inv) + '</b></span><span><i class="dot" style="background:#7FB59A"></i>MIRAIT and partners <b>' + aud.format(r.par) + '</b></span><span>' + r.n + ' order' + (r.n === 1 ? '' : 's') + '</span></div></div>'; }).join('') + '</div>';
     // Last 30 days chart
     var bars = [], max = 1;
-    for (var i = 29; i >= 0; i--) { var d = new Date(t); d.setUTCDate(t.getUTCDate() - i); var k = ymd(d), v = days[k] || { ep: 0, pz: 0, pzinv: 0 }; bars.push([k, v.ep, v.pz, v.pzinv || 0]); max = Math.max(max, v.ep + v.pz + (v.pzinv || 0)); }
+    for (var i = 29; i >= 0; i--) { var d = new Date(t); d.setUTCDate(t.getUTCDate() - i); var k = ymd(d), v = days[k] || { ep: 0, pz: 0, pzinv: 0, partner: 0 }; bars.push([k, v.ep, v.pz, v.pzinv || 0, v.partner || 0]); max = Math.max(max, v.ep + v.pz + (v.pzinv || 0) + (v.partner || 0)); }
     var W = 900, H = 220, bw = W / 30;
     var svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 24) + '" width="100%" role="img" aria-label="Daily sales, last 30 days">' + bars.map(function (b, i) {
-      var he = b[1] / max * H, hp = b[2] / max * H, hi = b[3] / max * H, x = i * bw + 3, w = bw - 6;
-      return '<g><title>' + b[0] + ': Express ' + aud2.format(b[1]) + ', Primal Zone paid ' + aud2.format(b[2]) + ', to invoice ' + aud2.format(b[3]) + '</title><rect x="' + x + '" y="' + (H - he) + '" width="' + w + '" height="' + he + '" rx="2" fill="#17302A"/><rect x="' + x + '" y="' + (H - he - hp) + '" width="' + w + '" height="' + hp + '" rx="2" fill="#F2A981"/><rect x="' + x + '" y="' + (H - he - hp - hi) + '" width="' + w + '" height="' + hi + '" rx="2" fill="#C9B6E4"/>' + (i % 5 === 4 || i === 29 ? '<text x="' + (x + w / 2) + '" y="' + (H + 16) + '" font-size="11" text-anchor="middle" fill="#5A645E">' + Number(b[0].slice(8)) + '/' + Number(b[0].slice(5, 7)) + '</text>' : '') + '</g>';
+      var he = b[1] / max * H, hp = b[2] / max * H, hi = b[3] / max * H, hq = b[4] / max * H, x = i * bw + 3, w = bw - 6;
+      return '<g><title>' + b[0] + ': Express ' + aud2.format(b[1]) + ', Primal Zone paid ' + aud2.format(b[2]) + ', to invoice ' + aud2.format(b[3]) + ', MIRAIT and partners ' + aud2.format(b[4]) + '</title><rect x="' + x + '" y="' + (H - he) + '" width="' + w + '" height="' + he + '" rx="2" fill="#17302A"/><rect x="' + x + '" y="' + (H - he - hp) + '" width="' + w + '" height="' + hp + '" rx="2" fill="#F2A981"/><rect x="' + x + '" y="' + (H - he - hp - hi) + '" width="' + w + '" height="' + hi + '" rx="2" fill="#C9B6E4"/><rect x="' + x + '" y="' + (H - he - hp - hi - hq) + '" width="' + w + '" height="' + hq + '" rx="2" fill="#7FB59A"/>' + (i % 5 === 4 || i === 29 ? '<text x="' + (x + w / 2) + '" y="' + (H + 16) + '" font-size="11" text-anchor="middle" fill="#5A645E">' + Number(b[0].slice(8)) + '/' + Number(b[0].slice(5, 7)) + '</text>' : '') + '</g>';
     }).join('') + '</svg>';
-    html += '<div class="panel"><h3>Daily sales, last 30 days</h3><div class="legend"><span><i class="dot" style="background:#17302A"></i>Express</span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid</span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone</span><span>Highest day ' + aud.format(max) + '</span></div>' + svg + '</div>';
+    html += '<div class="panel"><h3>Daily sales, last 30 days</h3><div class="legend"><span><i class="dot" style="background:#17302A"></i>Express</span><span><i class="dot" style="background:#F2A981"></i>Primal Zone paid</span><span><i class="dot" style="background:#C9B6E4"></i>To invoice Primal Zone</span><span><i class="dot" style="background:#7FB59A"></i>MIRAIT and partners</span><span>Highest day ' + aud.format(max) + '</span></div>' + svg + '</div>';
     // By month
-    var months = {}; Object.keys(days).forEach(function (k) { var m = k.slice(0, 7), d = days[k], r = months[m] || (months[m] = { ep: 0, pz: 0, inv: 0, n: 0 }); r.ep += d.ep; r.pz += d.pz; r.inv += d.pzinv || 0; r.n += d.epN + d.pzN + (d.pzinvN || 0); });
+    var months = {}; Object.keys(days).forEach(function (k) { var m = k.slice(0, 7), d = days[k], r = months[m] || (months[m] = { ep: 0, pz: 0, inv: 0, par: 0, n: 0 }); r.ep += d.ep; r.pz += d.pz; r.inv += d.pzinv || 0; r.par += d.partner || 0; r.n += d.epN + d.pzN + (d.pzinvN || 0) + (d.partnerN || 0); });
     var mf = new Intl.DateTimeFormat('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-    html += '<div class="panel"><h3>By month</h3><table class="mtable"><thead><tr><th>Month</th><th>Express</th><th>Primal Zone paid</th><th>To invoice PZ</th><th>Total</th><th>Orders</th></tr></thead><tbody>' + Object.keys(months).sort().reverse().map(function (m) { var r = months[m]; return '<tr><td>' + mf.format(new Date(m + '-01T00:00:00Z')) + '</td><td>' + aud2.format(r.ep) + '</td><td>' + aud2.format(r.pz) + '</td><td>' + aud2.format(r.inv) + '</td><td><b>' + aud2.format(r.ep + r.pz + r.inv) + '</b></td><td>' + r.n + '</td></tr>'; }).join('') + '</tbody></table></div>';
-    var inv = j.invoices || [], invMonths = Object.keys(inv.reduce(function (o, x) { o[x.date.slice(0, 7)] = 1; return o; }, {})).sort().reverse();
+    html += '<div class="panel"><h3>By month</h3><table class="mtable"><thead><tr><th>Month</th><th>Express</th><th>Primal Zone paid</th><th>To invoice PZ</th><th>MIRAIT and partners</th><th>Total</th><th>Orders</th></tr></thead><tbody>' + Object.keys(months).sort().reverse().map(function (m) { var r = months[m]; return '<tr><td>' + mf.format(new Date(m + '-01T00:00:00Z')) + '</td><td>' + aud2.format(r.ep) + '</td><td>' + aud2.format(r.pz) + '</td><td>' + aud2.format(r.inv) + '</td><td>' + aud2.format(r.par) + '</td><td><b>' + aud2.format(r.ep + r.pz + r.inv + r.par) + '</b></td><td>' + r.n + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    var invAll = j.invoices || [], partners = Object.keys(invAll.reduce(function (o, x) { o[x.partner || 'Primal Zone'] = 1; return o; }, { 'Primal Zone': 1 })); if (partners.indexOf(invPartner) === -1) invPartner = partners[0];
+    var inv = invAll.filter(function (x) { return (x.partner || 'Primal Zone') === invPartner; }), invMonths = Object.keys(inv.reduce(function (o, x) { o[x.date.slice(0, 7)] = 1; return o; }, {})).sort().reverse();
     if (!invMonth || invMonths.indexOf(invMonth) === -1) invMonth = invMonths[0] || j.today.slice(0, 7);
     var rowsInv = inv.filter(function (x) { return x.date.slice(0, 7) === invMonth; }), invTot = rowsInv.reduce(function (t, x) { return t + x.value; }, 0);
-    html += '<div class="panel"><h3>Primal Zone month-end invoice</h3><div class="legend" style="align-items:center;flex-wrap:wrap"><select id="invmonth" aria-label="Invoice month">' + (invMonths.length ? invMonths : [invMonth]).map(function (m) { return '<option value="' + m + '"' + (m === invMonth ? ' selected' : '') + '>' + mf.format(new Date(m + '-01T00:00:00Z')) + '</option>'; }).join('') + '</select><span><b>' + rowsInv.length + '</b> orders · <b>' + aud2.format(invTot) + '</b> to invoice</span>' + (rowsInv.length ? '<button type="button" class="linkbtn" id="invcsv">Download as spreadsheet</button>' : '') + '</div>' +
-      (rowsInv.length ? '<table class="mtable"><thead><tr><th>Date</th><th>Order</th><th>Patient</th><th>Tests</th><th>Type</th><th>Value</th></tr></thead><tbody>' + rowsInv.map(function (x) { return '<tr><td>' + x.date.slice(8) + '/' + x.date.slice(5, 7) + '</td><td>' + esc(x.order) + '</td><td>' + esc(x.patient || '—') + '</td><td style="text-align:left">' + esc(x.items) + '</td><td style="text-align:left">' + esc(x.reason) + '</td><td>' + (x.check ? '<span class="tag warn">Price needed</span>' : aud2.format(x.value)) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="msg">No $0 Primal Zone orders this month.</p>') + '</div>';
+    html += '<div class="panel"><h3>Month-end partner invoices</h3><div class="legend" style="align-items:center;flex-wrap:wrap"><select id="invpartner" aria-label="Partner">' + partners.map(function (x) { return '<option' + (x === invPartner ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select><select id="invmonth" aria-label="Invoice month">' + (invMonths.length ? invMonths : [invMonth]).map(function (m) { return '<option value="' + m + '"' + (m === invMonth ? ' selected' : '') + '>' + mf.format(new Date(m + '-01T00:00:00Z')) + '</option>'; }).join('') + '</select><span><b>' + rowsInv.length + '</b> orders · <b>' + aud2.format(invTot) + '</b> to invoice</span>' + (rowsInv.length ? '<button type="button" class="linkbtn" id="invcsv">Download as spreadsheet</button>' : '') + '</div>' +
+      (rowsInv.length ? '<table class="mtable"><thead><tr><th>Date</th><th>Order</th><th>Patient</th><th>Tests</th><th>Type</th><th>Value</th></tr></thead><tbody>' + rowsInv.map(function (x) { return '<tr><td>' + x.date.slice(8) + '/' + x.date.slice(5, 7) + '</td><td>' + esc(x.order) + '</td><td>' + esc(x.patient || '—') + '</td><td style="text-align:left">' + esc(x.items) + '</td><td style="text-align:left">' + esc(x.reason) + '</td><td>' + (x.check ? '<span class="tag warn">Price needed</span>' : aud2.format(x.value)) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="msg">Nothing to invoice ' + esc(invPartner) + ' for this month.</p>') + '</div>';
     lastInv = rowsInv;
-    html += '<p class="msg">Sales totals as paid by customers, including GST, less refunds. Express covers website orders and any other Shopify orders; Primal Zone paid covers Primal Zone orders paid online; To invoice Primal Zone covers $0 Primal Zone orders (100% discount secondary panels and ordering API orders), valued at the panel price for the month-end invoice. Partner referrals invoiced monthly, such as LSG, are not included.' + (j.shopify !== 'ok' ? ' Shopify could not be reached, so Primal Zone figures are missing.' : '') + '</p>';
+    html += '<p class="msg">Sales totals as paid by customers, including GST, less refunds. Express covers website orders and any other Shopify orders; Primal Zone paid covers Primal Zone orders paid online; To invoice Primal Zone covers $0 Primal Zone orders (100% discount secondary panels and ordering API orders), valued at the panel price for the month-end invoice. MIRAIT and partners covers jobs added in the tracker, at $235 + GST per MIRAIT test. LSG referrals are not included yet.' + (j.shopify !== 'ok' ? ' Shopify could not be reached, so Primal Zone figures are missing.' : '') + '</p>';
     $('revbody').innerHTML = html;
   }
-  document.addEventListener('change', function (e) { if (e.target.id === 'invmonth') { invMonth = e.target.value; drawRevenue(lastRev); } });
+  document.addEventListener('change', function (e) { if (e.target.id === 'invmonth') { invMonth = e.target.value; drawRevenue(lastRev); } if (e.target.id === 'invpartner') { invPartner = e.target.value; invMonth = ''; drawRevenue(lastRev); } });
   document.addEventListener('click', function (e) {
     if (e.target.id !== 'invcsv') return;
     var q = function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
     var csv = 'Date,Order,Patient,Tests,Type,Value\n' + lastInv.map(function (x) { return [x.date, x.order, x.patient, x.items, x.reason, x.value.toFixed(2)].map(q).join(','); }).join('\n');
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'primal-zone-invoice-' + invMonth + '.csv'; a.click();
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = invPartner.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-invoice-' + invMonth + '.csv'; a.click();
   });
   $('revbtn').addEventListener('click', openRevenue);
   $('revback').addEventListener('click', closeRevenue);
   $('pinform').addEventListener('submit', function (e) { e.preventDefault(); pin = String(new FormData(this).get('pin') || ''); try { sessionStorage.setItem('ep-rev-pin', pin); } catch (x) {} $('pinmsg').textContent = ''; this.reset(); loadRevenue(); });
+  $('addjob').addEventListener('click', function () { $('jobform').hidden = false; $('jobmsg').textContent = ''; $('jobform').querySelector('input').focus(); });
+  $('jobcancel').addEventListener('click', function () { $('jobform').hidden = true; });
+  $('jobform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var d = Object.fromEntries(new FormData(this).entries()); d.action = 'create_job'; d.partner = 'MIRAIT';
+    $('jobmsg').textContent = 'Adding…';
+    var f = this;
+    api('POST', d).then(function (j) { f.reset(); f.hidden = true; toast('MIRAIT job ' + j.order + ' added'); load(); }).catch(function (er) { if (er.message !== 'auth') $('jobmsg').textContent = er.message; });
+  });
   $('undo').addEventListener('click', function () { if (undo) undo(); $('toast').hidden = true; });
   $('q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); openId = ''; render(); });
   $('signout').addEventListener('click', signOut);
