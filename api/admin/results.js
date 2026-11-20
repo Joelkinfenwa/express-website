@@ -65,8 +65,7 @@ export default async function handler(req, res) {
   const who = verify(req);
   if (!who) return res.status(401).json({ error: 'Please sign in again.' });
   if (req.method !== 'POST') return res.status(405).end();
-  // Switched off: no results emails go to patients until RESULTS_EMAIL_ENABLED=1 is set in Vercel
-  if (process.env.RESULTS_EMAIL_ENABLED !== '1') return res.status(403).json({ error: 'Results emails are switched off.' });
+
   if (!shopifyConfigured()) return res.status(500).json({ error: 'Shopify is not connected.' });
   if (!process.env.RESEND_API_KEY || !process.env.ENQUIRY_FROM) return res.status(500).json({ error: 'Email is not configured.' });
   let b = req.body;
@@ -79,6 +78,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, to: who, from: sent.from });
     } catch (e) { console.error('test results failed:', e.message); return res.status(500).json({ error: 'The test email did not send.' }); }
   }
+  // Patient emails are switched off until RESULTS_EMAIL_ENABLED=1 is set in Vercel (the test above only goes to the signed-in admin)
+  if (process.env.RESULTS_EMAIL_ENABLED !== '1') return res.status(403).json({ error: 'Results emails to patients are switched off.' });
   const id = String(b.id || '');
   if (!/^gid:\/\/shopify\/Order\/\d+$/.test(id)) return res.status(400).json({ error: 'Unknown order.' });
   const files = Array.isArray(b.files) ? b.files.slice(0, 5) : [];

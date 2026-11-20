@@ -259,7 +259,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
     $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
     $('addjob').hidden = section !== 'mirait' || !!q;
-    $('rtest').hidden = !RESULTS_EMAIL || section !== 'pz' || !!q;
+    $('rtest').hidden = section !== 'pz' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
