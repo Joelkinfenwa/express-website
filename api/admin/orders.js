@@ -70,6 +70,8 @@ export async function referrals() {
 // Shopify). The tracker stage is saved on the Shopify order as metafields (namespace express_tracker).
 const SHOP_FROM = '2026-10-15';
 const FEE = /^(home visit|mobile nurse|nurse|build your own test fee|tip|shipping)/i;
+// Results checklist for every Primal Zone order (the tests on the Primal Zone panel)
+const PZ_CHECKLIST = ['Free & total testosterone', 'Oestradiol (E2) & SHBG', 'Liver function (LFT)', 'Kidney function (UEC)', 'Magnesium', 'Lipids (Chol, TG, HDL, LDL)', 'Glucose', 'High-sensitivity CRP', 'Full blood count', 'FSH / LH, prolactin, progesterone', 'DHEAS & cortisol', 'Thyroid (TSH, FT3, FT4)', 'Iron studies', 'Insulin'];
 async function shopifyOrders() {
   if (!shopifyConfigured()) return { orders: [], status: 'not_configured' };
   const q = `query($after: String) { orders(first: 100, after: $after, sortKey: CREATED_AT, reverse: true, query: "created_at:>=${SHOP_FROM} -status:cancelled") {
@@ -100,7 +102,7 @@ async function shopifyOrders() {
       name: [c.firstName || a.firstName, c.lastName || a.lastName].filter(Boolean).join(' '), email: c.email || o.email || '', phone: c.phone || o.phone || a.phone || '',
       items: titles.join('; '), type: 'shopify', partner, collection: home ? 'Home visit' : 'Collection centre', fasting: partner === 'Primal Zone',
       total: Number(o.totalPriceSet.shopMoney.amount || 0), preferred: '', addto: '',
-      lines: titles.filter((t) => !FEE.test(t)), ticks: String(mf.ticks || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number),
+      lines: partner === 'Primal Zone' ? PZ_CHECKLIST : titles.filter((t) => !FEE.test(t)), ticks: String(mf.ticks || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number).filter((x) => x < (partner === 'Primal Zone' ? PZ_CHECKLIST.length : 200)),
       stage: STAGES.includes(mf.stage) ? mf.stage : (home ? 'paid' : 'form_sent'), note: mf.note || '', appt: mf.appt || '', nurse: mf.nurse || '',
       address: [a.address1, a.address2, a.city, a.provinceCode, a.zip].filter(Boolean).join(', '), updated: updated || '', by: by || ''
     };
