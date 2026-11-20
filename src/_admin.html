@@ -183,6 +183,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (qu === 'results') return { label: 'Results in', stage: 'results_in' };
     if (o.type === 'job' && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Sent to ' + (o.partner || 'partner'), stage: 'sent' };
     if (canEmail(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Email results', open: true };
+    if (isPZ(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Mark results sent', stage: 'sent' };
     if (o.stage === 'results_in') return { label: 'Send to Jai', stage: 'review' };
     if (o.stage === 'review') return { label: 'Mark sent', stage: 'sent' };
     return null;
@@ -247,7 +248,10 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   // Sections: Express, Primal Zone, MIRAIT jobs and LSG (partner referrals) each run as their own flow
   var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG']];
   function secOf(o) { var k = kind(o); return k === 'pz' ? 'pz' : k === 'job' ? 'mirait' : k === 'ref' ? 'lsg' : 'ep'; }
-  function canEmail(o) { return o.kind === 'shop' && o.partner === 'Primal Zone'; }
+  // Results emails are switched off for now: the team sends results themselves and marks the order sent here
+  var RESULTS_EMAIL = false;
+  function isPZ(o) { return o.kind === 'shop' && o.partner === 'Primal Zone'; }
+  function canEmail(o) { return RESULTS_EMAIL && isPZ(o); }
   function inSection(o) { return secOf(o) === section; }
   function render() {
     var open = { ep: 0, pz: 0, mirait: 0, lsg: 0 };
@@ -255,7 +259,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
     $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
     $('addjob').hidden = section !== 'mirait' || !!q;
-    $('rtest').hidden = section !== 'pz' || !!q;
+    $('rtest').hidden = !RESULTS_EMAIL || section !== 'pz' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
