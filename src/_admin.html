@@ -230,7 +230,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
         .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'The email did not send. Try again.'); return j; }); });
     }).then(function (j) {
       o.stage = 'sent'; o.resultsSent = j.updated + '|' + j.by + '|' + j.to; o.updated = j.updated; o.by = j.by;
-      toast('Results emailed to ' + j.to); render();
+      toast('Results emailed to ' + j.to + ' from ' + (j.from || '') + ', copy to express@'); render();
     }).catch(function (er) { btn.disabled = false; if (er.message !== 'auth') msg.textContent = er.message; });
   });
   function signOut() { store(''); token = ''; show(); }

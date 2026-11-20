@@ -16,21 +16,35 @@ async function findOrder(id) {
   return d.order;
 }
 
+// Plain email: no images, cards or branding, just the message and the attached PDF
 function message(first) {
   const hi = first ? `Hi ${first},` : 'Hi,';
-  const text = `${hi}\n\nPlease see your attached Primal Zone results. Please upload these to your Primal Zone portal.\n\nExpress Pathology`;
-  const html = `<!doctype html><html><body style="margin:0;background:#F7F4EF;font-family:Helvetica,Arial,sans-serif;color:#1C2420">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EF"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:20px;border:1px solid #DCE0D8">
-<tr><td style="padding:32px 32px 8px;font-size:20px;font-weight:700">express<span style="color:#A4502E">.</span> <span style="font-weight:400;color:#4B5650">pathology</span></td></tr>
-<tr><td style="padding:8px 32px 32px;font-size:16px;line-height:1.6">
-<p style="margin:0 0 16px">${esc(hi)}</p>
-<p style="margin:0 0 16px">Please see your attached Primal Zone results. Please upload these to your Primal Zone portal.</p>
-<p style="margin:0">Express Pathology</p>
-</td></tr></table>
-</td></tr></table></body></html>`;
+  const text = `${hi}\n\nPlease see your attached Primal Zone results. Please upload these to your Primal Zone portal.\n\nKind regards,\nExpress Pathology`;
+  const html = `<p>${esc(hi)}</p><p>Please see your attached Primal Zone results. Please upload these to your Primal Zone portal.</p><p>Kind regards,<br>Express Pathology</p>`;
   return { text, html };
 }
+
+// Sends from results@ (RESULTS_FROM can override it). If that address is refused, it falls back to the usual sender.
+// express@ is always copied in, and replies go to express@.
+const OFFICE = 'express@expresspathology.com.au';
+async function sendResults(to, subject, first, attachments) {
+  const { text, html } = message(first);
+  const froms = [process.env.RESULTS_FROM || 'Express Pathology <results@expresspathology.com.au>', process.env.ENQUIRY_FROM].filter(Boolean);
+  let last = '';
+  for (const from of froms) {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [to], cc: to.toLowerCase() === OFFICE ? undefined : [OFFICE], reply_to: OFFICE, subject, html, text, attachments })
+    });
+    if (r.ok) return { ok: true, from };
+    last = `${r.status} ${(await r.text()).slice(0, 200)}`;
+    console.error('results email failed from', from, last);
+    if (r.status !== 403 && r.status !== 422) break; // only retry when the sender address itself was refused
+  }
+  return { ok: false, error: last };
+}
+const subjectFor = (order) => `PRIMAL ZONE BLOOD RESULTS - Order ${order}`;
 
 // A clearly marked sample report, used for the "Send me a test" button
 async function samplePdf() {
@@ -58,14 +72,9 @@ export default async function handler(req, res) {
   b = b || {};
   if (b.test === true) {
     try {
-      const { text, html } = message('Tom');
-      const r = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [who], reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim() || undefined, subject: '[TEST] Your Primal Zone results (Order #TEST)', html, text, attachments: [{ filename: 'Sample-Primal-Zone-results.pdf', content: (await samplePdf()).toString('base64') }] })
-      });
-      if (!r.ok) { console.error('test results email failed', r.status, (await r.text()).slice(0, 200)); return res.status(502).json({ error: 'The test email did not send.' }); }
-      return res.status(200).json({ ok: true, to: who, from: process.env.ENQUIRY_FROM });
+      const sent = await sendResults(who, subjectFor('#TEST'), 'Tom', [{ filename: 'Sample-Primal-Zone-results.pdf', content: (await samplePdf()).toString('base64') }]);
+      if (!sent.ok) return res.status(502).json({ error: 'The test email did not send.' });
+      return res.status(200).json({ ok: true, to: who, from: sent.from });
     } catch (e) { console.error('test results failed:', e.message); return res.status(500).json({ error: 'The test email did not send.' }); }
   }
   const id = String(b.id || '');
@@ -92,16 +101,11 @@ export default async function handler(req, res) {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return res.status(400).json({ error: 'This order has no patient email in Shopify.' });
     if (b.confirm_to && String(b.confirm_to).toLowerCase() !== to.toLowerCase()) return res.status(409).json({ error: 'The email on the Shopify order has changed. Reload and check before sending.' });
     const first = (o.customer && o.customer.firstName) || (o.billingAddress && o.billingAddress.firstName) || (o.shippingAddress && o.shippingAddress.firstName) || '';
-    const { text, html } = message(first);
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [to], reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim() || undefined, subject: `Your Primal Zone results (Order ${o.name})`, html, text, attachments })
-    });
-    if (!r.ok) { console.error('results email failed', r.status, (await r.text()).slice(0, 200)); return res.status(502).json({ error: 'The email did not send. Try again.' }); }
+    const sent = await sendResults(to, subjectFor(o.name), first, attachments);
+    if (!sent.ok) return res.status(502).json({ error: 'The email did not send. Try again.' });
     const now = new Date().toISOString();
     await saveShopify(id, { stage: 'sent', results_sent: `${now}|${who}|${to}`, updated: `${now}|${who}` });
-    return res.status(200).json({ ok: true, to, updated: now, by: who });
+    return res.status(200).json({ ok: true, to, from: sent.from, updated: now, by: who });
   } catch (e) {
     console.error('results send failed:', e.message);
     return res.status(500).json({ error: 'Could not send the results. Try again.' });
