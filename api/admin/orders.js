@@ -104,13 +104,13 @@ async function shopifyOrders() {
       total: Number(o.totalPriceSet.shopMoney.amount || 0), preferred: '', addto: '',
       lines: partner === 'Primal Zone' ? PZ_CHECKLIST : titles.filter((t) => !FEE.test(t)), ticks: String(mf.ticks || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number).filter((x) => x < (partner === 'Primal Zone' ? PZ_CHECKLIST.length : 200)),
       stage: STAGES.includes(mf.stage) ? mf.stage : (home ? 'paid' : 'form_sent'), note: mf.note || '', appt: mf.appt || '', nurse: mf.nurse || '',
-      address: [a.address1, a.address2, a.city, a.provinceCode, a.zip].filter(Boolean).join(', '), updated: updated || '', by: by || ''
+      address: [a.address1, a.address2, a.city, a.provinceCode, a.zip].filter(Boolean).join(', '), updated: updated || '', by: by || '', resultsSent: mf.results_sent || ''
     };
   });
   return { orders, status: 'ok' };
 }
 
-async function saveShopify(id, fields) {
+export async function saveShopify(id, fields) {
   const metafields = Object.entries(fields).map(([key, value]) => ({ ownerId: id, namespace: 'express_tracker', key, type: key === 'note' ? 'multi_line_text_field' : 'single_line_text_field', value: String(value) }));
   const keep = metafields.filter((m) => m.value !== '');
   const clear = metafields.filter((m) => m.value === '');

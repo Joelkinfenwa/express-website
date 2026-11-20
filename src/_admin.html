@@ -31,6 +31,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .btn.light{background:#fff;color:var(--forest);border:1px solid var(--line)}
 .msg{font-size:14px;color:var(--soft);margin:0}
 /* Queues */
+.rbox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:#FBFAF7}.rbox h4{margin:0 0 6px;font-size:15px}.rbox p{margin:0 0 10px;font-size:14px;color:var(--soft)}.rbox input[type=file]{display:block;margin:0 0 10px;max-width:100%}.rbox .sent{color:#1F7A4D;font-weight:700}
 .addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
 .jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
 .sections{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
@@ -180,6 +181,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (qu === 'collect') return { label: 'Mark collected', stage: 'collected' };
     if (qu === 'results') return { label: 'Results in', stage: 'results_in' };
     if (o.type === 'job' && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Sent to ' + (o.partner || 'partner'), stage: 'sent' };
+    if (canEmail(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Email results', open: true };
     if (o.stage === 'results_in') return { label: 'Send to Jai', stage: 'review' };
     if (o.stage === 'review') return { label: 'Mark sent', stage: 'sent' };
     return null;
@@ -201,6 +203,35 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     return fetch('/api/admin/orders', { method: method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
   }
+  // Results email (Primal Zone): the PDF goes to the email on the Shopify order
+  function resultsBox(o) {
+    var rs = String(o.resultsSent || '').split('|');
+    return '<div class="rbox" data-rbox="' + esc(o.id) + '"><h4>Email results to patient</h4>' +
+      (rs[0] ? '<p class="sent">Results emailed to ' + esc(rs[2] || o.email) + ' on ' + tfmt.format(new Date(rs[0])) + (rs[1] ? ' by ' + esc(rs[1].split('@')[0]) : '') + '</p>' : '') +
+      (o.email ? '<p>To <strong>' + esc(o.email) + '</strong>. Choose the results PDF, check the name, then send.</p><input type="file" accept="application/pdf,.pdf" multiple data-rfile><button class="btn" type="button" data-rsend disabled>' + (rs[0] ? 'Send again' : 'Send results') + '</button><p class="msg" data-rmsg role="status"></p>'
+        : '<p>This order has no patient email in Shopify, so results cannot be emailed from here.</p>') + '</div>';
+  }
+  function readFile(f) { return new Promise(function (ok, bad) { var r = new FileReader(); r.onload = function () { ok({ name: f.name, data: String(r.result).split(',')[1] || '' }); }; r.onerror = function () { bad(new Error('Could not read ' + f.name)); }; r.readAsDataURL(f); }); }
+  document.addEventListener('change', function (e) {
+    if (!e.target.matches('[data-rfile]')) return;
+    var box = e.target.closest('[data-rbox]'), fs = [].slice.call(e.target.files || []), size = fs.reduce(function (a, f) { return a + f.size; }, 0);
+    var bad = fs.filter(function (f) { return !/\.pdf$/i.test(f.name); });
+    box.querySelector('[data-rmsg]').textContent = bad.length ? bad[0].name + ' is not a PDF.' : size > 3 * 1048576 ? 'Over 3 MB together. Send one file at a time.' : fs.length ? fs.map(function (f) { return f.name; }).join(', ') : '';
+    box.querySelector('[data-rsend]').disabled = !fs.length || !!bad.length || size > 3 * 1048576;
+  });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-rsend]'); if (!btn) return;
+    var box = btn.closest('[data-rbox]'), id = box.getAttribute('data-rbox'), o = orders.find(function (x) { return x.id === id; }), input = box.querySelector('[data-rfile]'), msg = box.querySelector('[data-rmsg]');
+    if (!o || !input.files.length) return;
+    btn.disabled = true; msg.textContent = 'Sending to ' + o.email + '…';
+    Promise.all([].slice.call(input.files).map(readFile)).then(function (files) {
+      return fetch('/api/admin/results', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, files: files, confirm_to: o.email }) })
+        .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'The email did not send. Try again.'); return j; }); });
+    }).then(function (j) {
+      o.stage = 'sent'; o.resultsSent = j.updated + '|' + j.by + '|' + j.to; o.updated = j.updated; o.by = j.by;
+      toast('Results emailed to ' + j.to); render();
+    }).catch(function (er) { btn.disabled = false; if (er.message !== 'auth') msg.textContent = er.message; });
+  });
   function signOut() { store(''); token = ''; show(); }
   function show() {
     $('login').hidden = !!token; $('board').hidden = !token; $('search-wrap').hidden = !token; $('signout').hidden = !token; $('revbtn').hidden = !token; $('revenue').hidden = true;
@@ -215,6 +246,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   // Sections: Express, Primal Zone, MIRAIT jobs and LSG (partner referrals) each run as their own flow
   var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG']];
   function secOf(o) { var k = kind(o); return k === 'pz' ? 'pz' : k === 'job' ? 'mirait' : k === 'ref' ? 'lsg' : 'ep'; }
+  function canEmail(o) { return o.kind === 'shop' && o.partner === 'Primal Zone'; }
   function inSection(o) { return secOf(o) === section; }
   function render() {
     var open = { ep: 0, pz: 0, mirait: 0, lsg: 0 };
@@ -273,6 +305,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       '<dt>Paid</dt><dd>' + (o.total ? money.format(o.total) + ' · ' : '') + tfmt.format(new Date(o.date * 1000)) + '</dd>' +
       (o.addto ? '<dt>Add-on to</dt><dd>#' + esc(o.addto) + '</dd>' : '') + '</dl>' +
       ((o.lines || []).length ? '<div class="checks"><div class="checks-h"><strong>Results checklist</strong><span>' + (o.ticks || []).length + ' of ' + o.lines.length + '</span></div>' + o.lines.map(function (l, i) { return '<label class="chk"><input type="checkbox" data-tick="' + i + '"' + ((o.ticks || []).indexOf(i) !== -1 ? ' checked' : '') + '><span>' + esc(l) + '</span></label>'; }).join('') + '<div class="meta">Tick each test as its result comes in. When every box is ticked, the order moves to Results in.</div></div>' : '') +
+      (canEmail(o) ? resultsBox(o) : '') +
       '<form class="form" data-form>' +
       (isHome(o) ? '<div class="row2"><label>Appointment<input type="datetime-local" name="appt" value="' + esc(o.appt) + '"></label><label>Nurse<input type="text" name="nurse" list="nurses" value="' + esc(o.nurse) + '" placeholder="Name"></label></div>' : '') +
       '<label>Note<textarea name="note" placeholder="Anything the team should know">' + esc(o.note) + '</textarea></label>' +
