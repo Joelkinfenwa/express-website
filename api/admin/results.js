@@ -78,8 +78,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, to: who, from: sent.from });
     } catch (e) { console.error('test results failed:', e.message); return res.status(500).json({ error: 'The test email did not send.' }); }
   }
-  // Patient emails are switched off until RESULTS_EMAIL_ENABLED=1 is set in Vercel (the test above only goes to the signed-in admin)
-  if (process.env.RESULTS_EMAIL_ENABLED !== '1') return res.status(403).json({ error: 'Results emails to patients are switched off.' });
+  // Kill switch: set RESULTS_EMAIL_DISABLED=1 in Vercel to stop all patient results emails
+  if (process.env.RESULTS_EMAIL_DISABLED === '1') return res.status(403).json({ error: 'Results emails to patients are switched off.' });
   const id = String(b.id || '');
   if (!/^gid:\/\/shopify\/Order\/\d+$/.test(id)) return res.status(400).json({ error: 'Unknown order.' });
   const files = Array.isArray(b.files) ? b.files.slice(0, 5) : [];

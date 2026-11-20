@@ -248,8 +248,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   // Sections: Express, Primal Zone, MIRAIT jobs and LSG (partner referrals) each run as their own flow
   var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG']];
   function secOf(o) { var k = kind(o); return k === 'pz' ? 'pz' : k === 'job' ? 'mirait' : k === 'ref' ? 'lsg' : 'ep'; }
-  // Results emails are switched off for now: the team sends results themselves and marks the order sent here
-  var RESULTS_EMAIL = false;
+  // Primal Zone results can be emailed to the patient from the order (set RESULTS_EMAIL to false to hide it)
+  var RESULTS_EMAIL = true;
   function isPZ(o) { return o.kind === 'shop' && o.partner === 'Primal Zone'; }
   function canEmail(o) { return RESULTS_EMAIL && isPZ(o); }
   function inSection(o) { return secOf(o) === section; }
