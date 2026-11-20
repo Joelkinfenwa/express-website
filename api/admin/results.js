@@ -11,7 +11,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 
 async function findOrder(id) {
   const d = await shopifyGraphQL(`query($id: ID!) { order(id: $id) { id name email tags note sourceName
-    customer { firstName email } billingAddress { firstName } shippingAddress { firstName }
+    billingAddress { firstName } shippingAddress { firstName }
     lineItems(first: 40) { nodes { title } } } }`, { id });
   return d.order;
 }
@@ -100,17 +100,19 @@ export default async function handler(req, res) {
     if (!o) return res.status(404).json({ error: 'Order not found in Shopify.' });
     const titles = o.lineItems.nodes.map((x) => x.title);
     if (!/primal/i.test([o.tags.join(' '), o.sourceName, titles.join(' '), o.note].join(' '))) return res.status(400).json({ error: 'Results emails are only set up for Primal Zone orders.' });
-    const to = String((o.customer && o.customer.email) || o.email || '').trim();
+    const to = String(o.email || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return res.status(400).json({ error: 'This order has no patient email in Shopify.' });
     if (b.confirm_to && String(b.confirm_to).toLowerCase() !== to.toLowerCase()) return res.status(409).json({ error: 'The email on the Shopify order has changed. Reload and check before sending.' });
-    const first = (o.customer && o.customer.firstName) || (o.billingAddress && o.billingAddress.firstName) || (o.shippingAddress && o.shippingAddress.firstName) || '';
+    const first = (o.billingAddress && o.billingAddress.firstName) || (o.shippingAddress && o.shippingAddress.firstName) || '';
     const sent = await sendResults(to, subjectFor(o.name), first, attachments);
     if (!sent.ok) return res.status(502).json({ error: 'The email did not send. Try again.' });
     const now = new Date().toISOString();
-    await saveShopify(id, { stage: 'sent', results_sent: `${now}|${who}|${to}`, updated: `${now}|${who}` });
+    // The email has gone at this point, so a failed save must not show as a failed send (that would invite a second send)
+    try { await saveShopify(id, { stage: 'sent', results_sent: `${now}|${who}|${to}`, updated: `${now}|${who}` }); }
+    catch (e) { console.error('results sent but stage save failed:', e.message); return res.status(200).json({ ok: true, to, from: sent.from, updated: now, by: who, warning: 'Sent, but the stage did not save. Set it to Sent to patient.' }); }
     return res.status(200).json({ ok: true, to, from: sent.from, updated: now, by: who });
   } catch (e) {
     console.error('results send failed:', e.message);
-    return res.status(500).json({ error: 'Could not send the results. Try again.' });
+    return res.status(500).json({ error: 'Could not send the results (' + String(e.message || '').slice(0, 120) + '). Nothing was emailed.' });
   }
 }
