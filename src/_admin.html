@@ -263,7 +263,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
-    var QL = section === 'mirait' ? { jai: ['Results in', 'Results back, ready to send to MIRAIT.'], done: ['Done', 'Results sent to MIRAIT.'] } : {};
+    var QL = section === 'mirait' ? { jai: ['Results in', 'Results back, ready to send to MIRAIT.'], done: ['Done', 'Results sent to MIRAIT.'] }
+      : section === 'pz' ? { jai: ['Results in', 'Results back, ready to email to the patient. Primal Zone results do not go to Jai.'] } : {};
     $('queues').innerHTML = QUEUES.map(function (x) {
       return '<button type="button" class="q' + (late[x[0]] && x[0] !== 'done' ? ' alert' : '') + '" data-v="' + x[0] + '" aria-pressed="' + (!q && view === x[0]) + '"><b>' + (counts[x[0]] || 0) + '</b><span>' + (QL[x[0]] ? QL[x[0]][0] : x[1]) + '</span></button>';
     }).join('');
@@ -288,7 +289,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var n = nextStep(o), open = openId === o.id;
     var days = Math.floor((Date.now() / 1000 - o.date) / 86400);
     var status = o.stage === 'booked' && o.appt ? 'Booked for <strong>' + esc(appt(o.appt)) + '</strong>' + (o.nurse ? ' with ' + esc(o.nurse) : '')
-      : o.stage === 'review' ? '<strong>With Jai for review</strong>' : o.stage === 'results_in' ? (o.type === 'job' ? '<strong>Results in</strong>, ready to send to ' + esc(o.partner || 'partner') : '<strong>Results in</strong>, not yet with Jai')
+      : o.stage === 'review' ? '<strong>With Jai for review</strong>' : o.stage === 'results_in' ? (o.type === 'job' ? '<strong>Results in</strong>, ready to send to ' + esc(o.partner || 'partner') : (isPZ(o) ? '<strong>Results in</strong>, ready to email to the patient' : '<strong>Results in</strong>, not yet with Jai'))
       : o.stage === 'dropped' ? 'Bloods dropped at lab · results go to their doctor' + (o.updated ? ' · ' + dfmt.format(new Date(o.updated)) : '')
       : o.type === 'own-form' && o.stage === 'collected' ? '<strong>Collected</strong>, not yet dropped at the lab'
       : o.stage === 'sent' ? (o.type === 'job' ? 'Results sent to ' + (o.partner || 'partner') : 'Sent to patient') + (o.updated ? ' ' + dfmt.format(new Date(o.updated)) : '') : '';
@@ -315,7 +316,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       '<form class="form" data-form>' +
       (isHome(o) ? '<div class="row2"><label>Appointment<input type="datetime-local" name="appt" value="' + esc(o.appt) + '"></label><label>Nurse<input type="text" name="nurse" list="nurses" value="' + esc(o.nurse) + '" placeholder="Name"></label></div>' : '') +
       '<label>Note<textarea name="note" placeholder="Anything the team should know">' + esc(o.note) + '</textarea></label>' +
-      '<label>Stage<select name="stage">' + STAGES.filter(function (s) { return o.type === 'own-form' ? GP_STAGES.indexOf(s[0]) !== -1 || s[0] === o.stage : s[0] !== 'dropped' && (isHome(o) || s[0] !== 'booked'); }).map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></label>' +
+      '<label>Stage<select name="stage">' + STAGES.filter(function (s) { if (s[0] === 'review' && (isPZ(o) || o.type === 'job') && o.stage !== 'review') return false; return o.type === 'own-form' ? GP_STAGES.indexOf(s[0]) !== -1 || s[0] === o.stage : s[0] !== 'dropped' && (isHome(o) || s[0] !== 'booked'); }).map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === o.stage ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></label>' +
       '<div class="row2"><button class="btn" type="submit">' + (queueOf(o) === 'book' ? 'Save booking' : 'Save') + '</button><button class="btn light" type="button" data-toggle>Close</button></div>' +
       '<div class="meta">' + (o.updated ? 'Last updated ' + tfmt.format(new Date(o.updated)) + (o.by ? ' by ' + esc(o.by.split('@')[0]) : '') : '') + '</div></form></div>';
   }
@@ -368,7 +369,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     var all = ticks.length === o.lines.length, patch = { ticks: ticks };
     if (all && ['paid', 'form_sent', 'booked', 'collected'].indexOf(o.stage) !== -1) patch.stage = 'results_in';
     var hdr = t.closest('.checks').querySelector('.checks-h span'); if (hdr) hdr.textContent = ticks.length + ' of ' + o.lines.length;
-    if (patch.stage) { save(o, patch, 'All results in for ' + (o.name || o.order) + '. Moved to With Jai queue.'); return; }
+    if (patch.stage) { save(o, patch, 'All results in for ' + (o.name || o.order) + (isPZ(o) ? '. Ready to email to the patient.' : o.type === 'job' ? '. Ready to send to ' + (o.partner || 'the partner') + '.' : '. Moved to With Jai queue.')); return; }
     api('POST', { id: o.id, kind: o.kind, ticks: ticks }).catch(function (er) { if (er.message !== 'auth') toast('Not saved: ' + er.message); });
   });
   // ---- Revenue (PIN locked) ----
