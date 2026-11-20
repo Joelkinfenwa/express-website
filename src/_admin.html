@@ -135,6 +135,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 </form>
 <section id="board" hidden>
 <div class="sections" id="sections" role="tablist" aria-label="Business"></div>
+<button type="button" class="addjob" id="rtest" hidden>Send me a test results email</button>
 <button type="button" class="addjob" id="addjob">+ Add MIRAIT jobs</button>
 <form class="jobform" id="jobform" hidden><h3>Add MIRAIT jobs</h3><div class="form"><label>Workers<textarea name="workers" id="jobworkers" rows="6" required placeholder="Paste the names from the email, one per line. A phone number on the same line is picked up too."></textarea></label><p class="msg" id="jobcount"></p><div class="row2"><label>Tests per worker<input name="qty" type="number" min="1" max="50" value="1" required></label><label>Date of the job<input name="job_date" type="date"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit" id="jobsubmit">Add jobs</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
@@ -254,6 +255,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
     $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
     $('addjob').hidden = section !== 'mirait' || !!q;
+    $('rtest').hidden = section !== 'pz' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
@@ -438,6 +440,13 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     }).filter(function (w) { var k = w.name.toLowerCase(); if (!w.name || w.name.length < 2 || /^(name|names|worker|workers|employee|employees|hi|hello|thanks|thank you|regards|cheers)\b/i.test(w.name) || seen[k]) return false; seen[k] = 1; return true; });
   }
   $('jobworkers').addEventListener('input', function () { var n = parseWorkers(this.value).length, q = Number($('jobform').qty.value) || 1; $('jobcount').textContent = n ? n + ' worker' + (n === 1 ? '' : 's') + ' · ' + n + ' job' + (n === 1 ? '' : 's') + ' · ' + aud2.format(n * q * 258.5) + ' incl. GST' : ''; });
+  $('rtest').addEventListener('click', function () {
+    var btn = this; btn.disabled = true; btn.textContent = 'Sending…';
+    fetch('/api/admin/results', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ test: true }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'The test email did not send.'); return j; }); })
+      .then(function (j) { toast('Test sent to ' + j.to + (j.from ? ' from ' + j.from : '')); }).catch(function (er) { toast(er.message); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Send me a test results email'; });
+  });
   $('addjob').addEventListener('click', function () { $('jobform').hidden = false; $('jobmsg').textContent = ''; $('jobworkers').focus(); });
   $('jobcancel').addEventListener('click', function () { $('jobform').hidden = true; });
   $('jobform').addEventListener('submit', function (e) {

@@ -4,6 +4,7 @@
 import { verify } from '../../lib/admin-auth.js';
 import { shopifyConfigured, shopifyGraphQL } from '../../lib/shopify-admin.js';
 import { saveShopify } from './orders.js';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 const MAX_BYTES = 3 * 1024 * 1024; // Vercel's request limit is 4.5 MB, and base64 adds a third
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -31,6 +32,21 @@ function message(first) {
   return { text, html };
 }
 
+// A clearly marked sample report, used for the "Send me a test" button
+async function samplePdf() {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595, 842]);
+  const font = await doc.embedFont(StandardFonts.Helvetica), bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const ink = rgb(0.11, 0.14, 0.13), soft = rgb(0.4, 0.44, 0.42), red = rgb(0.64, 0.31, 0.18);
+  page.drawText('SAMPLE REPORT - NOT A REAL RESULT', { x: 50, y: 790, size: 16, font: bold, color: red });
+  page.drawText('Primal Zone panel - test email from the Express orders tracker', { x: 50, y: 766, size: 11, font, color: soft });
+  page.drawText('Patient: Tom Sample    Order: #TEST', { x: 50, y: 740, size: 11, font, color: ink });
+  const tests = ['Free & total testosterone', 'Oestradiol (E2) & SHBG', 'Liver function (LFT)', 'Kidney function (UEC)', 'Magnesium', 'Lipids (Chol, TG, HDL, LDL)', 'Glucose', 'High-sensitivity CRP', 'Full blood count', 'FSH / LH, prolactin, progesterone', 'DHEAS & cortisol', 'Thyroid (TSH, FT3, FT4)', 'Iron studies', 'Insulin'];
+  tests.forEach((t, i) => { const y = 700 - i * 26; page.drawText(t, { x: 50, y, size: 11, font, color: ink }); page.drawText('sample only', { x: 400, y, size: 11, font, color: soft }); });
+  page.drawText('The real email attaches the lab report PDF you upload in the tracker.', { x: 50, y: 300, size: 10, font, color: soft });
+  return Buffer.from(await doc.save());
+}
+
 export default async function handler(req, res) {
   const who = verify(req);
   if (!who) return res.status(401).json({ error: 'Please sign in again.' });
@@ -40,6 +56,18 @@ export default async function handler(req, res) {
   let b = req.body;
   if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
   b = b || {};
+  if (b.test === true) {
+    try {
+      const { text, html } = message('Tom');
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [who], reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim() || undefined, subject: '[TEST] Your Primal Zone results (Order #TEST)', html, text, attachments: [{ filename: 'Sample-Primal-Zone-results.pdf', content: (await samplePdf()).toString('base64') }] })
+      });
+      if (!r.ok) { console.error('test results email failed', r.status, (await r.text()).slice(0, 200)); return res.status(502).json({ error: 'The test email did not send.' }); }
+      return res.status(200).json({ ok: true, to: who, from: process.env.ENQUIRY_FROM });
+    } catch (e) { console.error('test results failed:', e.message); return res.status(500).json({ error: 'The test email did not send.' }); }
+  }
   const id = String(b.id || '');
   if (!/^gid:\/\/shopify\/Order\/\d+$/.test(id)) return res.status(400).json({ error: 'Unknown order.' });
   const files = Array.isArray(b.files) ? b.files.slice(0, 5) : [];
