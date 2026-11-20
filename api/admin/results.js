@@ -15,21 +15,18 @@ async function findOrder(id) {
   return d.order;
 }
 
-function message(first, order) {
-  const hi = first ? `Hi ${first},` : 'Hello,';
-  const text = `${hi}\n\nYour blood test results for your Primal Zone panel (order ${order}) are attached to this email as a PDF.\n\nIf you have any questions about what your results mean, please speak with your Primal Zone doctor.\n\nIf you have trouble opening the attachment, reply to this email and our team will help.\n\nExpress Pathology, collection partner for Primal Zone`;
+function message(first) {
+  const hi = first ? `Hi ${first},` : 'Hi,';
+  const text = `${hi}\n\nPlease see your attached Primal Zone results. Please upload these to your Primal Zone portal.\n\nExpress Pathology`;
   const html = `<!doctype html><html><body style="margin:0;background:#F7F4EF;font-family:Helvetica,Arial,sans-serif;color:#1C2420">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EF"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:20px;border:1px solid #DCE0D8">
 <tr><td style="padding:32px 32px 8px;font-size:20px;font-weight:700">express<span style="color:#A4502E">.</span> <span style="font-weight:400;color:#4B5650">pathology</span></td></tr>
-<tr><td style="padding:8px 32px 0;font-size:16px;line-height:1.6">
+<tr><td style="padding:8px 32px 32px;font-size:16px;line-height:1.6">
 <p style="margin:0 0 16px">${esc(hi)}</p>
-<h1 style="margin:0 0 16px;font-size:24px;line-height:1.25">Your blood test results are attached</h1>
-<p style="margin:0 0 16px">Your results for your Primal Zone panel (order ${esc(order)}) are attached to this email as a PDF.</p>
-<p style="margin:0 0 16px">If you have any questions about what your results mean, please speak with your Primal Zone doctor.</p>
-<p style="margin:0 0 32px;color:#4B5650">If you have trouble opening the attachment, reply to this email and our team will help.</p>
+<p style="margin:0 0 16px">Please see your attached Primal Zone results. Please upload these to your Primal Zone portal.</p>
+<p style="margin:0">Express Pathology</p>
 </td></tr></table>
-<p style="margin:16px 0 0;font-size:12px;color:#6B756F">Express Pathology · collection partner for Primal Zone · expresspathology.com.au</p>
 </td></tr></table></body></html>`;
   return { text, html };
 }
@@ -67,11 +64,11 @@ export default async function handler(req, res) {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return res.status(400).json({ error: 'This order has no patient email in Shopify.' });
     if (b.confirm_to && String(b.confirm_to).toLowerCase() !== to.toLowerCase()) return res.status(409).json({ error: 'The email on the Shopify order has changed. Reload and check before sending.' });
     const first = (o.customer && o.customer.firstName) || (o.billingAddress && o.billingAddress.firstName) || (o.shippingAddress && o.shippingAddress.firstName) || '';
-    const { text, html } = message(first, o.name);
+    const { text, html } = message(first);
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [to], reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim() || undefined, subject: `Your blood test results (Order ${o.name})`, html, text, attachments })
+      body: JSON.stringify({ from: process.env.ENQUIRY_FROM, to: [to], reply_to: String(process.env.ENQUIRY_TO || '').split(',')[0].trim() || undefined, subject: `Your Primal Zone results (Order ${o.name})`, html, text, attachments })
     });
     if (!r.ok) { console.error('results email failed', r.status, (await r.text()).slice(0, 200)); return res.status(502).json({ error: 'The email did not send. Try again.' }); }
     const now = new Date().toISOString();
