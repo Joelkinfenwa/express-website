@@ -32,6 +32,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .msg{font-size:14px;color:var(--soft);margin:0}
 /* Queues */
 .rbox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:#FBFAF7}.rbox h4{margin:0 0 6px;font-size:15px}.rbox p{margin:0 0 10px;font-size:14px;color:var(--soft)}.rbox .rfile{display:block;font-weight:700;font-size:14px;margin:0 0 10px}.rbox input[type=file]{display:block;margin:4px 0 0;max-width:100%;font-weight:400}.rbox .sent{color:#1F7A4D;font-weight:700}
+.mgrp{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#fff}.mgrp h4{margin:0 0 4px}.mgrp .sub{font-size:13px;color:var(--soft);margin:0 0 10px}.mrow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}.mrow .f{color:var(--soft);word-break:break-all}.mrow .miss{color:#A4502E;font-weight:700}.mrow select{max-width:100%}.mgrp .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.mgrp .acts .btn{width:auto;padding:10px 14px}
 .addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
 .jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
 .sections{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
@@ -137,6 +138,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <div class="sections" id="sections" role="tablist" aria-label="Business"></div>
 <button type="button" class="addjob" id="rtest" hidden>Send me a test results email</button>
 <button type="button" class="addjob" id="addjob">+ Add MIRAIT jobs</button>
+<button type="button" class="addjob" id="mup" hidden style="margin-right:8px">Upload MIRAIT results</button>
+<section class="jobform" id="mres" hidden><h3>MIRAIT results</h3><p class="msg">Choose all the result PDFs at once. Each one is matched to a worker by name and grouped by booking. Files stay in this browser only and are cleared when you leave the page.</p><input type="file" id="mfiles" accept="application/pdf,.pdf" multiple><p class="msg" id="mstatus" role="status"></p><div id="mgroups"></div><div class="row2" style="margin-top:12px"><button class="btn light" type="button" id="mclose">Close</button></div></section>
 <form class="jobform" id="jobform" hidden><h3>Add MIRAIT jobs</h3><div class="form"><label>Workers<textarea name="workers" id="jobworkers" rows="6" required placeholder="Paste the names from the email, one per line. A phone number on the same line is picked up too."></textarea></label><p class="msg" id="jobcount"></p><div class="row2"><label>Tests per worker<input name="qty" type="number" min="1" max="50" value="1" required></label><label>Date of the job<input name="job_date" type="date"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit" id="jobsubmit">Add jobs</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
 <p class="shopnote" id="shopnote" hidden></p>
@@ -266,6 +269,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
     $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
     $('addjob').hidden = section !== 'mirait' || !!q;
+    $('mup').hidden = section !== 'mirait' || !!q; if (section !== 'mirait') $('mres').hidden = true;
     $('rtest').hidden = section !== 'pz' || !!q;
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
@@ -458,6 +462,112 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'The test email did not send.'); return j; }); })
       .then(function (j) { toast('Test sent to ' + j.to + (j.from ? ' from ' + j.from : '')); }).catch(function (er) { toast(er.message); })
       .then(function () { btn.disabled = false; btn.textContent = 'Send me a test results email'; });
+  });
+  // ---- MIRAIT results: match uploaded PDFs to workers by name, group by booking ----
+  var mFiles = []; // { file, name, text, jobId, auto }
+  function normT(x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/['’`]/g, '').replace(/[^a-z]+/g, ' ').trim(); }
+  function mJobs() { return orders.filter(function (o) { return o.type === 'job'; }); }
+  // A booking is one batch of workers added together; older jobs without a batch are grouped by date, site and add time
+  function bookings() {
+    var g = {}, prev = {};
+    mJobs().slice().sort(function (x, y) { return (x.date || 0) - (y.date || 0); }).forEach(function (o) {
+      var k = o.batch;
+      if (!k) { var sig = [o.preferred, o.address, o.note].join('|'), pv = prev[sig]; k = pv && o.date - pv.date <= 300 ? pv.key : 'old|' + sig + '|' + o.date; prev[sig] = { key: k, date: o.date }; }
+      (g[k] = g[k] || { key: k, jobs: [] }).jobs.push(o);
+    });
+    return Object.keys(g).map(function (k) { var b = g[k]; b.jobs.sort(function (x, y) { return String(x.order).localeCompare(String(y.order)); }); b.first = b.jobs[0]; return b; })
+      .sort(function (x, y) { return (y.first.date || 0) - (x.first.date || 0); });
+  }
+  function matchJob(hay) {
+    var h = ' ' + normT(hay) + ' ', best = null, bestScore = 0, tie = false;
+    mJobs().forEach(function (o) {
+      var t = normT(o.name).split(' ').filter(function (w) { return w.length > 1; }); if (!t.length) return;
+      var last = t[t.length - 1], first = t[0], sc = 0;
+      if (h.indexOf(' ' + last + ' ') > -1) sc += 2; else return;
+      if (t.length > 1 && h.indexOf(' ' + first + ' ') > -1) sc += 2;
+      t.slice(1, -1).forEach(function (w) { if (h.indexOf(' ' + w + ' ') > -1) sc += 1; });
+      if (sc > bestScore) { best = o; bestScore = sc; tie = false; } else if (sc === bestScore) tie = true;
+    });
+    return tie ? null : best;
+  }
+  var pdfjs = null;
+  function loadPdfjs() {
+    if (pdfjs) return pdfjs;
+    pdfjs = new Promise(function (ok, bad) { var sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'; sc.onload = function () { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; ok(window.pdfjsLib); }; sc.onerror = function () { pdfjs = null; bad(new Error('pdf reader')); }; document.head.appendChild(sc); });
+    return pdfjs;
+  }
+  function pdfText(file) {
+    return loadPdfjs().then(function (lib) { return file.arrayBuffer().then(function (buf) { return lib.getDocument({ data: buf }).promise; }).then(function (doc) {
+      var n = Math.min(doc.numPages, 2), out = [], ch = Promise.resolve();
+      for (var i = 1; i <= n; i++) (function (i) { ch = ch.then(function () { return doc.getPage(i).then(function (pg) { return pg.getTextContent(); }).then(function (tc) { out.push(tc.items.map(function (x) { return x.str; }).join(' ')); }); }); })(i);
+      return ch.then(function () { return out.join(' '); });
+    }); }).catch(function () { return ''; });
+  }
+  function drawM() {
+    var bs = bookings(), byJob = {};
+    mFiles.forEach(function (f, i) { if (f.jobId) (byJob[f.jobId] = byJob[f.jobId] || []).push(i); });
+    var opts = function (sel) { return '<option value="">Not matched</option>' + mJobs().map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === sel ? ' selected' : '') + '>' + esc(o.name) + ' ' + esc(o.order) + '</option>'; }).join(''); };
+    var html = '';
+    var un = mFiles.map(function (f, i) { return [f, i]; }).filter(function (x) { return !x[0].jobId; });
+    if (un.length) html += '<div class="mgrp"><h4>Not matched (' + un.length + ')</h4><p class="sub">Pick the worker for each file.</p>' + un.map(function (x) { return '<div class="mrow"><span class="f">' + esc(x[0].name) + '</span><select data-massign="' + x[1] + '">' + opts('') + '</select></div>'; }).join('') + '</div>';
+    bs.forEach(function (b) {
+      var got = b.jobs.filter(function (o) { return byJob[o.id]; }).length; if (!mFiles.length && !b.jobs.some(function (o) { return o.stage !== 'sent'; })) return;
+      var f = b.first, sent = b.jobs.every(function (o) { return o.stage === 'sent'; });
+      html += '<div class="mgrp" data-mbook="' + esc(b.key) + '"><h4>Booking ' + (f.preferred ? dfmt.format(new Date(f.preferred + 'T00:00:00')) : 'added ' + dfmt.format(new Date(f.date * 1000))) + ' · ' + b.jobs.length + ' worker' + (b.jobs.length === 1 ? '' : 's') + '</h4>' +
+        '<p class="sub">' + esc([f.address, f.note].filter(Boolean).join(' · ') || 'No site or note') + ' · ' + (sent ? 'Sent to MIRAIT' : got + ' of ' + b.jobs.length + ' results uploaded') + '</p>' +
+        b.jobs.map(function (o) { var fs = byJob[o.id] || []; return '<div class="mrow"><span><strong>' + esc(o.name) + '</strong> ' + esc(o.order) + '</span>' + (fs.length ? '<span class="f">' + fs.map(function (i) { return esc(mFiles[i].name) + (mFiles[i].auto ? '' : ' (picked)'); }).join(', ') + '</span>' : '<span class="miss">' + (o.stage === 'sent' ? 'Sent' : 'No result yet') + '</span>') + '</div>'; }).join('') +
+        '<div class="acts">' + (got ? '<button class="btn" type="button" data-mzip="' + esc(b.key) + '">Download ' + got + ' result' + (got === 1 ? '' : 's') + ' (ZIP)</button><button class="btn light" type="button" data-min="' + esc(b.key) + '">Mark these results in</button>' : '') + (sent ? '' : '<button class="btn light" type="button" data-msent="' + esc(b.key) + '">Mark booking sent to MIRAIT</button>') + '</div></div>';
+    });
+    $('mgroups').innerHTML = html || '<p class="msg">No MIRAIT bookings yet.</p>';
+  }
+  function bookingByKey(k) { return bookings().find(function (b) { return b.key === k; }); }
+  function setStages(jobs, stage, label) {
+    var todo = jobs.filter(function (o) { return o.stage !== stage; });
+    if (!todo.length) { toast('Nothing to change'); return; }
+    Promise.all(todo.map(function (o) { return api('POST', { id: o.id, kind: o.kind, stage: stage }).then(function (j) { o.stage = stage; o.updated = j.updated; o.by = j.by; }); }))
+      .then(function () { toast(todo.length + ' marked ' + label); render(); drawM(); })
+      .catch(function (er) { if (er.message !== 'auth') toast('Some not saved: ' + er.message); render(); drawM(); });
+  }
+  var jszip = null;
+  function loadZip() { return jszip || (jszip = new Promise(function (ok, bad) { var sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; sc.onload = function () { ok(window.JSZip); }; sc.onerror = function () { jszip = null; bad(new Error('zip')); }; document.head.appendChild(sc); })); }
+  $('mup').addEventListener('click', function () { $('mres').hidden = false; drawM(); $('mres').scrollIntoView({ block: 'start' }); });
+  $('mclose').addEventListener('click', function () { $('mres').hidden = true; });
+  $('mfiles').addEventListener('change', function () {
+    var list = [].slice.call(this.files || []).filter(function (f) { return /\.pdf$/i.test(f.name); });
+    if (!list.length) return;
+    $('mstatus').textContent = 'Reading ' + list.length + ' file' + (list.length === 1 ? '' : 's') + '…';
+    var done = 0;
+    Promise.all(list.map(function (f) {
+      var m = matchJob(f.name.replace(/\.pdf$/i, ''));
+      var p = m ? Promise.resolve('') : pdfText(f);
+      return p.then(function (text) { if (!m && text) m = matchJob(text); done++; $('mstatus').textContent = 'Reading ' + done + ' of ' + list.length + '…'; return { file: f, name: f.name, jobId: m ? m.id : '', auto: !!m }; });
+    })).then(function (rows) {
+      var seen = {}; mFiles.forEach(function (x) { seen[x.name + x.file.size] = 1; });
+      rows.forEach(function (r) { if (!seen[r.name + r.file.size]) mFiles.push(r); });
+      var un = mFiles.filter(function (x) { return !x.jobId; }).length;
+      $('mstatus').textContent = mFiles.length + ' file' + (mFiles.length === 1 ? '' : 's') + ' loaded · ' + (mFiles.length - un) + ' matched' + (un ? ' · ' + un + ' to pick' : '');
+      $('mfiles').value = ''; drawM();
+    });
+  });
+  $('mgroups').addEventListener('change', function (e) {
+    var s2 = e.target.closest('[data-massign]'); if (!s2) return;
+    var f = mFiles[Number(s2.getAttribute('data-massign'))]; f.jobId = s2.value; f.auto = false; drawM();
+  });
+  $('mgroups').addEventListener('click', function (e) {
+    var z = e.target.closest('[data-mzip]'), ri = e.target.closest('[data-min]'), ms = e.target.closest('[data-msent]');
+    if (z) {
+      var b = bookingByKey(z.getAttribute('data-mzip')), ids = b.jobs.map(function (o) { return o.id; }), fs = mFiles.filter(function (f) { return ids.indexOf(f.jobId) > -1; });
+      z.disabled = true;
+      loadZip().then(function (JSZip) {
+        var zip = new JSZip(), used = {};
+        fs.forEach(function (f) { var o = orders.find(function (x) { return x.id === f.jobId; }), nm = (o ? o.name.replace(/[^\w .-]/g, '') + ' ' + o.order.replace('#', '') + ' - ' : '') + f.name; while (used[nm]) nm = '1 ' + nm; used[nm] = 1; zip.file(nm, f.file); });
+        return zip.generateAsync({ type: 'blob' });
+      }).then(function (blob) {
+        var f = b.first, a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'MIRAIT results ' + (f.preferred || new Date(f.date * 1000).toISOString().slice(0, 10)) + '.zip'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+      }).catch(function () { toast('Could not build the ZIP. Try again.'); }).then(function () { z.disabled = false; });
+    }
+    if (ri) { var b2 = bookingByKey(ri.getAttribute('data-min')), ids2 = mFiles.map(function (f) { return f.jobId; }); setStages(b2.jobs.filter(function (o) { return ids2.indexOf(o.id) > -1 && o.stage !== 'sent'; }), 'results_in', 'results in'); }
+    if (ms) { var b3 = bookingByKey(ms.getAttribute('data-msent')); if (confirm('Mark all ' + b3.jobs.length + ' workers in this booking as sent to MIRAIT?')) setStages(b3.jobs, 'sent', 'sent to MIRAIT'); }
   });
   $('addjob').addEventListener('click', function () { $('jobform').hidden = false; $('jobmsg').textContent = ''; $('jobworkers').focus(); });
   $('jobcancel').addEventListener('click', function () { $('jobform').hidden = true; });

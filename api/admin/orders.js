@@ -55,7 +55,7 @@ export async function referrals() {
       return {
         id: c.id, kind: 'cus', order: '#' + m.order_number, date: c.created, name: m.patient || '', email: m.email || '', phone: m.phone || '',
         items: `${qty} x ${p.item || 'Test'} (${m.partner})`, type: 'job', partner: m.partner, qty, collection: 'Home visit', total: 0, preferred: m.job_date || '', addto: '',
-        stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'paid', note: m.ops_note || '', appt: m.ops_appt || '', nurse: m.ops_nurse || '', address: m.address || '', updated: updated || '', by: by || ''
+        stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'paid', note: m.ops_note || '', appt: m.ops_appt || '', nurse: m.ops_nurse || '', address: m.address || '', batch: m.batch || '', updated: updated || '', by: by || ''
       };
     }
     return {
@@ -145,10 +145,10 @@ export default async function handler(req, res) {
         const qty = Math.max(1, Math.min(50, parseInt(b.qty, 10) || 1));
         const jd = String(b.job_date || '').slice(0, 10);
         if (jd && !/^\d{4}-\d{2}-\d{2}$/.test(jd)) return res.status(400).json({ error: 'Invalid date.' });
-        const orders = [];
+        const orders = [], batch = Date.now().toString(36); // one booking = one batch of workers pasted together
         let last = 0;
         for (const w of list) {
-          last = await jobNumber({ partner, patient: w.name, qty: String(qty), job_date: jd, phone: w.phone || String(b.phone || '').slice(0, 40), email: String(b.email || '').slice(0, 120), address: String(b.address || '').slice(0, 200), ops_note: String(b.note || '').slice(0, 480), ops_updated: `${new Date().toISOString()}|${who}` }, last);
+          last = await jobNumber({ partner, batch, patient: w.name, qty: String(qty), job_date: jd, phone: w.phone || String(b.phone || '').slice(0, 40), email: String(b.email || '').slice(0, 120), address: String(b.address || '').slice(0, 200), ops_note: String(b.note || '').slice(0, 480), ops_updated: `${new Date().toISOString()}|${who}` }, last);
           orders.push('#' + last);
         }
         return res.status(200).json({ ok: true, order: orders[0], orders });
