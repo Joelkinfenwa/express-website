@@ -31,7 +31,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 .btn.light{background:#fff;color:var(--forest);border:1px solid var(--line)}
 .msg{font-size:14px;color:var(--soft);margin:0}
 /* Queues */
-.rbox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:#FBFAF7}.rbox h4{margin:0 0 6px;font-size:15px}.rbox p{margin:0 0 10px;font-size:14px;color:var(--soft)}.rbox input[type=file]{display:block;margin:0 0 10px;max-width:100%}.rbox .sent{color:#1F7A4D;font-weight:700}
+.rbox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:#FBFAF7}.rbox h4{margin:0 0 6px;font-size:15px}.rbox p{margin:0 0 10px;font-size:14px;color:var(--soft)}.rbox .rfile{display:block;font-weight:700;font-size:14px;margin:0 0 10px}.rbox input[type=file]{display:block;margin:4px 0 0;max-width:100%;font-weight:400}.rbox .sent{color:#1F7A4D;font-weight:700}
 .addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
 .jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
 .sections{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
@@ -182,7 +182,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     if (qu === 'collect') return { label: 'Mark collected', stage: 'collected' };
     if (qu === 'results') return { label: 'Results in', stage: 'results_in' };
     if (o.type === 'job' && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Sent to ' + (o.partner || 'partner'), stage: 'sent' };
-    if (canEmail(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Email results', open: true };
+    if (canEmail(o) && isPZ(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Email results', open: true };
+    if (canEmail(o) && o.stage === 'review') return { label: 'Email results', open: true };
     if (isPZ(o) && (o.stage === 'results_in' || o.stage === 'review')) return { label: 'Mark results sent', stage: 'sent' };
     if (o.stage === 'results_in') return { label: 'Send to Jai', stage: 'review' };
     if (o.stage === 'review') return { label: 'Mark sent', stage: 'sent' };
@@ -206,27 +207,33 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
       .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
   }
   // Results email (Primal Zone): the PDF goes to the email on the Shopify order
+  function isEPResults(o) { return o.kind === 'pi' && o.type !== 'own-form'; }
+  // Express orders need two PDFs (lab results and Jai's report); Primal Zone needs the lab results only
   function resultsBox(o) {
-    var rs = String(o.resultsSent || '').split('|');
+    var rs = String(o.resultsSent || '').split('|'), ep = isEPResults(o);
+    var picker = function (role, label) { return '<label class="rfile">' + label + '<input type="file" accept="application/pdf,.pdf" data-rfile data-role="' + role + '"></label>'; };
     return '<div class="rbox" data-rbox="' + esc(o.id) + '"><h4>Email results to patient</h4>' +
       (rs[0] ? '<p class="sent">Results emailed to ' + esc(rs[2] || o.email) + ' on ' + tfmt.format(new Date(rs[0])) + (rs[1] ? ' by ' + esc(rs[1].split('@')[0]) : '') + '</p>' : '') +
-      (o.email ? '<p>To <strong>' + esc(o.email) + '</strong>. Choose the results PDF, check the name, then send.</p><input type="file" accept="application/pdf,.pdf" multiple data-rfile><button class="btn" type="button" data-rsend disabled>' + (rs[0] ? 'Send again' : 'Send results') + '</button><p class="msg" data-rmsg role="status"></p>'
-        : '<p>This order has no patient email in Shopify, so results cannot be emailed from here.</p>') + '</div>';
+      (o.email ? '<p>To <strong>' + esc(o.email) + '</strong>. ' + (ep ? 'Add the lab results and Jai\'s report. Send unlocks once both are added.' : 'Choose the results PDF, check the name, then send.') + '</p>' +
+        (ep ? picker('lab', 'Lab results PDF') + picker('report', 'Jai\'s report PDF') : picker('lab', 'Results PDF')) +
+        '<button class="btn" type="button" data-rsend disabled>' + (rs[0] ? 'Send again' : 'Send results') + '</button><p class="msg" data-rmsg role="status"></p>'
+        : '<p>This order has no patient email, so results cannot be emailed from here.</p>') + '</div>';
   }
-  function readFile(f) { return new Promise(function (ok, bad) { var r = new FileReader(); r.onload = function () { ok({ name: f.name, data: String(r.result).split(',')[1] || '' }); }; r.onerror = function () { bad(new Error('Could not read ' + f.name)); }; r.readAsDataURL(f); }); }
+  function readFile(f, role) { return new Promise(function (ok, bad) { var r = new FileReader(); r.onload = function () { ok({ name: f.name, role: role, data: String(r.result).split(',')[1] || '' }); }; r.onerror = function () { bad(new Error('Could not read ' + f.name)); }; r.readAsDataURL(f); }); }
+  function chosen(box) { return [].slice.call(box.querySelectorAll('[data-rfile]')).map(function (i) { return { role: i.getAttribute('data-role'), file: i.files && i.files[0] }; }); }
   document.addEventListener('change', function (e) {
     if (!e.target.matches('[data-rfile]')) return;
-    var box = e.target.closest('[data-rbox]'), fs = [].slice.call(e.target.files || []), size = fs.reduce(function (a, f) { return a + f.size; }, 0);
-    var bad = fs.filter(function (f) { return !/\.pdf$/i.test(f.name); });
-    box.querySelector('[data-rmsg]').textContent = bad.length ? bad[0].name + ' is not a PDF.' : size > 3 * 1048576 ? 'Over 3 MB together. Send one file at a time.' : fs.length ? fs.map(function (f) { return f.name; }).join(', ') : '';
-    box.querySelector('[data-rsend]').disabled = !fs.length || !!bad.length || size > 3 * 1048576;
+    var box = e.target.closest('[data-rbox]'), c = chosen(box), fs = c.filter(function (x) { return x.file; }), size = fs.reduce(function (a, x) { return a + x.file.size; }, 0);
+    var bad = fs.filter(function (x) { return !/\.pdf$/i.test(x.file.name); }), missing = c.filter(function (x) { return !x.file; });
+    box.querySelector('[data-rmsg]').textContent = bad.length ? bad[0].file.name + ' is not a PDF.' : size > 3 * 1048576 ? 'Over 3 MB together. Ask for a smaller PDF.' : missing.length && fs.length ? 'Still needed: ' + missing.map(function (x) { return x.role === 'report' ? 'Jai\'s report' : 'lab results'; }).join(' and ') + '.' : '';
+    box.querySelector('[data-rsend]').disabled = !!missing.length || !!bad.length || size > 3 * 1048576;
   });
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-rsend]'); if (!btn) return;
-    var box = btn.closest('[data-rbox]'), id = box.getAttribute('data-rbox'), o = orders.find(function (x) { return x.id === id; }), input = box.querySelector('[data-rfile]'), msg = box.querySelector('[data-rmsg]');
-    if (!o || !input.files.length) return;
+    var box = btn.closest('[data-rbox]'), id = box.getAttribute('data-rbox'), o = orders.find(function (x) { return x.id === id; }), msg = box.querySelector('[data-rmsg]'), c = chosen(box);
+    if (!o || c.some(function (x) { return !x.file; })) return;
     btn.disabled = true; msg.textContent = 'Sending to ' + o.email + '…';
-    Promise.all([].slice.call(input.files).map(readFile)).then(function (files) {
+    Promise.all(c.map(function (x) { return readFile(x.file, x.role); })).then(function (files) {
       return fetch('/api/admin/results', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, files: files, confirm_to: o.email }) })
         .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'The email did not send. Try again.'); return j; }); });
     }).then(function (j) {
@@ -251,7 +258,7 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   // Primal Zone results can be emailed to the patient from the order (set RESULTS_EMAIL to false to hide it)
   var RESULTS_EMAIL = true;
   function isPZ(o) { return o.kind === 'shop' && o.partner === 'Primal Zone'; }
-  function canEmail(o) { return RESULTS_EMAIL && isPZ(o); }
+  function canEmail(o) { return RESULTS_EMAIL && (isPZ(o) || (o.kind === 'pi' && o.type !== 'own-form')); }
   function inSection(o) { return secOf(o) === section; }
   function render() {
     var open = { ep: 0, pz: 0, mirait: 0, lsg: 0 };

@@ -41,7 +41,7 @@ export function fromSession(s) {
     phone: m.phone || '', items: m.items || '', type: m.order_type, collection: m.collection || '', total: (s.amount_total || 0) / 100,
     preferred: [m.preferred_date, m.preferred_time].filter(Boolean).join(', '), addto: m.addto || '',
     stage: STAGES.includes(pm.ops_stage) ? pm.ops_stage : (m.order_type === 'own-form' ? 'paid' : 'form_sent'),
-    note: pm.ops_note || '', appt: pm.ops_appt || '', nurse: pm.ops_nurse || '', address: [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', '), updated: updated || '', by: by || '', refunded: !!(charge && typeof charge === 'object' && (charge.refunded || charge.amount_refunded > 0))
+    resultsSent: pm.ops_results_sent || '', note: pm.ops_note || '', appt: pm.ops_appt || '', nurse: pm.ops_nurse || '', address: [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', '), updated: updated || '', by: by || '', refunded: !!(charge && typeof charge === 'object' && (charge.refunded || charge.amount_refunded > 0))
   };
 }
 
