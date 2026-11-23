@@ -99,7 +99,7 @@
     var ok = true, firstBad = null;
     required.forEach(function(id){
       var el = $(id);
-      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1) || (id === 'ref' && !/^OHC-[A-Z0-9]{4,8}$/.test(el.value));
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1) || (id === 'ref' && !/^OHC-[A-Za-z0-9]{4,8}$/.test(el.value));
       el.classList.toggle('err', bad);
       if (bad){ ok = false; if (!firstBad) firstBad = el; }
     });
