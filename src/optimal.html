@@ -168,12 +168,12 @@
   <div class="wrap">
     <div class="kicker">Choose the panel</div>
     <h2 class="sec">Your panels, as they run today</h2>
-    <p class="sub">Replicated exactly from your current panel library, at the same prices. All prices include GST.</p>
+    <p class="sub">Replicated exactly from your current panel library — at lower prices. All prices include GST.</p>
     <div class="panels">
 
       <div class="panel" id="pan-male">
         <h3>Male Initial</h3>
-        <div class="price">$184 <span>incl. GST</span></div>
+        <div class="price">$176 <span>incl. GST</span></div>
         <div class="count">13 tests</div>
         <button type="button" class="mtoggle" data-list="ml-male">Hide markers</button>
         <ul class="mlist" id="ml-male">
@@ -218,7 +218,7 @@
 
       <div class="panel" id="pan-followup">
         <h3>OHC Follow Up</h3>
-        <div class="price">$139 <span>incl. GST</span></div>
+        <div class="price">$131 <span>incl. GST</span></div>
         <div class="count">6 tests — ongoing monitoring</div>
         <button type="button" class="mtoggle" data-list="ml-follow">Hide markers</button>
         <ul class="mlist" id="ml-follow">
@@ -235,7 +235,7 @@
       <div class="panel addon" id="pan-addon">
         <span class="addon-flag">Optional add-on</span>
         <h3>Additional Markers</h3>
-        <div class="price">$232 <span>incl. GST</span></div>
+        <div class="price">$224 <span>incl. GST</span></div>
         <div class="count">6 tests — can be added to any panel</div>
         <button type="button" class="mtoggle" data-list="ml-addon">Hide markers</button>
         <ul class="mlist" id="ml-addon">
@@ -269,7 +269,7 @@
           </div>
           <div class="selected-test" id="selAddon" style="display:none">
             <div><div class="st-name">Additional Markers</div></div>
-            <div style="display:flex;align-items:center;gap:14px"><span class="st-price">$232.00</span><button type="button" id="addonRemove">Remove</button></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price">$224.00</span><button type="button" id="addonRemove">Remove</button></div>
           </div>
         </div>
         <div class="fstep">
@@ -328,7 +328,7 @@
         <h3>Order summary</h3>
         <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
         <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
-        <div class="srow" id="sAddonRow" style="display:none"><span>Additional Markers</span><span class="sv">$232.00</span></div>
+        <div class="srow" id="sAddonRow" style="display:none"><span>Additional Markers</span><span class="sv">$224.00</span></div>
         <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
         <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
         <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
@@ -367,11 +367,11 @@
 (function(){
   var $ = function(id){ return document.getElementById(id); };
   var PANELS = {
-    male:    {n:'Male Initial',   p:184},
+    male:    {n:'Male Initial',   p:176},
     female:  {n:'Female Initial', p:194},
-    followup:{n:'OHC Follow Up',  p:139}
+    followup:{n:'OHC Follow Up',  p:131}
   };
-  var ADDON_PRICE = 232, HOME_FEE = 75;
+  var ADDON_PRICE = 224, HOME_FEE = 75;
   var selPanel = null, addon = false;
 
   /* marker show/hide — visible by default */
