@@ -275,17 +275,17 @@
         <div class="fstep">
           <div class="fstep-head"><span class="num">2</span><h3>How will the bloods be collected?</h3></div>
           <div class="choice-row">
-            <label class="choice sel" id="chHome">
-              <input type="radio" name="cmode" value="home" checked>
-              <div class="c-title">At-home nurse visit</div>
-              <div class="c-desc">A qualified nurse visits the patient — our team confirms the time within 4 hours</div>
-              <span class="c-fee">+ $75</span>
-            </label>
-            <label class="choice" id="chClinic">
-              <input type="radio" name="cmode" value="clinic">
+            <label class="choice sel" id="chClinic">
+              <input type="radio" name="cmode" value="clinic" checked>
               <div class="c-title">Collection centre</div>
               <div class="c-desc">The patient walks into any of 2,000+ centres — no appointment needed</div>
               <span class="c-fee">Included</span>
+            </label>
+            <label class="choice" id="chHome">
+              <input type="radio" name="cmode" value="home">
+              <div class="c-title">At-home nurse visit</div>
+              <div class="c-desc">A qualified nurse visits the patient — our team confirms the time within 4 hours</div>
+              <span class="c-fee">+ $75</span>
             </label>
           </div>
           <div class="field" style="margin-top:14px">
@@ -515,7 +515,7 @@
   $('againBtn').addEventListener('click', function(){ location.reload(); });
 
   (function(){ var d = new Date(); d.setDate(d.getDate() + 1); $('prefDate').min = d.toISOString().slice(0,10); })();
-  setMode(true);
+  setMode(false);
 })();
 </script>
 </body>
