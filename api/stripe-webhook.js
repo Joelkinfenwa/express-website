@@ -2,11 +2,11 @@
 // confirmation to the patient (via Resend). Configure in Stripe with the event
 // checkout.session.completed (and checkout.session.async_payment_succeeded), and set
 // STRIPE_WEBHOOK_SECRET in Vercel.
-import { verifySignature } from '../lib/stripe.js';
+import { stripe, verifySignature } from '../lib/stripe.js';
 import { findOrder } from '../lib/original-order.js';
 import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
-import { patientEmail } from '../lib/patient-email.js';
+import { patientEmail, homeUpgradePaidEmail } from '../lib/patient-email.js';
 import { orderNumber } from '../lib/order-number.js';
 import { klaviyoEvent } from '../lib/klaviyo.js';
 
@@ -124,6 +124,26 @@ export default async function handler(req, res) {
       await send({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()), subject: `Payment received (not a website order): ${total} from ${who}`,
         html: `<p>A payment was received outside the website checkout, for example through a Stripe payment link. No confirmation was sent to the customer.</p><p>Amount: ${esc(total)}<br>Customer: ${esc(who)}${s.customer_details && s.customer_details.email ? ' (' + esc(s.customer_details.email) + ')' : ''}<br>Stripe session: ${esc(s.id)}</p>` });
       return res.status(200).json({ received: true, external: true });
+    }
+    // Home visit upgrade on a clinic order (/optimal-home): notify the team, confirm to the
+    // patient, and mark the clinic order record. No request form or order number is involved.
+    if (m.order_type === 'ohc_home_upgrade') {
+      const name = [m.first_name, m.last_name].filter(Boolean).join(' ');
+      const when = [m.preferred_date, m.preferred_time].filter(Boolean).join(', ');
+      const addr = [m.address, m.suburb, m.state, m.postcode].filter(Boolean).join(', ');
+      const rows = [['Order', m.reference], ['Patient', name], ['Phone', m.phone], ['Email', s.customer_email || (s.customer_details || {}).email], ['Address', addr], ['Preferred', when || 'No preference'], ['Paid', '$75.00 home visit fee']];
+      await send({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()),
+        subject: `OHC HOME UPGRADE PAID ${m.reference}: ${name} — book the visit (${m.postcode})`,
+        html: `<p><strong>This patient paid $75 to upgrade their clinic order to a home visit.</strong> Contact them within 4 hours to confirm the time, and assign a nurse.</p><table>${rows.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join('')}</table>` });
+      const pe = homeUpgradePaidEmail({ reference: m.reference, firstName: m.first_name, preferredDate: m.preferred_date, preferredTime: m.preferred_time, address: m.address, suburb: m.suburb, state: m.state, postcode: m.postcode });
+      const to = s.customer_email || (s.customer_details || {}).email;
+      if (to) await send({ from: process.env.ENQUIRY_FROM, to: [to], reply_to: process.env.ENQUIRY_TO.split(',')[0], subject: pe.subject, html: pe.html, text: pe.text }).catch((e) => console.error('upgrade patient email failed:', e.message));
+      try {
+        const found = await stripe('GET', `/customers/search?query=${encodeURIComponent(`metadata['type']:'clinic_order' AND metadata['reference']:'${m.reference}'`)}`);
+        const c = (found.data || [])[0];
+        if (c) await stripe('POST', `/customers/${c.id}`, { metadata: { collection: 'Home visit (upgraded, $75 paid)', preferred: when || c.metadata.preferred || '', ops_note: `${c.metadata.ops_note || ''} Home upgrade paid ${new Date().toISOString().slice(0, 10)}.`.trim().slice(0, 480) } });
+      } catch (e) { console.error('clinic order upgrade update failed:', e.message); }
+      return res.status(200).json({ received: true, upgrade: true });
     }
     m.checkout_ref = m.reference;
     try { m.reference = '#' + await orderNumber(s); } catch (e) { console.error('order number failed:', e.message); }

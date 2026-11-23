@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add a home collection — Express Pathology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--forest:#17302A;--ink:#1C2420;--body:#4B5650;--muted:#6B746E;--line:#DCE0D8;--ivory:#F7F4EF;--sage:#E8EDE6;--peach:#F2A981;--clay:#A4502E;--white:#FFFFFF;--err:#B3261E}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Instrument Sans','Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--ivory);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:28px 18px 60px}
+  .brand{font-size:22px;font-weight:600;letter-spacing:-.04em;padding:4px 4px 20px}
+  .brand span{color:var(--peach);font-weight:700}
+  .card{background:var(--white);border-radius:24px;padding:34px 34px 30px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--clay)}
+  h1{font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-.03em;margin:10px 0 10px}
+  .intro{color:var(--body);font-size:16px;margin-bottom:6px}
+  .fee{display:inline-block;margin:10px 0 18px;padding:8px 16px;border-radius:999px;background:var(--sage);color:var(--forest);font-weight:700;font-size:15px}
+  .field{margin-top:14px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .field input,.field select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:15px;color:var(--ink);background:var(--white)}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--forest)}
+  .field input.err,.field select.err{border-color:var(--err)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr}}
+  .btn{display:block;width:100%;margin-top:22px;padding:16px;border:0;border-radius:999px;background:var(--forest);color:var(--ivory);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:default}
+  .note{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
+  .err-box{display:none;margin-top:14px;background:#FDECEC;color:var(--err);border:1px solid #F3C2BE;border-radius:12px;padding:11px 13px;font-size:13.5px}
+  .success{display:none;text-align:center;padding:14px 0 6px}
+  .success .tick{width:52px;height:52px;border-radius:999px;background:var(--sage);margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+  .success h2{font-size:26px;letter-spacing:-.02em;margin-bottom:10px}
+  .success p{color:var(--body);font-size:15.5px;max-width:420px;margin:0 auto 8px}
+  footer{text-align:center;padding:26px 0 0;font-size:13px;color:var(--muted)}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">express<span>.</span> pathology</div>
+  <div class="card">
+    <div id="formView">
+      <div class="eyebrow">Home collection</div>
+      <h1>We come to you.</h1>
+      <p class="intro">A registered nurse collects your bloods at your home or workplace. Your tests are already covered by your clinic order — the visit fee is the only cost to you.</p>
+      <div class="fee">Flat $75, paid securely by card</div>
+      <div class="field"><label for="ref">Order reference (from your confirmation email)</label><input id="ref" placeholder="OHC-XXXXX" maxlength="14" autocapitalize="characters"></div>
+      <div class="grid2">
+        <div class="field"><label for="fname">First name</label><input id="fname"></div>
+        <div class="field"><label for="lname">Last name</label><input id="lname"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="email">Email</label><input id="email" type="email"></div>
+        <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel"></div>
+      </div>
+      <div class="field"><label for="addr">Street address for the visit</label><input id="addr" placeholder="Unit / street"></div>
+      <div class="grid2">
+        <div class="field"><label for="suburb">Suburb</label><input id="suburb"></div>
+        <div class="field"><label for="state">State</label>
+          <select id="state"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="postcode">Postcode</label><input id="postcode" inputmode="numeric" maxlength="4"></div>
+        <div class="field"><label for="prefTime">Preferred time</label>
+          <select id="prefTime"><option>Morning</option><option>Afternoon</option><option>No preference</option></select>
+        </div>
+      </div>
+      <div class="field"><label for="prefDate">Preferred date</label><input id="prefDate" type="date"></div>
+      <button class="btn" id="payBtn" type="button">Pay $75 &amp; book my home collection</button>
+      <div class="err-box" id="errBox"></div>
+      <div class="note">Secure payment by card. Our team confirms the exact visit time within 4 hours.</div>
+    </div>
+    <div class="success" id="successView">
+      <div class="tick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#17302A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2>Your home visit is booked.</h2>
+      <p>Payment received. Our team will contact you within 4 hours to confirm the exact time of your visit.</p>
+      <p>There is nothing to print — your nurse brings your request form. A confirmation email is on its way.</p>
+    </div>
+  </div>
+  <footer>Express Pathology · <a href="tel:+61295452940">02 9545 2940</a> · express@expresspathology.com.au</footer>
+</div>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  if (q.get('ref')) $('ref').value = q.get('ref').toUpperCase();
+  if (q.get('postcode')) $('postcode').value = q.get('postcode').replace(/\D/g,'').slice(0,4);
+  if (q.get('paid') === '1'){ $('formView').style.display = 'none'; $('successView').style.display = 'block'; return; }
+  (function(){ var d = new Date(); d.setDate(d.getDate() + 1); $('prefDate').min = d.toISOString().slice(0,10); })();
+  $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+  $('ref').addEventListener('input', function(){ this.value = this.value.toUpperCase(); });
+  $('payBtn').addEventListener('click', function(){
+    var required = ['ref','fname','lname','email','mobile','addr','suburb','state','postcode'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1) || (id === 'ref' && !/^OHC-[A-Z0-9]{4,8}$/.test(el.value));
+      el.classList.toggle('err', bad);
+      if (bad){ ok = false; if (!firstBad) firstBad = el; }
+    });
+    if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    var btn = this;
+    btn.textContent = 'Taking you to payment…'; btn.disabled = true;
+    $('errBox').style.display = 'none';
+    fetch('/api/home-upgrade', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      reference: $('ref').value, firstName: $('fname').value, lastName: $('lname').value,
+      email: $('email').value, phone: $('mobile').value,
+      address: $('addr').value, suburb: $('suburb').value, state: $('state').value, postcode: $('postcode').value,
+      preferredDate: $('prefDate').value, preferredTime: $('prefTime').value
+    })})
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if (!res.ok || !res.j.url) throw new Error(res.j && res.j.error || 'We could not start checkout.');
+        location.href = res.j.url;
+      })
+      .catch(function(e){
+        $('errBox').textContent = e.message || 'We could not start checkout. Please call us on 02 9545 2940.';
+        $('errBox').style.display = 'block';
+        btn.textContent = 'Pay $75 & book my home collection'; btn.disabled = false;
+      });
+  });
+})();
+</script>
+</body>
+</html>

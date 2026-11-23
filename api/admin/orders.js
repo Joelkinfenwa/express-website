@@ -47,9 +47,20 @@ export function fromSession(s) {
 
 export async function referrals() {
   const all = await allCustomers();
-  return all.filter((c) => ['partner_referral', 'partner_job'].includes((c.metadata || {}).type) && (c.metadata || {}).deleted !== '1').map((c) => {
+  return all.filter((c) => ['partner_referral', 'partner_job', 'clinic_order'].includes((c.metadata || {}).type) && (c.metadata || {}).deleted !== '1').map((c) => {
     const m = c.metadata;
     const [updated, by] = String(m.ops_updated || '').split('|');
+    // Clinic ordering pages (for example /optimal): no payment at order, invoiced to the clinic monthly
+    if (m.type === 'clinic_order') {
+      return {
+        id: c.id, kind: 'cus', order: m.reference || '', date: c.created, name: m.patient || '', email: m.email || '', phone: m.phone || '',
+        items: m.items || '', type: 'clinic', partner: m.partner || '', collection: m.collection || '', total: Number(m.total) || 0,
+        preferred: m.preferred || '', addto: '', lines: String(m.tests || '').split('; ').filter(Boolean),
+        ticks: String(m.ops_ticks || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number),
+        stage: STAGES.includes(m.ops_stage) ? m.ops_stage : 'form_sent', note: m.ops_note || '', appt: m.ops_appt || '', nurse: m.ops_nurse || '',
+        address: m.address || '', updated: updated || '', by: by || ''
+      };
+    }
     if (m.type === 'partner_job') {
       const qty = Number(m.qty) || 1, p = JOB_PARTNERS[m.partner] || {};
       return {

@@ -5,7 +5,8 @@
 // form to the operations inbox, and sends the patient a confirmation with the form attached.
 // The patient email carries NO pricing — billing sits between Express and the clinic.
 import { requestFormPdf } from '../lib/request-form.js';
-import { clinicOrderEmail } from '../lib/patient-email.js';
+import { clinicOrderEmail, homeUpgradeEmail } from '../lib/patient-email.js';
+import { stripe } from '../lib/stripe.js';
 
 const CLINIC = 'Optimal Health Clinic';
 const PANELS = {
@@ -117,6 +118,21 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(502).json({ error: 'The order could not be transmitted. Please call us on 02 9545 2940 and we will take it over the phone.' });
   }
+  // Record the order in Stripe (customer object, the partner-referral pattern) so it appears in
+  // the Express /admin tracker and the clinic portal with a trackable stage. Never blocks the order.
+  try {
+    await stripe('POST', '/customers', {
+      description: `OHC order ${reference} (${p.firstName} ${p.lastName})`, email: p.email,
+      metadata: {
+        type: 'clinic_order', partner: 'OHC', reference,
+        patient: `${p.firstName} ${p.lastName}`.slice(0, 120), email: p.email, phone: p.phone, dob: p.dob, sex: p.sex,
+        items: `${panel.n}${addons.length ? ' + ' + addons.map((a) => a.n).join(', ') : ''}`.slice(0, 480),
+        tests: [...panel.lines, ...addons.map((a) => a.n)].join('; ').slice(0, 480),
+        collection: home ? 'Home visit' : 'Collection centre', preferred: d.preferred || '',
+        total: String(total), address: d.address.slice(0, 480), ops_stage: 'form_sent'
+      }
+    });
+  } catch (e) { console.error('clinic order record failed:', e.message); }
   // The patient email must never block the order; the team copy is the system of record
   try {
     const pe = clinicOrderEmail({
@@ -132,5 +148,12 @@ export default async function handler(req, res) {
       ...(form ? { attachments: [form] } : {})
     });
   } catch (e) { console.error('patient email failed:', e.message); }
+  // Collection-centre orders: follow with the home-collection upsell ($75 upgrade, patient-paid)
+  if (!home) {
+    try {
+      const ue = homeUpgradeEmail({ reference, firstName: p.firstName, postcode: p.postcode });
+      await send({ from: process.env.ENQUIRY_FROM, to: [p.email], reply_to: (process.env.ENQUIRY_TO || '').split(',')[0] || undefined, subject: ue.subject, html: ue.html, text: ue.text });
+    } catch (e) { console.error('upsell email failed:', e.message); }
+  }
   return res.status(200).json({ ok: true, reference });
 }
