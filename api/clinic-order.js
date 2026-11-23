@@ -5,6 +5,7 @@
 // form to the operations inbox, and sends the patient a confirmation with the form attached.
 // The patient email carries NO pricing — billing sits between Express and the clinic.
 import { requestFormPdf } from '../lib/request-form.js';
+import { clinicOrderEmail } from '../lib/patient-email.js';
 
 const CLINIC = 'Optimal Health Clinic';
 const PANELS = {
@@ -39,47 +40,6 @@ async function send(payload) {
     body: JSON.stringify(payload)
   });
   if (!r.ok) throw new Error(`Resend ${r.status}`);
-}
-
-// Patient confirmation — deliberately carries no pricing of any kind
-function patientEmail(p, reference, panel, addons, home, lab, attached) {
-  const first = esc(p.firstName || 'there');
-  const tests = [...panel.lines, ...addons.map((a) => a.n)];
-  const li = tests.map((t) => `<li style="margin:4px 0">${esc(t)}</li>`).join('');
-  const steps = home
-    ? `<p style="margin:0 0 12px">Our team will contact you within 4 hours to confirm your visit time. A qualified nurse comes to your address — there is nothing to print and nothing to prepare beyond any instructions your clinic has given you.</p>
-       <p style="margin:0 0 12px">Your pathology request form is attached for your records; your nurse brings everything needed on the day.</p>`
-    : `<p style="margin:0 0 12px">Your pathology request form is attached as a PDF. Print it and bring it with you, along with photo ID, to any ${esc(lab.name)} collection centre — no appointment needed. <a href="${lab.url}" style="color:#A4502E">Find your nearest centre</a>.</p>`;
-  const html = `<div style="background:#F7F4EF;padding:32px 16px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1C2420">
-<table role="presentation" width="100%" style="max-width:600px;margin:0 auto;background:#FFFFFF;border-radius:20px;border-collapse:separate;overflow:hidden"><tr><td style="padding:32px 36px 8px">
-<div style="font-size:20px;font-weight:700">express<span style="color:#F2A981">.</span> pathology</div>
-<h1 style="font-size:26px;margin:20px 0 8px">Your blood test is ordered, ${first}.</h1>
-<p style="color:#4B5650;margin:0 0 4px">Order reference ${esc(reference)} — requested through ${CLINIC}.</p>
-</td></tr><tr><td style="padding:8px 36px 0">
-<div style="font-size:12px;font-weight:700;color:#A4502E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Your tests</div>
-<ul style="margin:0 0 16px;padding-left:20px;color:#4B5650">${li}</ul>
-<div style="font-size:12px;font-weight:700;color:#A4502E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">What happens next</div>
-<div style="color:#4B5650">${steps}</div>
-<p style="color:#4B5650;margin:0 0 16px">Your results are reviewed and sent to ${CLINIC}, who will follow up with you.</p>
-</td></tr><tr><td style="padding:16px 36px 28px;border-top:1px solid #DCE0D8;font-size:13px;color:#5A645E">
-Questions? Reply to this email or call us on <a href="${TEL}" style="color:#5A645E">${PHONE}</a>.<br>Express Pathology — mobile blood collection across Australia. <a href="${SITE}" style="color:#5A645E">${SITE.replace('https://', '')}</a>
-</td></tr></table></div>`;
-  const text = [
-    `Your blood test is ordered — order reference ${reference}, requested through ${CLINIC}.`,
-    '', 'Your tests:', ...tests.map((t) => `- ${t}`), '',
-    home
-      ? 'Our team will contact you within 4 hours to confirm your home visit time. Your request form is attached for your records; your nurse brings everything needed.'
-      : `Your pathology request form is attached. Print it and bring it with photo ID to any ${lab.name} collection centre — no appointment needed. Locations: ${lab.url}`,
-    `Your results are reviewed and sent to ${CLINIC}, who will follow up with you.`,
-    `Questions? Call ${PHONE}.`
-  ].join('\n');
-  return {
-    from: process.env.ENQUIRY_FROM,
-    to: [p.email],
-    reply_to: (process.env.ENQUIRY_TO || '').split(',')[0] || undefined,
-    subject: attached ? `Your pathology request form (Order ${reference})` : `Your blood test is ordered (Order ${reference})`,
-    html, text
-  };
 }
 
 export default async function handler(req, res) {
@@ -159,9 +119,18 @@ export default async function handler(req, res) {
   }
   // The patient email must never block the order; the team copy is the system of record
   try {
-    const pe = patientEmail(p, reference, panel, addons, home, lab, !!form);
-    if (form) pe.attachments = [form];
-    await send(pe);
+    const pe = clinicOrderEmail({
+      reference, clinic: CLINIC, firstName: p.firstName, state: p.state,
+      preferredDate: str(body.preferredDate, 10), preferredTime: str(body.preferredTime, 20),
+      address: p.address, suburb: p.suburb, postcode: p.postcode,
+      tests: [...panel.lines, ...addons.map((a) => a.n)], home, attached: !!form
+    });
+    await send({
+      from: process.env.ENQUIRY_FROM, to: [p.email],
+      reply_to: (process.env.ENQUIRY_TO || '').split(',')[0] || undefined,
+      subject: pe.subject, html: pe.html, text: pe.text,
+      ...(form ? { attachments: [form] } : {})
+    });
   } catch (e) { console.error('patient email failed:', e.message); }
   return res.status(200).json({ ok: true, reference });
 }
