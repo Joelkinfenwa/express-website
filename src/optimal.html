@@ -319,6 +319,12 @@
             </div>
           </div>
           <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+          <div class="grid2">
+            <div class="field"><label for="suburb">Suburb</label><input id="suburb"></div>
+            <div class="field"><label for="state">State</label>
+              <select id="state"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -452,7 +458,7 @@
   $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
 
   $('payBtn').addEventListener('click', function(){
-    var required = ['postcode','fname','lname','email','mobile','dob','sex','addr'];
+    var required = ['postcode','fname','lname','email','mobile','dob','sex','addr','suburb','state'];
     var ok = true, firstBad = null;
     required.forEach(function(id){
       var el = $(id);
@@ -475,7 +481,7 @@
       firstName: $('fname').value, lastName: $('lname').value,
       email: $('email').value, phone: $('mobile').value,
       dob: $('dob').value, sex: $('sex').value,
-      address: $('addr').value, postcode: $('postcode').value
+      address: $('addr').value, suburb: $('suburb').value, state: $('state').value, postcode: $('postcode').value
     };
     fetch('/api/clinic-order', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)})
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
