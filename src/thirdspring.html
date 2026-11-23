@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Third Spring Medical — Pathology Ordering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--forest:#102821;--forest-mid:#1A3C30;--sand:#D2BFA2;--sand-light:#F0E9DC;--cream:#FAF8F4;--ink:#20251F;--slate:#5C635A;--line:#E4DFD2;--bg:#FFFFFF;--ok:#2E6B4F}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2.sec,.panel h3,.confirm h3,.modal-head h4{font-family:"Bodoni Moda",serif;font-weight:400}
+  .ribbon{background:var(--forest);color:var(--sand);font-size:12.5px;text-align:center;padding:7px 16px;border-bottom:1px solid rgba(210,191,162,.25)}
+  .ribbon strong{color:#fff;font-weight:600}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(16,40,33,.95);backdrop-filter:blur(10px);color:#fff}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{font-family:"Bodoni Moda",serif;font-size:19px;color:#fff;text-decoration:none;letter-spacing:.02em}
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .pby-badge{font-size:11.5px;color:rgba(250,248,244,.6)}
+  .pby-badge strong{color:var(--sand);font-weight:500}
+  .btn{display:inline-block;text-decoration:none;font-family:inherit;font-weight:600;cursor:pointer;border:0;transition:background .12s;border-radius:999px;text-align:center}
+  .btn-primary{background:var(--sand);color:var(--forest);font-size:13.5px;padding:12px 26px}
+  .btn-primary:hover{background:#DECBAF}
+  .btn-dark{background:var(--forest);color:#fff;font-size:13px;padding:12px 26px}
+  .btn-dark:hover{background:var(--forest-mid)}
+  .btn-sm{font-size:12.5px;padding:9px 18px}
+  .hero{background:linear-gradient(165deg,#102821 0%,#1A3C30 65%,#24493A 130%);color:#fff}
+  .hero-inner{max-width:1120px;margin:0 auto;padding:62px 24px 66px;text-align:center}
+  .eyebrow{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--sand);margin-bottom:18px}
+  .hero h1{font-size:clamp(32px,4.6vw,50px);line-height:1.12;max-width:760px;margin:0 auto}
+  .hero h1 .accent{font-style:italic;color:var(--sand)}
+  .hero p{margin:16px auto 0;font-size:16px;color:rgba(250,248,244,.78);max-width:560px}
+  section{padding:58px 0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .kicker{font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#8A7C5E;margin-bottom:10px}
+  h2.sec{font-size:clamp(26px,3.4vw,36px)}
+  p.sub{margin-top:8px;color:var(--slate);font-size:15px;max-width:640px}
+  .panels{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+  .panel{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;transition:border-color .15s, box-shadow .15s}
+  .panel.sel{border-color:var(--forest);box-shadow:0 0 0 1px var(--forest)}
+  .panel h3{font-size:24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ftag{font-family:"DM Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--forest);background:var(--sand-light);border:1px solid var(--sand);border-radius:999px;padding:3px 10px}
+  .price{margin-top:8px;font-size:24px;font-weight:700}
+  .price span{font-size:12px;font-weight:500;color:var(--slate)}
+  .count{font-size:12.5px;color:var(--slate);margin-top:2px}
+  .mtoggle{align-self:flex-start;background:none;border:0;padding:0;margin-top:12px;font-family:inherit;font-size:12px;font-weight:600;color:var(--forest);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .mlist{list-style:none;margin:10px 0 4px}
+  .mlist.hidden{display:none}
+  .mlist li{font-size:12px;color:var(--slate);padding:6px 0;border-bottom:1px dashed var(--line)}
+  .mlist li strong{display:block;color:var(--ink);font-weight:600;font-size:12px}
+  .panel .btn{margin-top:16px}
+  .book-sec{background:var(--cream);border-top:1px solid var(--line)}
+  .book-grid{margin-top:30px;display:grid;grid-template-columns:1fr 350px;gap:26px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px}
+  .fstep{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .fstep:last-child{border:0;margin:0;padding:0}
+  .fstep-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  .fstep-head .num{width:26px;height:26px;flex:none;border-radius:999px;background:var(--forest);color:var(--sand);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .fstep-head h3{font-size:16px;font-weight:600}
+  .no-test{font-size:14px;color:var(--slate);background:var(--cream);border:1px dashed var(--line);border-radius:10px;padding:16px 18px}
+  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--sand-light);border:1px solid var(--sand);border-radius:10px;padding:13px 16px}
+  .selected-test .st-name{font-weight:600;font-size:14.5px}
+  .selected-test .st-sub{font-size:12px;color:var(--slate)}
+  .selected-test .st-price{font-weight:700;font-size:16px}
+  .selected-test button{background:none;border:0;font-family:inherit;font-size:12px;font-weight:600;color:var(--forest);text-decoration:underline;cursor:pointer}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+  .field input{width:100%;font-family:inherit;font-size:14.5px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;outline:none;background:#fff;color:var(--ink)}
+  .field input:focus{border-color:var(--forest)}
+  .field input.err{border-color:#C25B5B}
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1px solid var(--line);border-radius:10px;padding:14px 15px;cursor:pointer;background:#fff}
+  .choice input{position:absolute;opacity:0}
+  .choice .c-title{font-size:14px;font-weight:600}
+  .choice .c-desc{font-size:12px;color:var(--slate);margin-top:2px;max-width:85%}
+  .choice .c-fee{position:absolute;top:11px;right:13px;font-size:11px;font-weight:700;color:var(--forest);background:var(--sand-light);border-radius:999px;padding:3px 10px}
+  .choice.sel{border-color:var(--forest);background:var(--sand-light)}
+  .summary{position:sticky;top:76px}
+  .summary h3{font-size:16px;font-weight:600;margin-bottom:14px}
+  .srow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;color:var(--slate);gap:10px}
+  .srow .sv{color:var(--ink);font-weight:500;text-align:right}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:13px;font-size:15px;color:var(--ink)}
+  .srow.total .sv{font-weight:700;font-size:19px}
+  .incl{font-size:12px;color:var(--slate);background:var(--sand-light);border-radius:9px;padding:10px 13px;margin:11px 0 15px}
+  .paybtn{width:100%;font-size:14px;padding:15px 20px;background:var(--forest);color:#fff}
+  .paybtn:hover{background:var(--forest-mid)}
+  .paybtn:disabled{opacity:.55;cursor:default}
+  .secure{text-align:center;font-size:11px;color:#9A9A8E;margin-top:9px}
+  .demo-tag{font-size:11px;color:#9A9A8E;text-align:center;margin-top:7px}
+  .confirm{display:none}
+  .confirm.show{display:block}
+  .conf-icon{width:50px;height:50px;border-radius:999px;background:rgba(46,107,79,.12);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .confirm h3{font-size:28px}
+  .ref{display:inline-block;font-size:12.5px;font-weight:600;background:var(--cream);border:1px solid var(--line);border-radius:999px;padding:6px 15px}
+  .conf-chip{display:inline-flex;align-items:center;background:var(--sand-light);border:1px solid var(--sand);border-radius:999px;padding:9px 17px;font-weight:600;font-size:14px}
+  .conf-list{margin:18px 0;display:grid;gap:10px}
+  .conf-item{display:flex;gap:10px;font-size:14px;color:var(--slate)}
+  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:999px;background:var(--sand-light);display:inline-flex;align-items:center;justify-content:center}
+  .partner{margin-top:24px;background:var(--forest);color:var(--cream);border-radius:12px;padding:24px 26px}
+  .partner h4{font-family:"Bodoni Moda",serif;font-size:18px;color:var(--sand);font-weight:400}
+  .partner p{font-size:13px;color:rgba(250,248,244,.78);margin:9px 0 16px}
+  .overlay{position:fixed;inset:0;background:rgba(16,40,33,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(16,40,33,.4)}
+  .modal-head{background:var(--forest);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;gap:16px}
+  .modal-head h4{font-size:22px}
+  .modal-head p{font-size:12.5px;color:rgba(250,248,244,.65);margin-top:3px}
+  .modal-head button{background:none;border:0;color:rgba(250,248,244,.7);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;white-space:nowrap}
+  .cal-dates{display:flex;gap:8px;overflow-x:auto;padding:16px 24px 6px;flex:none}
+  .dchip{flex:none;border:1px solid var(--line);border-radius:9px;padding:7px 13px;cursor:pointer;text-align:center;background:#fff;font-family:inherit}
+  .dchip .dw{font-size:10px;color:var(--slate);font-weight:600}
+  .dchip .dd{font-size:14px;font-weight:600;margin-top:1px}
+  .dchip.sel{border-color:var(--forest);background:var(--sand-light)}
+  .cal-note{font-size:12px;color:var(--slate);padding:5px 24px 0}
+  .cal-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:13px 24px 16px;overflow-y:auto}
+  .slot{border:1px solid var(--line);border-radius:9px;padding:9px 6px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;background:#fff;font-family:inherit;color:var(--ink)}
+  .slot.sel{border-color:var(--forest);background:var(--sand-light);font-weight:600}
+  .slot:disabled{opacity:.3;cursor:default}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-top:1px solid var(--line);flex:none}
+  .modal-foot .pb{font-size:11px;color:#9A9A8E}
+  footer{border-top:1px solid var(--line);padding:26px 0;background:#fff}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;color:var(--slate)}
+  .foot .pby{font-weight:600;color:var(--ink)}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--forest);outline-offset:2px}
+  @media(max-width:960px){.panels{grid-template-columns:1fr 1fr}}
+  @media(max-width:720px){.panels{grid-template-columns:1fr}.book-grid{grid-template-columns:1fr}.summary{position:static}.grid2,.choice-row{grid-template-columns:1fr}.cal-slots{grid-template-columns:repeat(3,1fr)}.pby-badge{display:none}}
+</style>
+</head>
+<body>
+
+<div class="ribbon"><strong>Demo environment</strong> — prepared by Express Pathology for Third Spring Medical. No real orders or payments are processed.</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top">Third Spring Medical</a>
+    <div class="nav-right">
+      <span class="pby-badge">Pathology by <strong>Express Pathology</strong></span>
+      <a class="btn btn-primary btn-sm" href="#tests">Order bloods</a>
+    </div>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <span class="eyebrow">Third Spring Medical — Pathology Ordering</span>
+    <h1>Your bloods, booked <span class="accent">in two minutes.</span></h1>
+    <p>Pick your panel, enter your details once, and choose collection — a qualified nurse at your door, or any of 2,000+ collection centres nationally. Results return to your Third Spring practitioner.</p>
+  </div>
+</div>
+
+<section id="tests">
+  <div class="wrap">
+    <div class="kicker">Choose the panel</div>
+    <h2 class="sec">Your panels, as they run today</h2>
+    <p class="sub">Replicated exactly from your current panel library. All prices include GST and the pathology request, issued at booking.</p>
+    <div class="panels">
+      <div class="panel" id="pan-panel1">
+        <h3>Panel 1<span class="ftag">Fasting</span></h3>
+        <div class="price">$235 <span>incl. GST</span></div>
+        <div class="count">50 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-panel1">Hide markers</button>
+        <ul class="mlist" id="ml-panel1"><li><strong>Metabolic</strong>Fasting glucose, HbA1c (DCCT), HbA1c (IFCC)</li><li><strong>Thyroid</strong>TSH, Free T4, Free T3</li><li><strong>Inflammation and muscle</strong>hs-CRP, LDH, Creatine kinase</li><li><strong>Minerals</strong>Calcium, Corrected calcium, Magnesium, Phosphate, Urate</li><li><strong>Hormones</strong>Prolactin, IGF-1</li><li><strong>Pancreas</strong>Lipase, Amylase</li><li><strong>Trace elements</strong>Copper, Zinc, Copper to zinc ratio</li><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li><li><strong>Full blood count</strong>Red blood cell count, Haemoglobin, Haematocrit, MCV, MCH, MCHC, RDW, White cell count, Neutrophils, Lymphocytes, Monocytes, Eosinophils, Basophils, Platelet count</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="panel1">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-peptide">
+        <h3>Peptide Panel<span class="ftag">Fasting</span></h3>
+        <div class="price">$150 <span>incl. GST</span></div>
+        <div class="count">27 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-peptide">Hide markers</button>
+        <ul class="mlist" id="ml-peptide"><li><strong>Pancreas</strong>Lipase, Amylase</li><li><strong>Growth</strong>IGF-1</li><li><strong>Metabolic</strong>Fasting glucose, HbA1c (DCCT), HbA1c (IFCC)</li><li><strong>Inflammation and muscle</strong>hs-CRP, LDH, Creatine kinase</li><li><strong>Trace elements</strong>Copper, Zinc, Copper to zinc ratio</li><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="peptide">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-weight">
+        <h3>Weight Loss Panel<span class="ftag">Fasting</span></h3>
+        <div class="price">$255 <span>incl. GST</span></div>
+        <div class="count">49 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-weight">Hide markers</button>
+        <ul class="mlist" id="ml-weight"><li><strong>Pancreas</strong>Lipase, Amylase</li><li><strong>Metabolic</strong>Fasting glucose</li><li><strong>Iron studies</strong>Iron, Transferrin / TIBC, Transferrin saturation, Ferritin</li><li><strong>Vitamins</strong>Vitamin D, Vitamin B12, Folate</li><li><strong>Minerals</strong>Calcium, Corrected calcium, Magnesium, Phosphate, Urate</li><li><strong>Trace elements</strong>Zinc, Selenium</li><li><strong>Inflammation and muscle</strong>hs-CRP, LDH, Creatine kinase</li><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li><li><strong>Full blood count</strong>Red blood cell count, Haemoglobin, Haematocrit, MCV, MCH, MCHC, RDW, White cell count, Neutrophils, Lymphocytes, Monocytes, Eosinophils, Basophils, Platelet count</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="weight">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-iv">
+        <h3>IV Blood Test</h3>
+        <div class="price">$45 <span>incl. GST</span></div>
+        <div class="count">29 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-iv">Hide markers</button>
+        <ul class="mlist" id="ml-iv"><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li><li><strong>Full blood count</strong>Red blood cell count, Haemoglobin, Haematocrit, MCV, MCH, MCHC, RDW, White cell count, Neutrophils, Lymphocytes, Monocytes, Eosinophils, Basophils, Platelet count</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="iv">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-t1">
+        <h3>Test 1</h3>
+        <div class="price">$45 <span>incl. GST</span></div>
+        <div class="count">29 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-t1">Hide markers</button>
+        <ul class="mlist" id="ml-t1"><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li><li><strong>Full blood count</strong>Red blood cell count, Haemoglobin, Haematocrit, MCV, MCH, MCHC, RDW, White cell count, Neutrophils, Lymphocytes, Monocytes, Eosinophils, Basophils, Platelet count</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="t1">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-t2">
+        <h3>Test 2</h3>
+        <div class="price">$110 <span>incl. GST</span></div>
+        <div class="count">4 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-t2">Hide markers</button>
+        <ul class="mlist" id="ml-t2"><li><strong>Growth</strong>IGF-1</li><li><strong>Trace elements</strong>Copper, Zinc, Copper to zinc ratio</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="t2">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-t3">
+        <h3>Test 3</h3>
+        <div class="price">$150 <span>incl. GST</span></div>
+        <div class="count">33 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-t3">Hide markers</button>
+        <ul class="mlist" id="ml-t3"><li><strong>Growth</strong>IGF-1</li><li><strong>Trace elements</strong>Copper, Zinc, Copper to zinc ratio</li><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li><li><strong>Full blood count</strong>Red blood cell count, Haemoglobin, Haematocrit, MCV, MCH, MCHC, RDW, White cell count, Neutrophils, Lymphocytes, Monocytes, Eosinophils, Basophils, Platelet count</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="t3">Select this panel</button>
+      </div>
+      <div class="panel" id="pan-t4">
+        <h3>Test 4</h3>
+        <div class="price">$69 <span>incl. GST</span></div>
+        <div class="count">16 biomarkers</div>
+        <button type="button" class="mtoggle" data-list="ml-t4">Hide markers</button>
+        <ul class="mlist" id="ml-t4"><li><strong>Growth</strong>IGF-1</li><li><strong>Kidney and electrolytes</strong>Sodium, Potassium, Chloride, Bicarbonate, Urea, Creatinine, eGFR</li><li><strong>Liver</strong>Bilirubin, ALP, AST, ALT, GGT, Albumin, Total protein, Globulin</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="t4">Select this panel</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="book-sec" id="order">
+  <div class="wrap">
+    <div class="kicker">Place the order</div>
+    <h2 class="sec">Complete the booking</h2>
+    <div class="book-grid">
+      <div class="card" id="formCard">
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">1</span><h3>The panel</h3></div>
+          <div class="no-test" id="noTest">Select a panel above to begin.</div>
+          <div class="selected-test" id="selTest" style="display:none">
+            <div><div class="st-name" id="stName"></div><div class="st-sub" id="stSub"></div></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">2</span><h3>How would you like your bloods collected?</h3></div>
+          <div class="choice-row">
+            <label class="choice sel" id="chHome">
+              <input type="radio" name="cmode" value="home" checked>
+              <div class="c-title">At-home nurse visit</div>
+              <div class="c-desc">A qualified nurse comes to you — choose your exact time after checkout</div>
+              <span class="c-fee">+ $75</span>
+            </label>
+            <label class="choice" id="chClinic">
+              <input type="radio" name="cmode" value="clinic">
+              <div class="c-title">Collection centre</div>
+              <div class="c-desc">Walk into any of 2,000+ centres — no appointment needed</div>
+              <span class="c-fee">Included</span>
+            </label>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label for="postcode">Postcode</label>
+            <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 4000">
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">3</span><h3>Your details</h3></div>
+          <div class="grid2">
+            <div class="field"><label for="fname">First name</label><input id="fname"></div>
+            <div class="field"><label for="lname">Last name</label><input id="lname"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="email">Email</label><input id="email" type="email"></div>
+            <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
+            <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card confirm" id="confirmCard">
+        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#2E6B4F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 id="confHead">Your order is confirmed</h3>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <span class="conf-chip" id="confTime">—</span>
+          <span class="ref" id="bookingRef">Order reference —</span>
+        </div>
+        <div class="conf-list" id="confList"></div>
+        <div class="partner">
+          <h4>For the Third Spring team</h4>
+          <p>This flow runs on Doorstep, Express Pathology&rsquo;s booking engine. Pathology is ordered on Express forms with no Medicare involvement — fully private, matching your model — with every result reviewed before release and reports returned to your practitioners. Panels are fixed so results are comparable visit to visit.</p>
+          <a class="btn btn-primary btn-sm" href="https://devbookings.expresspathology.com.au/book/demo">Open the live booking sandbox</a>
+        </div>
+      </div>
+
+      <div class="card summary" id="summaryCard">
+        <h3>Your booking</h3>
+        <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
+        <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
+        <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
+        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
+        <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
+        <div class="incl">Your pathology request form is issued electronically and travels with your booking — nothing to print. Fasting guidance is confirmed with your booking.</div>
+        <button class="btn paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
+        <div class="secure">Secure card payment via Stripe · Powered by Express Pathology</div>
+        <div class="demo-tag">Demo checkout — no payment is taken.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" id="calOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h4>Choose your visit time</h4><p id="calSub">Live availability in your area</p></div>
+      <button type="button" id="calLater">Choose later</button>
+    </div>
+    <div class="cal-dates" id="calDates"></div>
+    <div class="cal-note">Fasting panels suit a morning time. Water is fine.</div>
+    <div class="cal-slots" id="calSlots"></div>
+    <div class="modal-foot">
+      <span class="pb">Powered by Express Pathology</span>
+      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <span class="pby">Pathology powered by Express Pathology</span>
+    <span>Demo page for Third Spring Medical · express@expresspathology.com.au · 02 9545 2940</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var PANELS = {"panel1": {"n": "Panel 1", "p": 235, "sub": "50 biomarkers \u00b7 fasting required"}, "peptide": {"n": "Peptide Panel", "p": 150, "sub": "27 biomarkers \u00b7 fasting required"}, "weight": {"n": "Weight Loss Panel", "p": 255, "sub": "49 biomarkers \u00b7 fasting required"}, "iv": {"n": "IV Blood Test", "p": 45, "sub": "29 biomarkers"}, "t1": {"n": "Test 1", "p": 45, "sub": "29 biomarkers"}, "t2": {"n": "Test 2", "p": 110, "sub": "4 biomarkers"}, "t3": {"n": "Test 3", "p": 150, "sub": "33 biomarkers"}, "t4": {"n": "Test 4", "p": 69, "sub": "16 biomarkers"}};
+  var HOME_FEE = 75, selPanel = null;
+  function money(v){ return '$' + v.toFixed(2); }
+
+  document.querySelectorAll('.mtoggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var list = $(btn.dataset.list);
+      var hidden = list.classList.toggle('hidden');
+      btn.textContent = hidden ? 'Show markers' : 'Hide markers';
+    });
+  });
+
+  document.querySelectorAll('[data-pick]').forEach(function(btn){
+    btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
+  });
+  function pick(key){
+    selPanel = key;
+    Object.keys(PANELS).forEach(function(k){
+      var el = $('pan-' + k); if (el) el.classList.toggle('sel', k === key);
+    });
+    $('noTest').style.display = 'none';
+    $('selTest').style.display = 'flex';
+    updateSummary();
+    $('order').scrollIntoView({behavior:'smooth'});
+  }
+  $('stChange').addEventListener('click', function(){ document.getElementById('tests').scrollIntoView({behavior:'smooth'}); });
+
+  var chHome = $('chHome'), chClinic = $('chClinic');
+  function setMode(home){
+    chHome.classList.toggle('sel', home);
+    chClinic.classList.toggle('sel', !home);
+    updateSummary();
+  }
+  chHome.addEventListener('click', function(){ setMode(true); });
+  chClinic.addEventListener('click', function(){ setMode(false); });
+  function isHome(){ return document.querySelector('input[name="cmode"]:checked').value === 'home'; }
+
+  function updateSummary(){
+    var home = isHome();
+    $('sMode').textContent = home ? 'At-home nurse visit' : 'Collection centre';
+    $('sFeeRow').style.display = home ? 'flex' : 'none';
+    if (selPanel){
+      var t = PANELS[selPanel];
+      $('stName').textContent = t.n;
+      $('stSub').textContent = t.sub;
+      $('stPrice').textContent = money(t.p);
+      $('sPanel').textContent = t.n;
+      $('sPanelPrice').textContent = money(t.p);
+      $('sTotal').textContent = money(t.p + (home ? HOME_FEE : 0));
+      $('payBtn').disabled = false;
+      $('payBtn').textContent = (home ? 'Book — ' : 'Order — ') + money(t.p + (home ? HOME_FEE : 0));
+    }
+  }
+  $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+
+  $('payBtn').addEventListener('click', function(){
+    var required = ['postcode','fname','lname','email','mobile','dob','addr'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1);
+      el.classList.toggle('err', bad);
+      if (bad){ ok = false; if (!firstBad) firstBad = el; }
+    });
+    if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    var btn = this;
+    btn.textContent = 'Processing'; btn.disabled = true;
+    setTimeout(function(){
+      var ref = 'TS-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      $('bookingRef').textContent = 'Order reference ' + ref;
+      if (isHome()){ openCalendar(); } else { finishClinic(); }
+    }, 900);
+  });
+
+  function confItem(text){
+    return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#1A3C30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
+  }
+  function showConfirm(){
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function finishClinic(){
+    $('confHead').textContent = 'Your order is confirmed';
+    $('confTime').textContent = 'Collection centre';
+    $('confList').innerHTML =
+      confItem('Your order confirmation is on its way by email.') +
+      confItem('Your request form is issued electronically — walk into any of 2,000+ partner collection centres, no appointment needed. A fasted morning visit works best.') +
+      confItem('Every result is reviewed before release, and your report is returned to your Third Spring practitioner, ready for your consultation.');
+    showConfirm();
+  }
+
+  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var SLOTS=['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am'];
+  var calDates=[], selDate=0, selSlot=-1;
+  function slotFree(d, i){ return ((d.getDate()*31 + i*17 + d.getMonth()*7) % 10) > 2; }
+  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+  function openCalendar(){
+    calDates=[]; var s=new Date(); s.setDate(s.getDate()+1);
+    for(var i=0;i<10;i++){ var d=new Date(s); d.setDate(s.getDate()+i); calDates.push(d); }
+    selDate=0; selSlot=-1;
+    $('calSub').textContent='Live availability for postcode ' + $('postcode').value;
+    renderDates(); renderSlots(); updC();
+    $('calOverlay').classList.add('show');
+  }
+  function renderDates(){
+    var w=$('calDates'); w.innerHTML='';
+    calDates.forEach(function(d,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='dchip'+(i===selDate?' sel':'');
+      b.innerHTML='<div class="dw">'+DAYS[d.getDay()]+'</div><div class="dd">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>';
+      b.addEventListener('click',function(){ selDate=i; selSlot=-1; updC(); renderDates(); renderSlots(); });
+      w.appendChild(b);
+    });
+  }
+  function renderSlots(){
+    var w=$('calSlots'); w.innerHTML='';
+    var d=calDates[selDate];
+    SLOTS.forEach(function(t,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='slot'+(i===selSlot?' sel':''); b.textContent=t;
+      if(!slotFree(d,i)){ b.disabled=true; }
+      else{ b.addEventListener('click',function(){ selSlot=i; updC(); renderSlots(); }); }
+      w.appendChild(b);
+    });
+  }
+  function updC(){
+    var c=$('calConfirm');
+    if(selSlot<0){ c.disabled=true; c.textContent='Select a time'; }
+    else{ c.disabled=false; c.textContent='Confirm '+dateLabel(calDates[selDate])+', '+SLOTS[selSlot]; }
+  }
+  $('calConfirm').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Your home collection is booked';
+    $('confTime').textContent=dateLabel(calDates[selDate])+' · '+SLOTS[selSlot];
+    $('confList').innerHTML=
+      confItem('A confirmation email is on its way, with a reminder 24 hours before your visit.') +
+      confItem('Your request form is issued electronically and travels with your booking. Fasting guidance is included — water is fine.') +
+      confItem('A qualified nurse in your area has been matched to your booking. Every result is reviewed before release and returned to your Third Spring practitioner.');
+    showConfirm();
+  });
+  $('calLater').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Your order is confirmed';
+    $('confTime').textContent='Visit time to be arranged';
+    $('confList').innerHTML=
+      confItem('Your order confirmation is on its way by email.') +
+      confItem('Our team will be in touch shortly to arrange your visit time.');
+    showConfirm();
+  });
+})();
+</script>
+</body>
+</html>
