@@ -15,7 +15,7 @@ const ADDONS = {
   b12: { n: 'Vitamin B12', p: 65 },
   iron: { n: 'Iron Studies', p: 45 },
   thyroid: { n: 'Thyroid — TSH, FT3, FT4', p: 65 },
-  iodine: { n: 'Urine iodine / creatinine (spot)', p: null } // price to be confirmed; flagged in the order email
+  iodine: { n: 'Urine iodine / creatinine (spot)', p: 79 }
 };
 const HOME_FEE = 75;
 
