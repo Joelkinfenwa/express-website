@@ -137,11 +137,16 @@
     .card{padding:22px 18px}
   }
   @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none !important}}
+  .alist{margin:10px 0 4px}
+  .arow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:13.5px;cursor:pointer}
+  .arow:last-child{border-bottom:0}
+  .arow input{accent-color:var(--sky);width:16px;height:16px;flex:none;cursor:pointer}
+  .arow .ap{margin-left:auto;font-weight:600;white-space:nowrap}
+  .err-box{display:none;margin-top:10px;background:#FDECEC;color:#B3261E;border:1px solid #F3C2BE;border-radius:10px;padding:10px 12px;font-size:13px}
 </style>
 </head>
 <body>
 
-<div class="ribbon"><strong>Demo environment</strong> — prepared by Express Pathology for Optimal Health Clinic. No real orders are processed.</div>
 
 <header class="nav">
   <div class="nav-inner">
@@ -233,21 +238,18 @@
       </div>
 
       <div class="panel addon" id="pan-addon">
-        <span class="addon-flag">Optional add-on</span>
+        <span class="addon-flag">Optional add-ons</span>
         <h3>Additional Markers</h3>
-        <div class="price">$224 <span>incl. GST</span></div>
-        <div class="count">6 tests — can be added to any panel</div>
-        <button type="button" class="mtoggle" data-list="ml-addon">Hide markers</button>
-        <ul class="mlist" id="ml-addon">
-          <li>Copper</li>
-          <li>Zinc</li>
-          <li>Vitamin B12</li>
-          <li>Iron studies</li>
-          <li>Thyroid function — TSH, FT3, FT4</li>
-          <li>Urine iodine / creatinine (spot)</li>
-        </ul>
-        <div class="mnote">Requires a urine specimen — the collection kit includes a container when added.</div>
-        <button class="btn btn-dark btn-sm" type="button" id="addonBtn">Add to order</button>
+        <div class="count">Individual markers — add any combination to any panel. Prices include GST.</div>
+        <div class="alist">
+          <label class="arow"><input type="checkbox" class="achk" data-key="copper"><span>Copper</span><span class="ap">$55</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="zinc"><span>Zinc</span><span class="ap">$55</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="b12"><span>Vitamin B12</span><span class="ap">$65</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="iron"><span>Iron Studies</span><span class="ap">$45</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="thyroid"><span>Thyroid function — TSH, FT3, FT4</span><span class="ap">$65</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="iodine"><span>Urine iodine / creatinine (spot)</span><span class="ap">Price confirmed on order</span></label>
+        </div>
+        <div class="mnote" id="iodNote" style="display:none">Urine iodine requires a urine specimen — the collection kit includes a container. Our team confirms its price with your clinic before it is invoiced.</div>
       </div>
 
     </div>
@@ -267,10 +269,7 @@
             <div><div class="st-name" id="stName"></div></div>
             <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
           </div>
-          <div class="selected-test" id="selAddon" style="display:none">
-            <div><div class="st-name">Additional Markers</div></div>
-            <div style="display:flex;align-items:center;gap:14px"><span class="st-price">$224.00</span><button type="button" id="addonRemove">Remove</button></div>
-          </div>
+          <div id="selAddons"></div>
         </div>
         <div class="fstep">
           <div class="fstep-head"><span class="num">2</span><h3>How will the bloods be collected?</h3></div>
@@ -278,7 +277,7 @@
             <label class="choice sel" id="chHome">
               <input type="radio" name="cmode" value="home" checked>
               <div class="c-title">At-home nurse visit</div>
-              <div class="c-desc">A qualified nurse visits the patient — exact time chosen at booking</div>
+              <div class="c-desc">A qualified nurse visits the patient — our team confirms the time within 4 hours</div>
               <span class="c-fee">+ $75</span>
             </label>
             <label class="choice" id="chClinic">
@@ -291,6 +290,15 @@
           <div class="field" style="margin-top:14px">
             <label for="postcode">Patient postcode</label>
             <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 4217">
+          </div>
+          <div id="prefWrap" style="margin-top:14px">
+            <div class="grid2">
+              <div class="field"><label for="prefDate">Preferred visit date</label><input id="prefDate" type="date"></div>
+              <div class="field"><label for="prefTime">Preferred time</label>
+                <select id="prefTime"><option>Morning</option><option>Afternoon</option><option>No preference</option></select>
+              </div>
+            </div>
+            <div class="mnote" style="margin-top:6px">Our team contacts the patient within 4 hours to confirm the exact visit time.</div>
           </div>
         </div>
         <div class="fstep">
@@ -321,45 +329,30 @@
           <span class="ref" id="bookingRef">Order reference —</span>
         </div>
         <div class="conf-list" id="confList"></div>
-        <a class="btn btn-dark btn-sm" href="https://devbookings.expresspathology.com.au/book/demo" id="timeLink">Open the live booking sandbox</a>
+        <button class="btn btn-dark btn-sm" type="button" id="againBtn" style="margin-top:4px">Place another order</button>
       </div>
 
       <div class="card summary" id="summaryCard">
         <h3>Order summary</h3>
         <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
         <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
-        <div class="srow" id="sAddonRow" style="display:none"><span>Additional Markers</span><span class="sv">$224.00</span></div>
+        <div id="sAddonRows"></div>
         <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
         <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
         <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
         <div class="incl" id="sNote">No payment at the point of order — all orders are billed to Optimal Health Clinic on one consolidated monthly invoice. The pathology request form is issued by Express Pathology and travels with the order.</div>
         <button class="btn btn-primary paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
         <div class="secure">Results are reviewed and returned to Optimal Health Clinic</div>
-        <div class="demo-tag">Demo — orders are not transmitted.</div>
+        <div class="err-box" id="orderErr"></div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="overlay" id="calOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div><h4>Choose the visit time</h4><p id="calSub">Live availability in the patient's area</p></div>
-      <button type="button" id="calLater">Choose later</button>
-    </div>
-    <div class="cal-dates" id="calDates"></div>
-    <div class="cal-slots" id="calSlots"></div>
-    <div class="modal-foot">
-      <span class="pb">Powered by Express Pathology</span>
-      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
-    </div>
-  </div>
-</div>
-
 <footer>
   <div class="foot">
     <span class="pby">Powered by Express Pathology</span>
-    <span>Demo page for Optimal Health Clinic · express@expresspathology.com.au · 02 9545 2940</span>
+    <span>Pathology ordering for Optimal Health Clinic · express@expresspathology.com.au · 02 9545 2940</span>
   </div>
 </footer>
 
@@ -371,8 +364,16 @@
     female:  {n:'Female Initial', p:194},
     followup:{n:'OHC Follow Up',  p:131}
   };
-  var ADDON_PRICE = 224, HOME_FEE = 75;
-  var selPanel = null, addon = false;
+  var ADDONS = {
+    copper:  {n:'Copper', p:55},
+    zinc:    {n:'Zinc', p:55},
+    b12:     {n:'Vitamin B12', p:65},
+    iron:    {n:'Iron Studies', p:45},
+    thyroid: {n:'Thyroid — TSH, FT3, FT4', p:65},
+    iodine:  {n:'Urine iodine / creatinine (spot)', p:null}
+  };
+  var HOME_FEE = 75;
+  var selPanel = null;
 
   /* marker show/hide — visible by default */
   document.querySelectorAll('.mtoggle').forEach(function(btn){
@@ -384,6 +385,9 @@
   });
 
   function money(v){ return '$' + v.toFixed(2); }
+  function chosenAddons(){
+    return Array.prototype.slice.call(document.querySelectorAll('.achk:checked')).map(function(c){ return c.dataset.key; });
+  }
 
   document.querySelectorAll('[data-pick]').forEach(function(btn){
     btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
@@ -402,22 +406,27 @@
   }
   $('stChange').addEventListener('click', function(){ document.getElementById('tests').scrollIntoView({behavior:'smooth'}); });
 
-  /* add-on */
-  function setAddon(on){
-    addon = on;
-    $('pan-addon').classList.toggle('sel', on);
-    $('addonBtn').textContent = on ? 'Added — remove' : 'Add to order';
-    $('selAddon').style.display = on ? 'flex' : 'none';
-    $('sAddonRow').style.display = on ? 'flex' : 'none';
+  /* individual add-on markers */
+  document.querySelectorAll('.achk').forEach(function(c){ c.addEventListener('change', updateAddons); });
+  function updateAddons(){
+    var keys = chosenAddons();
+    $('pan-addon').classList.toggle('sel', keys.length > 0);
+    $('iodNote').style.display = keys.indexOf('iodine') > -1 ? 'block' : 'none';
+    var sel = $('selAddons'), sum = $('sAddonRows');
+    sel.innerHTML = ''; sum.innerHTML = '';
+    keys.forEach(function(k){
+      var a = ADDONS[k];
+      sel.innerHTML += '<div class="selected-test" style="display:flex"><div><div class="st-name">' + a.n + '</div></div><div style="display:flex;align-items:center;gap:14px"><span class="st-price">' + (a.p == null ? 'TBC' : money(a.p)) + '</span></div></div>';
+      sum.innerHTML += '<div class="srow"><span>' + a.n + '</span><span class="sv">' + (a.p == null ? 'TBC' : money(a.p)) + '</span></div>';
+    });
     updateSummary();
   }
-  $('addonBtn').addEventListener('click', function(){ setAddon(!addon); });
-  $('addonRemove').addEventListener('click', function(){ setAddon(false); });
 
   var chHome = $('chHome'), chClinic = $('chClinic');
   function setMode(home){
     chHome.classList.toggle('sel', home);
     chClinic.classList.toggle('sel', !home);
+    $('prefWrap').style.display = home ? 'block' : 'none';
     updateSummary();
   }
   chHome.addEventListener('click', function(){ setMode(true); });
@@ -432,10 +441,11 @@
       var t = PANELS[selPanel];
       $('sPanel').textContent = t.n;
       $('sPanelPrice').textContent = money(t.p);
-      var total = t.p + (addon ? ADDON_PRICE : 0) + (home ? HOME_FEE : 0);
-      $('sTotal').textContent = money(total);
+      var total = t.p + (home ? HOME_FEE : 0), tbc = false;
+      chosenAddons().forEach(function(k){ if (ADDONS[k].p == null) tbc = true; else total += ADDONS[k].p; });
+      $('sTotal').textContent = money(total) + (tbc ? ' + iodine' : '');
       $('payBtn').disabled = false;
-      $('payBtn').textContent = 'Submit order — ' + money(total);
+      $('payBtn').textContent = 'Submit order — ' + money(total) + (tbc ? ' + iodine' : '');
     }
   }
   $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
@@ -451,96 +461,60 @@
     });
     if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
     var btn = this;
-    btn.textContent = 'Processing…'; btn.disabled = true;
-    setTimeout(function(){
-      var ref = 'OHC-' + Math.random().toString(36).slice(2,7).toUpperCase();
-      $('bookingRef').textContent = 'Order reference ' + ref;
-      $('timeLink').href = 'https://devbookings.expresspathology.com.au/book/demo?postcode=' + encodeURIComponent($('postcode').value) + '&ref=' + encodeURIComponent(ref);
-      if (isHome()){ openCalendar(); } else { finishClinic(); }
-    }, 900);
+    btn.textContent = 'Submitting…'; btn.disabled = true;
+    $('orderErr').style.display = 'none';
+    var ref = 'OHC-' + Math.random().toString(36).slice(2,7).toUpperCase();
+    var payload = {
+      reference: ref,
+      panel: selPanel,
+      addons: chosenAddons(),
+      collection: isHome() ? 'home' : 'clinic',
+      preferredDate: $('prefDate').value,
+      preferredTime: $('prefTime').value,
+      firstName: $('fname').value, lastName: $('lname').value,
+      email: $('email').value, phone: $('mobile').value,
+      dob: $('dob').value, sex: $('sex').value,
+      address: $('addr').value, postcode: $('postcode').value
+    };
+    fetch('/api/clinic-order', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)})
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.j && res.j.error || 'The order could not be transmitted.');
+        finishOrder(res.j.reference || ref);
+      })
+      .catch(function(e){
+        var m = e && e.message || '';
+        $('orderErr').textContent = /could not|Please/.test(m) ? m : 'The order could not be transmitted. Please call us on 02 9545 2940 and we will take it over the phone.';
+        $('orderErr').style.display = 'block';
+        updateSummary();
+      });
   });
 
   function confItem(text){
     return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#1DACFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
   }
-  function showConfirm(){
+  function finishOrder(ref){
+    var home = isHome();
+    $('bookingRef').textContent = 'Order reference ' + ref;
+    $('confHead').textContent = 'Order received';
+    $('confTime').textContent = home ? 'At-home nurse visit' : 'Collection centre';
+    $('confList').innerHTML = home
+      ? confItem('Our team contacts the patient within 4 hours to confirm the exact visit time.') +
+        confItem('The pathology request form is issued by Express Pathology and travels with the booking — nothing to re-key or print.') +
+        confItem('Results are reviewed and returned to Optimal Health Clinic.') +
+        confItem('The order lands on your consolidated monthly invoice — no per-order payment.')
+      : confItem('The pathology request form is sent to the patient with instructions — they walk into any of 2,000+ partner centres, no appointment needed.') +
+        confItem('Results are reviewed and returned to Optimal Health Clinic.') +
+        confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
     $('formCard').style.display = 'none';
     $('summaryCard').style.display = 'none';
     $('confirmCard').classList.add('show');
     $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
   }
-  function finishClinic(){
-    $('confHead').textContent = 'Order confirmed';
-    $('confTime').textContent = 'Collection centre';
-    $('confList').innerHTML =
-      confItem('Confirmation is on its way to your team and the patient by email — nothing to re-key or print.') +
-      confItem('The pathology request form is issued electronically — the patient walks into any of 2,000+ partner centres, no appointment needed.') +
-      confItem('Results are reviewed and returned to Optimal Health Clinic, with completion visible to your team.') +
-      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
-    showConfirm();
-  }
+  $('againBtn').addEventListener('click', function(){ location.reload(); });
 
-  /* calendar */
-  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var SLOTS=['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am','12:00 pm','1:00 pm','1:30 pm','2:00 pm','3:00 pm','3:30 pm','4:00 pm'];
-  var calDates=[], selDate=0, selSlot=-1;
-  function slotFree(d, i){ return ((d.getDate()*31 + i*17 + d.getMonth()*7) % 10) > 2; }
-  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
-  function openCalendar(){
-    calDates=[]; var s=new Date(); s.setDate(s.getDate()+1);
-    for(var i=0;i<10;i++){ var d=new Date(s); d.setDate(s.getDate()+i); calDates.push(d); }
-    selDate=0; selSlot=-1;
-    $('calSub').textContent='Live availability for postcode ' + $('postcode').value;
-    renderDates(); renderSlots();
-    $('calOverlay').classList.add('show');
-  }
-  function renderDates(){
-    var w=$('calDates'); w.innerHTML='';
-    calDates.forEach(function(d,i){
-      var b=document.createElement('button'); b.type='button';
-      b.className='dchip'+(i===selDate?' sel':'');
-      b.innerHTML='<div class="dw">'+DAYS[d.getDay()]+'</div><div class="dd">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>';
-      b.addEventListener('click',function(){ selDate=i; selSlot=-1; updC(); renderDates(); renderSlots(); });
-      w.appendChild(b);
-    });
-  }
-  function renderSlots(){
-    var w=$('calSlots'); w.innerHTML='';
-    var d=calDates[selDate];
-    SLOTS.forEach(function(t,i){
-      var b=document.createElement('button'); b.type='button';
-      b.className='slot'+(i===selSlot?' sel':''); b.textContent=t;
-      if(!slotFree(d,i)){ b.disabled=true; }
-      else{ b.addEventListener('click',function(){ selSlot=i; updC(); renderSlots(); }); }
-      w.appendChild(b);
-    });
-  }
-  function updC(){
-    var c=$('calConfirm');
-    if(selSlot<0){ c.disabled=true; c.textContent='Select a time'; }
-    else{ c.disabled=false; c.textContent='Confirm '+dateLabel(calDates[selDate])+', '+SLOTS[selSlot]; }
-  }
-  $('calConfirm').addEventListener('click',function(){
-    $('calOverlay').classList.remove('show');
-    $('confHead').textContent='Home collection booked';
-    $('confTime').textContent=dateLabel(calDates[selDate])+' · '+SLOTS[selSlot];
-    $('confList').innerHTML=
-      confItem('Confirmation is on its way to your team and the patient, with a reminder to the patient 24 hours before the visit.') +
-      confItem('The pathology request form is issued electronically and travels with the booking — nothing to re-key or print.') +
-      confItem('A qualified nurse in the patient\'s area has been matched to the booking.') +
-      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
-    showConfirm();
-  });
-  $('calLater').addEventListener('click',function(){
-    $('calOverlay').classList.remove('show');
-    $('confHead').textContent='Order confirmed';
-    $('confTime').textContent='Visit time to be arranged';
-    $('confList').innerHTML=
-      confItem('Confirmation is on its way to your team and the patient by email.') +
-      confItem('The Express team will be in touch to arrange the visit time.') +
-      confItem('The order lands on your consolidated monthly invoice — no per-order payment.');
-    showConfirm();
-  });
+  (function(){ var d = new Date(); d.setDate(d.getDate() + 1); $('prefDate').min = d.toISOString().slice(0,10); })();
+  setMode(true);
 })();
 </script>
 </body>
