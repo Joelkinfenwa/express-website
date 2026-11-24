@@ -1,3 +1,4 @@
+import { createLead } from '../lib/leads.js';
 import TESTS from '../lib/test-index.mjs';
 import { stripe } from '../lib/stripe.js';
 import { referralNumber } from '../lib/order-number.js';
@@ -283,6 +284,8 @@ export default async function handler(req, res) {
     else if (d.kind === 'quiz' && d.offer === 'quiz' && klaviyoReady()) { /* lead already recorded in Klaviyo */ }
     else throw new Error(att ? 'Attachment needs email delivery' : 'No delivery method configured');
     if (emailReady && hubspotReady) await toHubSpot(d).catch(() => {}); // also log the lead in HubSpot
+    // B2B enquiries also go into the orders tracker's B2B leads section
+    if (d.kind === 'partner' || (d.kind === 'contact' && /partnership/i.test(d.topic || '')) || /partnership/i.test(d.topic || '')) await createLead(d, d.kind === 'partner' ? 'website' : 'contact form').catch((e) => console.error('lead record failed:', e.message));
     const kl = quizClientKlaviyo(d, SITE);
     return res.status(200).json({ ok: true, ...(d.kind === 'referral' && d.reference ? { order: d.reference } : {}), ...(kl ? { kl } : {}), ...(nowTok ? { now: nowTok } : {}) });
   } catch (err) {

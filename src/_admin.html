@@ -33,6 +33,8 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 /* Queues */
 .rbox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:#FBFAF7}.rbox h4{margin:0 0 6px;font-size:15px}.rbox p{margin:0 0 10px;font-size:14px;color:var(--soft)}.rbox .rfile{display:block;font-weight:700;font-size:14px;margin:0 0 10px}.rbox input[type=file]{display:block;margin:4px 0 0;max-width:100%;font-weight:400}.rbox .sent{color:#1F7A4D;font-weight:700}
 .mgrp{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#fff}.mgrp h4{margin:0 0 4px}.mgrp .sub{font-size:13px;color:var(--soft);margin:0 0 10px}.mrow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}.mrow .f{color:var(--soft);word-break:break-all}.mrow .miss{color:#A4502E;font-weight:700}.mrow select{max-width:100%}.mgrp .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.mgrp .acts .btn{width:auto;padding:10px 14px}
+.lstages{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 0 14px}.lstages button{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;min-width:110px}.lstages button[aria-pressed=true]{background:var(--forest);color:#fff;border-color:var(--forest)}.lstages b{display:block;font-size:22px}.lstages span{font-size:13px}
+.lcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 10px}.lcard .lhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.lcard h3{margin:0;font-size:17px}.lcard .meta{font-size:14px;color:var(--soft);margin:4px 0 0}.lcard .msgtxt{font-size:14px;margin:8px 0 0;white-space:pre-wrap}.lcard .due{color:#A4502E;font-weight:700}.lcard .form{margin-top:12px}
 .addjob{float:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 16px;font-weight:700;color:var(--forest)}
 .jobform{background:#fff;border:1px solid var(--forest);border-radius:18px;padding:18px;margin-bottom:18px}.jobform h3{margin:0 0 10px}
 .sections{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
@@ -141,6 +143,10 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
 <button type="button" class="addjob" id="mup" hidden style="margin-right:8px">Upload MIRAIT results</button>
 <section class="jobform" id="mres" hidden><h3>MIRAIT results</h3><p class="msg">Choose all the result PDFs at once. Each one is matched to a worker by name and grouped by booking. Files stay in this browser only and are cleared when you leave the page.</p><input type="file" id="mfiles" accept="application/pdf,.pdf" multiple><p class="msg" id="mstatus" role="status"></p><div id="mgroups"></div><div class="row2" style="margin-top:12px"><button class="btn light" type="button" id="mclose">Close</button></div></section>
 <form class="jobform" id="jobform" hidden><h3>Add MIRAIT jobs</h3><div class="form"><label>Workers<textarea name="workers" id="jobworkers" rows="6" required placeholder="Paste the names from the email, one per line. A phone number on the same line is picked up too."></textarea></label><p class="msg" id="jobcount"></p><div class="row2"><label>Tests per worker<input name="qty" type="number" min="1" max="50" value="1" required></label><label>Date of the job<input name="job_date" type="date"></label></div><label>Address or site<input name="address"></label><label>Note<textarea name="note" placeholder="Subcontractor, site contact or anything from the email"></textarea></label><div class="row2"><button class="btn" type="submit" id="jobsubmit">Add jobs</button><button class="btn light" type="button" id="jobcancel">Cancel</button></div><p class="msg" id="jobmsg" role="status"></p></div></form>
+<button type="button" class="addjob" id="addlead" hidden>+ Add lead</button>
+<button type="button" class="addjob" id="importleads" hidden style="margin-right:8px">Import past enquiries</button>
+<form class="jobform" id="leadform" hidden><h3>Add a B2B lead</h3><div class="form"><div class="row2"><label>Business<input name="organisation" required></label><label>Type<input name="organisation_type" placeholder="Clinic, telehealth, aged care…"></label></div><div class="row2"><label>Contact name<input name="name"></label><label>Email<input name="email" type="email"></label></div><div class="row2"><label>Phone<input name="phone" type="tel"></label><label>Where it came from<input name="source" placeholder="Referral, LinkedIn, phone call…"></label></div><label>Notes<textarea name="message"></textarea></label><div class="row2"><button class="btn" type="submit">Add lead</button><button class="btn light" type="button" id="leadcancel">Cancel</button></div><p class="msg" id="leadmsg" role="status"></p></div></form>
+<div id="leadsview" hidden></div>
 <nav class="queues" id="queues" aria-label="Work queues"></nav>
 <p class="shopnote" id="shopnote" hidden></p>
 <div class="head"><h2 id="title"></h2><p id="hint"></p></div>
@@ -249,14 +255,77 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
     $('login').hidden = !!token; $('board').hidden = !token; $('search-wrap').hidden = !token; $('signout').hidden = !token; $('revbtn').hidden = !token; $('revenue').hidden = true;
     if (token) load();
   }
+  // ---- B2B leads ----
+  var leads = [], leadView = 'new', leadOpen = '';
+  var LSTAGES = [['new', 'New'], ['contacted', 'Contacted'], ['meeting', 'Meeting booked'], ['proposal', 'Proposal sent'], ['onboarding', 'Onboarding'], ['won', 'Won'], ['lost', 'Lost']];
+  function lapi(method, body) {
+    return fetch('/api/admin/leads', { method: method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { if (r.status === 401) { signOut(); throw new Error('auth'); } return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
+  }
+  function loadLeads() { return lapi('GET').then(function (j) { leads = j.leads || []; render(); }).catch(function (e) { if (e.message !== 'auth') console.error(e); }); }
+  function lstageName(k) { var x = LSTAGES.find(function (y) { return y[0] === k; }); return x ? x[1] : k; }
+  function drawLeads() {
+    var counts = {}; leads.forEach(function (l) { counts[l.stage] = (counts[l.stage] || 0) + 1; });
+    var today = new Date().toISOString().slice(0, 10);
+    var rows = leads.filter(function (l) { return l.stage === leadView; });
+    var html = '<div class="lstages">' + LSTAGES.map(function (x) { return '<button type="button" data-lv="' + x[0] + '" aria-pressed="' + (leadView === x[0]) + '"><b>' + (counts[x[0]] || 0) + '</b><span>' + x[1] + '</span></button>'; }).join('') + '</div>';
+    if (!rows.length) html += '<div class="empty">' + (leads.length ? 'No leads at this stage.' : 'No B2B leads yet. New partner enquiries from the website land here automatically. Use "Import past enquiries" to bring in earlier ones.') + '</div>';
+    html += rows.map(function (l) {
+      var open = leadOpen === l.id, days = Math.floor((Date.now() - Date.parse(l.received)) / 86400000), due = l.next && l.next <= today && l.stage !== 'won' && l.stage !== 'lost';
+      return '<div class="lcard"><div class="lhead"><h3>' + esc(l.org || l.contact || l.email) + '</h3><button type="button" class="btn light" style="width:auto;padding:8px 14px" data-lopen="' + esc(l.id) + '">' + (open ? 'Close' : 'Open') + '</button></div>' +
+        '<p class="meta">' + esc([l.contact, l.orgType, l.volume && l.volume + ' a month', l.source].filter(Boolean).join(' · ')) + '</p>' +
+        '<p class="meta">Received ' + dfmt.format(new Date(l.received)) + ' (' + (days <= 0 ? 'today' : days + ' day' + (days === 1 ? '' : 's') + ' ago') + ')' + (l.next ? ' · <span class="' + (due ? 'due' : '') + '">Follow up ' + dfmt.format(new Date(l.next + 'T00:00:00')) + '</span>' : '') + (l.owner ? ' · ' + esc(l.owner) : '') + '</p>' +
+        (l.note && !open ? '<p class="msgtxt">' + esc(l.note) + '</p>' : '') +
+        (open ? '<p class="meta">' + [l.email && '<a href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>', l.phone && '<a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a>'].filter(Boolean).join(' · ') + '</p>' +
+          (l.interest ? '<p class="meta">Interested in: ' + esc(l.interest) + '</p>' : '') + (l.message ? '<p class="msgtxt">' + esc(l.message) + '</p>' : '') +
+          '<form class="form" data-lform="' + esc(l.id) + '"><div class="row2"><label>Stage<select name="stage">' + LSTAGES.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === l.stage ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label><label>Next follow-up<input type="date" name="next" value="' + esc(l.next) + '"></label></div>' +
+          '<label>Owner<input name="owner" value="' + esc(l.owner) + '" placeholder="Who is handling it"></label><label>Notes<textarea name="note" placeholder="Calls, meetings, what was agreed">' + esc(l.note) + '</textarea></label>' +
+          '<div class="row2"><button class="btn" type="submit">Save</button><button class="btn light" type="button" data-ldel="' + esc(l.id) + '">Remove lead</button></div>' + (l.updated ? '<p class="msg">Updated ' + tfmt.format(new Date(l.updated)) + (l.by ? ' by ' + esc(l.by.split('@')[0]) : '') + '</p>' : '') + '</form>' : '') + '</div>';
+    }).join('');
+    $('leadsview').innerHTML = html;
+  }
+  $('leadsview').addEventListener('click', function (e) {
+    var v = e.target.closest('[data-lv]'), o = e.target.closest('[data-lopen]'), d = e.target.closest('[data-ldel]');
+    if (v) { leadView = v.getAttribute('data-lv'); leadOpen = ''; drawLeads(); }
+    if (o) { var id = o.getAttribute('data-lopen'); leadOpen = leadOpen === id ? '' : id; drawLeads(); }
+    if (d && confirm('Remove this lead from the tracker?')) { var did = d.getAttribute('data-ldel'); lapi('POST', { id: did, action: 'delete' }).then(function () { leads = leads.filter(function (l) { return l.id !== did; }); leadOpen = ''; toast('Lead removed'); render(); }).catch(function (er) { if (er.message !== 'auth') toast(er.message); }); }
+  });
+  $('leadsview').addEventListener('submit', function (e) {
+    var f = e.target.closest('[data-lform]'); if (!f) return; e.preventDefault();
+    var id = f.getAttribute('data-lform'), l = leads.find(function (x) { return x.id === id; }), d = Object.fromEntries(new FormData(f).entries());
+    lapi('POST', Object.assign({ id: id }, d)).then(function (j) { Object.assign(l, d, { updated: j.updated, by: j.by }); leadOpen = ''; toast(l.org + ' saved' + (d.stage !== leadView ? ', moved to ' + lstageName(d.stage) : '')); render(); })
+      .catch(function (er) { if (er.message !== 'auth') toast('Not saved: ' + er.message); });
+  });
+  $('addlead').addEventListener('click', function () { $('leadform').hidden = false; $('leadmsg').textContent = ''; $('leadform').querySelector('input').focus(); });
+  $('leadcancel').addEventListener('click', function () { $('leadform').hidden = true; });
+  $('leadform').addEventListener('submit', function (e) {
+    e.preventDefault(); var f = this, d = Object.fromEntries(new FormData(f).entries()); d.action = 'create';
+    $('leadmsg').textContent = 'Adding…';
+    lapi('POST', d).then(function () { f.reset(); f.hidden = true; leadView = 'new'; toast(d.organisation + ' added'); loadLeads(); }).catch(function (er) { if (er.message !== 'auth') $('leadmsg').textContent = er.message; });
+  });
+  $('importleads').addEventListener('click', function () {
+    var btn = this; btn.disabled = true; btn.textContent = 'Checking the email log…';
+    lapi('POST', { action: 'import_scan' }).then(function (j) {
+      var ids = (j.found || []).map(function (x) { return x.id; }), total = ids.length, made = 0;
+      if (!total) { toast('No new past enquiries found (' + (j.note || '') + ').'); return; }
+      function next() {
+        if (!ids.length) return Promise.resolve();
+        btn.textContent = 'Importing ' + Math.min(made + 5, total) + ' of ' + total + '…';
+        return lapi('POST', { action: 'import_take', ids: ids.splice(0, 5) }).then(function (r) { made += r.made || 0; return next(); });
+      }
+      return next().then(function () { toast(made + ' past enquir' + (made === 1 ? 'y' : 'ies') + ' imported'); leadView = 'new'; return loadLeads(); });
+    }).catch(function (er) { if (er.message !== 'auth') toast('Import stopped: ' + er.message); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Import past enquiries'; });
+  });
   function load() {
     $('list').innerHTML = '<div class="empty">Loading orders…</div>';
+    loadLeads();
     api('GET').then(function (j) { orders = j.orders; shopNote = j.shopify && j.shopify.status === 'error' ? 'Primal Zone orders could not be loaded from Shopify: ' + j.shopify.error : ''; render(); })
       .catch(function (e) { if (e.message !== 'auth') $('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
   }
   function overdue(o) { return queueOf(o) !== 'done' && (Date.now() / 1000 - o.date) / 86400 >= 7; }
   // Sections: Express, Primal Zone, MIRAIT jobs and LSG (partner referrals) each run as their own flow
-  var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG']];
+  var SECTIONS = [['ep', 'Express'], ['pz', 'Primal Zone'], ['mirait', 'MIRAIT'], ['lsg', 'LSG'], ['leads', 'B2B leads']];
   function secOf(o) { var k = kind(o); return k === 'pz' ? 'pz' : k === 'job' ? 'mirait' : k === 'ref' ? 'lsg' : 'ep'; }
   // Primal Zone results can be emailed to the patient from the order (set RESULTS_EMAIL to false to hide it)
   var RESULTS_EMAIL = true;
@@ -264,13 +333,17 @@ main{max-width:980px;margin:0 auto;padding:24px 20px 80px}
   function canEmail(o) { return RESULTS_EMAIL && (isPZ(o) || (o.kind === 'pi' && o.type !== 'own-form')); }
   function inSection(o) { return secOf(o) === section; }
   function render() {
-    var open = { ep: 0, pz: 0, mirait: 0, lsg: 0 };
+    var open = { ep: 0, pz: 0, mirait: 0, lsg: 0, leads: leads.filter(function (l) { return l.stage !== 'won' && l.stage !== 'lost'; }).length };
     if (!SECTIONS.some(function (x) { return x[0] === section; })) section = 'ep';
     orders.forEach(function (o) { if (queueOf(o) !== 'done') open[secOf(o)]++; });
     $('sections').innerHTML = SECTIONS.map(function (x) { return '<button type="button" class="sec" role="tab" data-sec="' + x[0] + '" aria-selected="' + (section === x[0]) + '">' + x[1] + ' <b>' + open[x[0]] + '</b></button>'; }).join('');
     $('addjob').hidden = section !== 'mirait' || !!q;
     $('mup').hidden = section !== 'mirait' || !!q; if (section !== 'mirait') $('mres').hidden = true;
     $('rtest').hidden = section !== 'pz' || !!q;
+    var isLeads = section === 'leads' && !q;
+    ['queues', 'list'].forEach(function (x) { $(x).hidden = isLeads; }); $('title').parentElement.hidden = isLeads; $('shopnote').hidden = isLeads || !shopNote;
+    $('leadsview').hidden = !isLeads; $('addlead').hidden = !isLeads; $('importleads').hidden = !isLeads; if (!isLeads) $('leadform').hidden = true;
+    if (isLeads) { drawLeads(); return; }
     var pool = orders.filter(inSection);
     var counts = {}, late = {};
     pool.forEach(function (o) { var k = queueOf(o); counts[k] = (counts[k] || 0) + 1; if (overdue(o)) late[k] = 1; });
