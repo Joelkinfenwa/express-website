@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baseline+ Home Blood Collections — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#050F21;
+    --navy-soft:#0B1B36;
+    --cyan:#30B0D1;
+    --cyan-light:#A6D5E6;
+    --ink:#050F21;
+    --slate:#4A5468;
+    --line:#E3E8F0;
+    --bg:#FFFFFF;
+    --bg-soft:#F4F7FA;
+    --ok:#1E9E6A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Inter Tight",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  img{max-width:100%}
+  a{color:inherit}
+
+  /* ---------- demo ribbon ---------- */
+  .ribbon{background:var(--navy);color:var(--cyan-light);font-size:12.5px;letter-spacing:.02em;text-align:center;padding:7px 16px;border-bottom:1px solid rgba(166,213,230,.18)}
+  .ribbon strong{color:#fff;font-weight:600}
+
+  /* ---------- nav ---------- */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(5,15,33,.92);backdrop-filter:blur(10px);color:#fff}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .wordmark{font-weight:600;font-size:21px;letter-spacing:-.01em;color:#fff;text-decoration:none;display:flex;align-items:baseline}
+  .wordmark .plus{color:var(--cyan);font-weight:700;margin-left:1px}
+  .nav-links{display:flex;align-items:center;gap:10px}
+  .nav-link{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:999px}
+  .nav-link:hover{color:#fff}
+  .btn{display:inline-block;text-decoration:none;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;border:0;transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--cyan);color:var(--navy);padding:12px 26px;border-radius:999px 8px 8px 999px}
+  .btn-primary:hover{background:#4CC2E0}
+  .btn-dark{background:var(--navy);color:#fff;padding:12px 26px;border-radius:999px 8px 8px 999px}
+  .btn-dark:hover{background:#0E2244}
+  .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);padding:12px 26px;border-radius:999px}
+  .btn-ghost:hover{border-color:#fff}
+  .btn-sm{font-size:13.5px;padding:9px 18px}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;background:var(--navy);color:#fff;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(42% 60% at 70% 38%, rgba(48,176,209,.42), rgba(48,176,209,0) 70%),
+    radial-gradient(48% 62% at 12% 85%, rgba(48,176,209,.18), rgba(48,176,209,0) 70%);pointer-events:none}
+  .hero-inner{position:relative;max-width:1120px;margin:0 auto;padding:88px 24px 96px}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan-light);background:rgba(166,213,230,.14);border:1px solid rgba(166,213,230,.28);padding:6px 16px;border-radius:999px;margin-bottom:22px}
+  .hero h1{font-size:clamp(34px,5.4vw,58px);font-weight:600;line-height:1.08;letter-spacing:-.02em;max-width:640px}
+  .hero h1 .accent{color:var(--cyan)}
+  .hero p.lede{margin-top:20px;font-size:clamp(16px,2vw,19px);color:rgba(255,255,255,.78);max-width:520px}
+  .hero-ctas{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px}
+  .hero-points{margin-top:46px;display:flex;flex-wrap:wrap;gap:12px 28px;font-size:14px;color:rgba(255,255,255,.72)}
+  .hero-points span{display:flex;align-items:center;gap:8px}
+  .tick{width:17px;height:17px;flex:none;border-radius:50%;background:rgba(48,176,209,.22);display:inline-flex;align-items:center;justify-content:center}
+  .tick svg{width:9px;height:9px}
+
+  /* ---------- sections ---------- */
+  section{padding:76px 0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .kicker{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+  h2.sec{font-size:clamp(26px,3.4vw,38px);font-weight:600;letter-spacing:-.015em;line-height:1.15}
+  p.sub{margin-top:12px;color:var(--slate);font-size:16.5px;max-width:560px}
+
+  /* steps */
+  .steps{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{background:var(--bg-soft);border:1px solid var(--line);border-radius:18px;padding:28px 26px}
+  .step .num{width:34px;height:34px;border-radius:999px;background:var(--navy);color:var(--cyan-light);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+  .step h3{font-size:18px;font-weight:600;margin-bottom:8px}
+  .step p{font-size:14.5px;color:var(--slate)}
+
+  /* ---------- booking ---------- */
+  .book-sec{background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .book-grid{margin-top:44px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:32px}
+  .fstep{padding-bottom:26px;margin-bottom:26px;border-bottom:1px solid var(--line)}
+  .fstep:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+  .fstep-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .fstep-head .num{width:28px;height:28px;flex:none;border-radius:999px;background:var(--navy);color:var(--cyan-light);font-weight:600;font-size:13.5px;display:flex;align-items:center;justify-content:center}
+  .fstep-head h3{font-size:17px;font-weight:600}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .field input,.field select{width:100%;font-family:inherit;font-size:15px;color:var(--ink);padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;outline:none;transition:border .12s}
+  .field input:focus,.field select:focus{border-color:var(--cyan)}
+  .field input.err,.field select.err{border-color:#E05C5C}
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;background:#fff;transition:border .12s,background .12s}
+  .choice input{position:absolute;opacity:0}
+  .choice .c-title{font-size:14.5px;font-weight:600}
+  .choice .c-desc{font-size:12.5px;color:var(--slate);margin-top:3px}
+  .choice.sel{border-color:var(--cyan);background:rgba(48,176,209,.06)}
+  .note{font-size:13px;color:var(--slate);background:rgba(48,176,209,.08);border:1px solid rgba(48,176,209,.25);border-radius:10px;padding:10px 14px;margin-top:12px;display:none}
+  .note.show{display:block}
+
+  /* upload */
+  .drop{border:1.5px dashed #BBC7D6;border-radius:14px;padding:26px 20px;text-align:center;cursor:pointer;transition:border .12s,background .12s;background:#FBFCFE}
+  .drop:hover,.drop.over{border-color:var(--cyan);background:rgba(48,176,209,.05)}
+  .drop .d-icon{width:40px;height:40px;margin:0 auto 10px;border-radius:999px;background:rgba(48,176,209,.14);display:flex;align-items:center;justify-content:center}
+  .drop p{font-size:14px;color:var(--slate)}
+  .drop p strong{color:var(--ink);font-weight:600}
+  .drop .d-hint{font-size:12px;color:#8A94A6;margin-top:4px}
+  .file-chip{display:none;margin-top:12px;align-items:center;gap:10px;background:rgba(30,158,106,.08);border:1px solid rgba(30,158,106,.3);border-radius:10px;padding:10px 14px;font-size:13.5px}
+  .file-chip.show{display:flex}
+  .file-chip .fc-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file-chip button{margin-left:auto;background:none;border:0;cursor:pointer;color:var(--slate);font-size:13px;font-family:inherit;text-decoration:underline}
+  .noform{margin-top:14px;display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--slate);cursor:pointer}
+  .noform input{margin-top:3px;accent-color:var(--cyan);width:15px;height:15px}
+
+  /* summary */
+  .summary{position:sticky;top:84px}
+  .summary h3{font-size:16px;font-weight:600;margin-bottom:18px}
+  .srow{display:flex;justify-content:space-between;font-size:14.5px;padding:9px 0;color:var(--slate)}
+  .srow .sv{color:var(--ink);font-weight:500}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:16px}
+  .srow.total .sv{font-weight:700;font-size:19px}
+  .incl{font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:10px;padding:10px 14px;margin:14px 0 18px}
+  .paybtn{width:100%;text-align:center;font-size:16px;padding:15px 20px}
+  .secure{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:#8A94A6;margin-top:12px}
+  .demo-tag{font-size:11.5px;color:#8A94A6;text-align:center;margin-top:10px}
+
+  /* calendar modal */
+  .overlay{position:fixed;inset:0;background:rgba(5,15,33,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:20px;max-width:580px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(5,15,33,.35)}
+  .modal-head{background:var(--navy);color:#fff;padding:22px 26px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;overflow:hidden}
+  .modal-head::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 120% at 90% 0%, rgba(48,176,209,.35), rgba(48,176,209,0) 70%);pointer-events:none}
+  .modal-head h4{font-size:18px;font-weight:600;position:relative}
+  .modal-head p{font-size:13px;color:rgba(255,255,255,.65);margin-top:3px;position:relative}
+  .modal-head button{position:relative;background:none;border:0;color:rgba(255,255,255,.7);font-size:12.5px;cursor:pointer;font-family:inherit;text-decoration:underline;white-space:nowrap;padding-top:4px}
+  .modal-head button:hover{color:#fff}
+  .cal-dates{display:flex;gap:8px;overflow-x:auto;padding:18px 26px 6px;flex:none}
+  .dchip{flex:none;border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer;text-align:center;background:#fff;font-family:inherit;transition:border .12s,background .12s}
+  .dchip .dw{font-size:10.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .dchip .dd{font-size:15px;font-weight:600;margin-top:2px}
+  .dchip.sel{border-color:var(--cyan);background:rgba(48,176,209,.08)}
+  .cal-note{font-size:12.5px;color:var(--slate);padding:8px 26px 0}
+  .cal-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 26px 18px;overflow-y:auto}
+  .slot{border:1.5px solid var(--line);border-radius:10px;padding:10px 6px;font-size:13.5px;font-weight:500;text-align:center;cursor:pointer;background:#fff;font-family:inherit;color:var(--ink);transition:border .12s,background .12s}
+  .slot.sel{border-color:var(--cyan);background:rgba(48,176,209,.1);font-weight:600}
+  .slot:disabled{opacity:.32;cursor:default}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 26px;border-top:1px solid var(--line);flex:none}
+  .modal-foot .pb{font-size:12px;color:#8A94A6}
+  @media(max-width:520px){.cal-slots{grid-template-columns:repeat(3,1fr)}}
+
+  /* confirmation */
+  .confirm{display:none}
+  .confirm.show{display:block}
+  .conf-icon{width:56px;height:56px;border-radius:999px;background:rgba(30,158,106,.12);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+  .confirm h3{font-size:24px;font-weight:600;letter-spacing:-.01em}
+  .confirm .ref{display:inline-block;margin-top:10px;font-size:13.5px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 16px}
+  .conf-list{margin:22px 0;display:grid;gap:12px}
+  .conf-item{display:flex;gap:12px;font-size:14.5px;color:var(--slate)}
+  .conf-item .tick{background:rgba(48,176,209,.16);margin-top:2px}
+  .nurse-cta{margin-top:26px;background:var(--navy);color:#fff;border-radius:16px;padding:26px 28px;position:relative;overflow:hidden}
+  .nurse-cta::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 90% at 85% 20%, rgba(48,176,209,.35), rgba(48,176,209,0) 70%);pointer-events:none}
+  .nurse-cta h4{font-size:17px;font-weight:600;position:relative}
+  .nurse-cta p{font-size:13.5px;color:rgba(255,255,255,.75);margin:8px 0 18px;position:relative}
+  .nurse-cta .btn{position:relative}
+
+  /* behind the scenes */
+  .bts{background:var(--navy);color:#fff;position:relative;overflow:hidden}
+  .bts::before{content:"";position:absolute;inset:0;background:radial-gradient(50% 70% at 85% 30%, rgba(48,176,209,.28), rgba(48,176,209,0) 70%);pointer-events:none}
+  .bts .wrap{position:relative}
+  .bts h2.sec{color:#fff}
+  .bts p.sub{color:rgba(255,255,255,.72)}
+  .bts-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .bts-card{background:rgba(255,255,255,.05);border:1px solid rgba(166,213,230,.18);border-radius:16px;padding:24px}
+  .bts-card h3{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--cyan-light)}
+  .bts-card p{font-size:13.5px;color:rgba(255,255,255,.68)}
+  .bts-cta{margin-top:36px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .bts-cta .hintline{font-size:13px;color:rgba(255,255,255,.55)}
+
+  /* footer */
+  footer{background:#fff;border-top:1px solid var(--line);padding:34px 0}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;font-size:13px;color:var(--slate)}
+  .foot .pby{font-weight:600;color:var(--ink)}
+
+  @media(max-width:860px){
+    .steps,.bts-grid{grid-template-columns:1fr}
+    .book-grid{grid-template-columns:1fr}
+    .summary{position:static}
+    .grid2{grid-template-columns:1fr}
+    .choice-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="ribbon"><strong>Demo environment</strong> — prepared by Express Pathology for Baseline+. No real bookings or payments are processed.</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="wordmark" href="#top">Baseline<span class="plus">+</span></a>
+    <nav class="nav-links">
+      <a class="nav-link" href="#how">How it works</a>
+      <a class="nav-link" href="https://devbookings.expresspathology.com.au/book/demo">Live booking demo</a>
+      <a class="btn btn-primary btn-sm" href="#book">Book a home collection</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <span class="eyebrow">Baseline+ At-Home Pathology</span>
+    <h1>Mobile blood collections,<br>at <span class="accent">your door</span>.</h1>
+    <p class="lede">A qualified nurse comes to you. Your Baseline+ bloods, collected at home or at work — no clinic, no queues, no waiting rooms.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#book">Book your home collection</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <div class="hero-points">
+      <span><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Qualified, experienced collectors</span>
+      <span><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Fasting and standard collections</span>
+      <span><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Results flow straight to your practitioner</span>
+    </div>
+  </div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2 class="sec">Three steps. Days, not weeks.</h2>
+    <p class="sub">Home collection fits around your day — book a window that suits you and your Baseline+ program takes care of the rest.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Check out, then pick your time</h3>
+        <p>Complete a two-minute checkout, then choose the exact date and time that suits you from live availability in your area.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>A nurse comes to you</h3>
+        <p>A qualified mobile collector arrives at your booked time, confirms your pathology request form and collects your bloods in minutes.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Results to your practitioner</h3>
+        <p>Samples go to an accredited laboratory the same day. Results are returned to your Baseline+ practitioner, ready for your review consult.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="book-sec" id="book">
+  <div class="wrap">
+    <div class="kicker">Book now</div>
+    <h2 class="sec">Book your home collection</h2>
+    <p class="sub">Takes about two minutes. Have your Baseline+ pathology request form handy if you have received it.</p>
+
+    <div class="book-grid">
+      <!-- form card -->
+      <div class="card" id="formCard">
+        <form id="bookingForm" novalidate>
+
+          <div class="fstep">
+            <div class="fstep-head"><span class="num">1</span><h3>Your visit</h3></div>
+            <div class="field">
+              <label for="postcode">Postcode</label>
+              <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 2230" required>
+            </div>
+            <div class="field">
+              <label>Visit type</label>
+              <div class="choice-row">
+                <label class="choice sel" id="chStd">
+                  <input type="radio" name="vtype" value="standard" checked>
+                  <div class="c-title">Standard collection</div>
+                  <div class="c-desc">No fasting required</div>
+                </label>
+                <label class="choice" id="chFast">
+                  <input type="radio" name="vtype" value="fasting">
+                  <div class="c-title">Fasting collection</div>
+                  <div class="c-desc">Morning window recommended</div>
+                </label>
+              </div>
+              <div class="note" id="fastNote">Fasting collections: nothing to eat or drink except water for 8–12 hours before your visit. We recommend booking a morning time.</div>
+            </div>
+            <div class="note show" style="background:var(--bg-soft);border-color:var(--line)">You will choose your exact visit time after payment, from live availability in your area.</div>
+          </div>
+
+          <div class="fstep">
+            <div class="fstep-head"><span class="num">2</span><h3>Your details</h3></div>
+            <div class="grid2">
+              <div class="field"><label for="fname">First name</label><input id="fname" required></div>
+              <div class="field"><label for="lname">Last name</label><input id="lname" required></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label for="email">Email</label><input id="email" type="email" required></div>
+              <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel" required></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date" required></div>
+              <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street" required></div>
+            </div>
+          </div>
+
+          <div class="fstep">
+            <div class="fstep-head"><span class="num">3</span><h3>Your pathology request form</h3></div>
+            <div class="drop" id="drop" tabindex="0">
+              <div class="d-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 13V3m0 0L6 7m4-4 4 4" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13v2.5A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5V13" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <p><strong>Upload your request form</strong> — click or drag a file here</p>
+              <p class="d-hint">PDF, JPG or PNG · a clear photo is fine</p>
+              <input type="file" id="pathfile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            </div>
+            <div class="file-chip" id="fileChip">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5 6 12 13.5 4" stroke="#1E9E6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="fc-name" id="fcName"></span>
+              <button type="button" id="fcRemove">Remove</button>
+            </div>
+            <label class="noform">
+              <input type="checkbox" id="noForm">
+              <span>I do not have my request form yet — Baseline+ will supply it to the collection team before my visit.</span>
+            </label>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- confirmation card (hidden until payment) -->
+      <div class="card confirm" id="confirmCard">
+        <div class="conf-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#1E9E6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Your home collection is booked</h3>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(48,176,209,.1);border:1px solid rgba(48,176,209,.35);border-radius:12px;padding:10px 18px;font-weight:600;font-size:15px" id="confTime">—</span>
+          <span class="ref" style="margin-top:0" id="bookingRef">Booking reference —</span>
+        </div>
+        <div class="conf-list">
+          <div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>A receipt and confirmation email are on their way, with a reminder 24 hours before your visit.</span></div>
+          <div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="confFormLine">Your pathology request form has been received and will travel with your booking.</span></div>
+          <div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#30B0D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="confNurseLine">A qualified nurse in your area has been matched to your booking.</span></div>
+        </div>
+        <div class="nurse-cta">
+          <h4>For the Baseline+ team</h4>
+          <p>The calendar your patient just used runs on Doorstep, Express Pathology's booking engine — real-time availability from the mobile nursing network. Open the sandbox to see the engine and its API activity directly.</p>
+          <a class="btn btn-primary btn-sm" id="timeLink" href="https://devbookings.expresspathology.com.au/book/demo">Open the live sandbox</a>
+        </div>
+      </div>
+
+      <!-- summary -->
+      <div class="card summary" id="summaryCard">
+        <h3>Your booking</h3>
+        <div class="srow"><span>Visit</span><span class="sv" id="sVisit">Standard collection</span></div>
+        <div class="srow"><span>Postcode</span><span class="sv" id="sPostcode">—</span></div>
+        <div class="srow"><span>Visit time</span><span class="sv">Chosen after checkout</span></div>
+        <div class="srow"><span>Home collection visit</span><span class="sv">$129.00</span></div>
+        <div class="srow total"><span>Total</span><span class="sv">$129.00</span></div>
+        <div class="incl">Pathology testing is included in your Baseline+ program. This fee covers your at-home nurse visit, incl. GST.</div>
+        <button class="btn btn-dark paybtn" id="payBtn" type="button">Confirm and pay $129.00</button>
+        <div class="secure">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="2.2" y="6" width="9.6" height="6" rx="1.4" stroke="#8A94A6" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#8A94A6" stroke-width="1.3"/></svg>
+          Secure card payment via Stripe
+        </div>
+        <div class="demo-tag">Demo checkout — no payment is taken. Pricing configurable per partner.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bts" id="behind">
+  <div class="wrap">
+    <div class="kicker" style="color:var(--cyan)">For the Baseline+ team</div>
+    <h2 class="sec">How this runs behind the scenes</h2>
+    <p class="sub">After checkout, patients book a real appointment time through Doorstep, Express Pathology's booking engine — the same infrastructure running home collections for telehealth and longevity partners across Australia.</p>
+    <div class="bts-grid">
+      <div class="bts-card">
+        <h3>Exact-time scheduling</h3>
+        <p>Patients choose a real appointment time from live nurse availability in their postcode — a network covering 1,100+ postcodes nationally.</p>
+      </div>
+      <div class="bts-card">
+        <h3>Automated confirmation</h3>
+        <p>The booking is matched to a qualified collector, confirmed instantly, and the patient receives an automated reminder 24 hours before the visit.</p>
+      </div>
+      <div class="bts-card">
+        <h3>Collection to results</h3>
+        <p>Request forms travel with the booking, samples are lodged with an accredited laboratory the same day, and results are returned to Baseline+.</p>
+      </div>
+    </div>
+    <div class="bts-cta">
+      <a class="btn btn-primary" href="https://devbookings.expresspathology.com.au/book/demo">Open the live booking demo</a>
+      <span class="hintline">Sandbox environment — the patient-facing booking engine with live availability.</span>
+    </div>
+  </div>
+</section>
+
+<!-- visit time calendar modal -->
+<div class="overlay" id="calOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h4>Choose your visit time</h4>
+        <p id="calSub">Live availability in your area</p>
+      </div>
+      <button type="button" id="calLater">Choose later</button>
+    </div>
+    <div class="cal-dates" id="calDates"></div>
+    <div class="cal-note" id="calNote"></div>
+    <div class="cal-slots" id="calSlots"></div>
+    <div class="modal-foot">
+      <span class="pb">Powered by Express Pathology</span>
+      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <span class="pby">Powered by Express Pathology</span>
+    <span>Demo page for Baseline+ · express@expresspathology.com.au · 02 9545 2940</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* visit type choices */
+  var chStd = $('chStd'), chFast = $('chFast'), fastNote = $('fastNote'), sVisit = $('sVisit');
+  function setType(fasting){
+    chStd.classList.toggle('sel', !fasting);
+    chFast.classList.toggle('sel', fasting);
+    fastNote.classList.toggle('show', fasting);
+    sVisit.textContent = fasting ? 'Fasting collection' : 'Standard collection';
+  }
+  chStd.addEventListener('click', function(){ setType(false); });
+  chFast.addEventListener('click', function(){ setType(true); });
+
+  /* summary live fields */
+  $('postcode').addEventListener('input', function(){
+    this.value = this.value.replace(/\D/g,'').slice(0,4);
+    $('sPostcode').textContent = this.value || '—';
+  });
+
+  /* upload */
+  var drop = $('drop'), fileInput = $('pathfile'), chip = $('fileChip'), fcName = $('fcName'), noForm = $('noForm');
+  drop.addEventListener('click', function(){ fileInput.click(); });
+  drop.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileInput.click(); } });
+  ['dragover','dragenter'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function(e){
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){ setFile(e.dataTransfer.files[0]); }
+  });
+  fileInput.addEventListener('change', function(){ if(this.files.length) setFile(this.files[0]); });
+  function setFile(f){
+    fcName.textContent = f.name;
+    chip.classList.add('show');
+    drop.style.display = 'none';
+    noForm.checked = false;
+  }
+  $('fcRemove').addEventListener('click', function(){
+    fileInput.value = '';
+    chip.classList.remove('show');
+    drop.style.display = '';
+  });
+  noForm.addEventListener('change', function(){
+    if(this.checked && chip.classList.contains('show')){ $('fcRemove').click(); }
+  });
+
+  /* pay */
+  $('payBtn').addEventListener('click', function(){
+    var required = ['postcode','fname','lname','email','mobile','dob','addr'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id==='postcode' && el.value.length!==4) || (id==='email' && el.value.indexOf('@')===-1);
+      el.classList.toggle('err', bad);
+      if(bad){ ok = false; if(!firstBad) firstBad = el; }
+    });
+    var hasForm = chip.classList.contains('show') || noForm.checked;
+    if(!hasForm){
+      ok = false;
+      drop.style.borderColor = '#E05C5C';
+      if(!firstBad) firstBad = drop;
+    } else {
+      drop.style.borderColor = '';
+    }
+    if(!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+
+    var btn = this;
+    btn.textContent = 'Processing…';
+    btn.disabled = true;
+    setTimeout(function(){
+      var ref = 'BP-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      $('bookingRef').textContent = 'Booking reference ' + ref;
+      var vtype = document.querySelector('input[name="vtype"]:checked').value;
+      $('timeLink').href = 'https://devbookings.expresspathology.com.au/book/demo'
+        + '?postcode=' + encodeURIComponent($('postcode').value)
+        + '&visit_type=' + encodeURIComponent(vtype)
+        + '&ref=' + encodeURIComponent(ref);
+      if(noForm.checked){
+        $('confFormLine').textContent = 'Our team will obtain your pathology request form from Baseline+ before your visit — nothing more for you to do.';
+      }
+      openCalendar(vtype);
+    }, 900);
+  });
+
+  /* ---------- visit time calendar ---------- */
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var SLOTS = ['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am','12:00 pm','12:30 pm','1:00 pm','1:30 pm','2:00 pm','2:30 pm','3:00 pm','3:30 pm','4:00 pm'];
+  var calDates = [], selDate = 0, selSlot = -1, calFasting = false;
+
+  function slotFree(dateObj, idx){
+    /* stable pseudo-availability so the demo feels like a live calendar */
+    var seed = dateObj.getDate() * 31 + idx * 17 + dateObj.getMonth() * 7;
+    return (seed % 10) > 2;
+  }
+  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+
+  function openCalendar(vtype){
+    calFasting = (vtype === 'fasting');
+    calDates = [];
+    var start = new Date(); start.setDate(start.getDate() + 1);
+    for (var i = 0; i < 10; i++){ var d = new Date(start); d.setDate(start.getDate() + i); calDates.push(d); }
+    selDate = 0; selSlot = -1;
+    var pc = $('postcode').value;
+    $('calSub').textContent = 'Live availability for postcode ' + pc + (calFasting ? ' · Fasting collection' : ' · Standard collection');
+    $('calNote').textContent = calFasting ? 'Fasting collection — a morning time is recommended. Nothing to eat or drink except water for 8–12 hours beforehand.' : '';
+    renderDates(); renderSlots();
+    $('calOverlay').classList.add('show');
+  }
+  function renderDates(){
+    var wrap = $('calDates'); wrap.innerHTML = '';
+    calDates.forEach(function(d, i){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'dchip' + (i === selDate ? ' sel' : '');
+      b.innerHTML = '<div class="dw">' + DAYS[d.getDay()] + '</div><div class="dd">' + d.getDate() + ' ' + MONTHS[d.getMonth()] + '</div>';
+      b.addEventListener('click', function(){ selDate = i; selSlot = -1; updateConfirm(); renderDates(); renderSlots(); });
+      wrap.appendChild(b);
+    });
+  }
+  function renderSlots(){
+    var wrap = $('calSlots'); wrap.innerHTML = '';
+    var d = calDates[selDate];
+    SLOTS.forEach(function(t, i){
+      if (calFasting && i > 9) return; /* fasting: morning times only */
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'slot' + (i === selSlot ? ' sel' : '');
+      b.textContent = t;
+      if (!slotFree(d, i)) { b.disabled = true; }
+      else { b.addEventListener('click', function(){ selSlot = i; updateConfirm(); renderSlots(); }); }
+      wrap.appendChild(b);
+    });
+  }
+  function updateConfirm(){
+    var c = $('calConfirm');
+    if (selSlot < 0){ c.disabled = true; c.textContent = 'Select a time'; }
+    else { c.disabled = false; c.textContent = 'Confirm ' + dateLabel(calDates[selDate]) + ', ' + SLOTS[selSlot]; }
+  }
+  $('calConfirm').addEventListener('click', function(){
+    finishBooking(dateLabel(calDates[selDate]) + ' · ' + SLOTS[selSlot]);
+  });
+  $('calLater').addEventListener('click', function(){
+    $('confNurseLine').textContent = 'Our team will be in touch shortly to arrange your visit time.';
+    finishBooking('Visit time to be arranged');
+  });
+  function finishBooking(timeText){
+    $('calOverlay').classList.remove('show');
+    $('confTime').textContent = timeText;
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+})();
+</script>
+</body>
+</html>
