@@ -3,304 +3,250 @@
 <head>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Como Wellness — Blood Test Ordering</title>
+<title>Como Wellness — Blood Tests</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root{--pine:#A4502E;--pine-deep:#2A1A12;--lime:#E8B89A;--lime-soft:rgba(164,80,46,.1);--ink:#241A14;--slate:#6B5F57;--line:#EBE2D9;--bg:#FFFFFF;--bg-soft:#F8F3EE;--err:#C25B5B}
+  :root{--navy:#38141F;--ink:#2A1E22;--slate:#6E6065;--green:#5A2232;--green-soft:rgba(90,34,50,.07);--line:#ECE2E2;--bg:#FFFFFF;--bg-soft:#FAF5F4;--ok:#1E9E6A;--err:#C25B5B}
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{font-family:"Figtree",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
-  h1,h2,h3,h4,.price,.st-price{font-family:"Instrument Sans",sans-serif}
-  .ribbon{background:var(--pine-deep);color:rgba(210,253,129,.85);font-size:12.5px;text-align:center;padding:7px 16px}
-  .ribbon strong{color:#fff;font-weight:600}
-  header.nav{position:sticky;top:0;z-index:50;background:rgba(12,27,23,.95);backdrop-filter:blur(10px)}
-  .nav-inner{max-width:1120px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-  .logo{text-decoration:none;line-height:1.15}
-  .logo .top{font-family:"Instrument Sans",sans-serif;font-weight:700;font-size:16px;letter-spacing:.12em;color:#fff}
-  .logo .sub{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(210,253,129,.8)}
-  .btn{display:inline-block;text-decoration:none;font-family:"Instrument Sans",sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:0;border-radius:999px;text-align:center;transition:background .12s}
-  .btn-lime{background:var(--lime);color:var(--pine-deep);padding:12px 26px}
-  .btn-lime:hover{background:#DEA67F}
-  .btn-dark{background:var(--pine);color:#fff;padding:12px 26px}
-  .btn-dark:hover{background:#8A4225}
-  .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);padding:12px 26px}
-  .btn-ghost:hover{border-color:#fff}
-  .btn-sm{font-size:13px;padding:9px 18px}
-  .hero{background:linear-gradient(160deg,#2A1A12 0%,#3C2518 60%,#6B3A20 130%);color:#fff}
-  .hero-inner{max-width:1120px;margin:0 auto;padding:72px 24px 66px}
-  .eyebrow{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--lime);margin-bottom:18px}
-  .hero h1{font-size:clamp(32px,4.8vw,54px);font-weight:700;line-height:1.08;letter-spacing:-.015em;max-width:720px;text-transform:uppercase}
-  .hero h1 .accent{color:var(--lime)}
-  .hero p{margin-top:18px;font-size:16.5px;color:rgba(255,255,255,.75);max-width:560px}
-  .hero-ctas{margin-top:32px;display:flex;flex-wrap:wrap;gap:13px}
-  .stats{background:rgba(255,255,255,.04);border-top:1px solid rgba(210,253,129,.15)}
-  .stats-inner{max-width:1120px;margin:0 auto;padding:16px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center}
-  .stat .n{font-family:"Instrument Sans",sans-serif;font-weight:700;color:var(--lime);font-size:15px}
-  .stat .l{font-size:12.5px;color:rgba(255,255,255,.6)}
-  section{padding:58px 0}
+  body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;line-height:1.15}
+  .logo .badge{width:34px;height:34px;flex:none;border-radius:999px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:.02em}
+  .logo .wm .top{font-weight:700;font-size:15px;color:var(--navy)}
+  .logo .wm .sub{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.18em;color:var(--slate);text-transform:uppercase}
+  .btn{display:inline-block;text-decoration:none;font-family:inherit;font-weight:600;font-size:14.5px;cursor:pointer;border:0;border-radius:8px;text-align:center;transition:background .12s}
+  .btn-dark{background:var(--navy);color:#fff;padding:12px 24px}
+  .btn-dark:hover{background:#4F1C28}
+  .btn-green{background:var(--green);color:#fff;padding:12px 24px}
+  .btn-green:hover{background:#6E2B3E}
+  .btn-sm{font-size:13px;padding:9px 16px}
+  .hero{border-bottom:1px solid var(--line)}
+  .hero-inner{max-width:1120px;margin:0 auto;padding:60px 24px 56px}
+  .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.75px;text-transform:uppercase;color:var(--slate);display:block;margin-bottom:14px}
+  .hero h1{font-size:clamp(30px,4.6vw,50px);font-weight:700;line-height:1.08;letter-spacing:-.02em;max-width:680px;color:var(--navy)}
+  .hero h1 .accent{color:var(--green)}
+  .tlbar{height:5px;width:220px;border-radius:999px;margin:22px 0 0;background:linear-gradient(90deg,#D64545 0%,#E8A33D 38%,#0A7F49 72%,#0A7F49 100%)}
+  .hero p{margin-top:18px;font-size:16.5px;color:var(--slate);max-width:560px}
+  section{padding:56px 0}
   .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-  .kicker{font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#A4502E;margin-bottom:10px}
-  h2.sec{font-size:clamp(25px,3.4vw,36px);font-weight:700;letter-spacing:-.01em;color:var(--pine-deep);text-transform:uppercase}
-  p.sub{margin-top:10px;color:var(--slate);font-size:15.5px;max-width:620px}
-  .steps{margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  .step{background:var(--bg-soft);border:1px solid var(--line);border-radius:16px;padding:22px}
-  .step .num{font-family:"Instrument Sans",sans-serif;width:30px;height:30px;border-radius:999px;background:var(--pine);color:var(--lime);font-weight:600;font-size:13.5px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-  .step h3{font-size:15.5px;font-weight:600;color:var(--pine-deep)}
-  .step p{font-size:13px;color:var(--slate);margin-top:5px}
-  .panels{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
-  .panel.feature{border-color:var(--pine);box-shadow:0 10px 32px rgba(18,40,35,.1)}
-  .panel.sel{border-color:var(--pine);box-shadow:0 0 0 2px var(--pine)}
-  .ptag{align-self:flex-start;font-family:"Instrument Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pine);background:var(--lime-soft);border:1px solid rgba(18,40,35,.12);border-radius:999px;padding:3px 11px;margin-bottom:10px}
-  .panel.feature .ptag{background:var(--pine);color:var(--lime);border-color:var(--pine)}
-  .panel h3{font-size:19px;font-weight:700;color:var(--pine-deep)}
-  .price{font-size:22px;font-weight:700;margin:8px 0 2px;color:var(--pine-deep)}
-  .price span{font-size:12px;font-weight:500;color:var(--slate)}
-  .count{font-size:12.5px;color:var(--slate);margin-bottom:10px}
-  .mtoggle{align-self:flex-start;background:none;border:0;padding:0;margin-bottom:8px;font-family:inherit;font-size:12.5px;font-weight:600;color:#8A4225;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .kicker{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.75px;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:10px}
+  h2.sec{font-size:clamp(24px,3vw,36px);font-weight:700;letter-spacing:-.015em;color:var(--navy)}
+  p.sub{margin-top:10px;color:var(--slate);font-size:15.5px;max-width:600px}
+  .panels{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+  .panel > .btn{margin-top:auto}
+  .panel{background:#fff;border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;padding:24px;display:flex;flex-direction:column;transition:box-shadow .12s,border-color .12s}
+  .panel.sel{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .pnum{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;font-weight:600;color:var(--green);margin-bottom:8px}
+  .panel h3{font-size:18px;font-weight:700;line-height:1.25;color:var(--navy)}
+  .panel .price{font-size:23px;font-weight:700;margin:8px 0 2px;color:var(--navy)}
+  .panel .price span{font-size:12px;font-weight:500;color:var(--slate)}
+  .panel .count{font-size:12.5px;color:var(--slate);margin-bottom:12px}
+  .mtoggle{background:none;border:0;cursor:pointer;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--green);text-align:left;padding:0;margin-bottom:10px}
+  .mtoggle:hover{text-decoration:underline}
   .mlist{list-style:none;margin:0 0 16px;flex:1}
   .mlist.hidden{display:none}
-  .mlist li{font-size:12.5px;color:var(--slate);padding:5px 0 5px 16px;border-bottom:1px dashed var(--line);position:relative}
+  .mlist li{font-size:13px;color:var(--slate);padding:4px 0 4px 18px;position:relative;border-bottom:1px dashed var(--line)}
   .mlist li:last-child{border-bottom:0}
-  .mlist li::before{content:"";position:absolute;left:1px;top:11px;width:5px;height:5px;border-radius:999px;background:#C08A5E}
-  .mlist li strong{color:var(--ink);font-weight:600}
-  .panel .btn{margin-top:auto}
-  .pnote{margin-top:16px;font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:12px;padding:12px 16px}
+  .mlist.cols{column-count:2;column-gap:20px}
+  .mlist.cols li{break-inside:avoid}
+  @media(max-width:480px){.mlist.cols{column-count:1}}
+  .mlist li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--green);opacity:.65}
+  .mnote{font-size:11.5px;color:#8A94A6;margin:-8px 0 14px}
   .book-sec{background:var(--bg-soft);border-top:1px solid var(--line)}
-  .book-grid{margin-top:30px;display:grid;grid-template-columns:1fr 350px;gap:26px;align-items:start}
-  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px}
+  .book-grid{margin-top:34px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px}
   .fstep{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
   .fstep:last-child{border:0;margin:0;padding:0}
-  .fstep-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
-  .fstep-head .num{width:26px;height:26px;flex:none;border-radius:999px;background:var(--pine);color:var(--lime);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:"Instrument Sans",sans-serif}
-  .fstep-head h3{font-size:16px;font-weight:600;color:var(--pine-deep)}
-  .no-test{font-size:14px;color:var(--slate);background:var(--bg-soft);border:1px dashed var(--line);border-radius:10px;padding:16px 18px}
-  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--lime-soft);border:1px solid rgba(18,40,35,.25);border-radius:10px;padding:13px 16px}
+  .fstep-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .fstep-head .num{font-family:"IBM Plex Mono",ui-monospace,monospace;flex:none;color:var(--green);font-weight:600;font-size:13px}
+  .fstep-head h3{font-size:16.5px;font-weight:700;color:var(--navy)}
+  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--green-soft);border:1px solid rgba(10,127,73,.35);border-radius:10px;padding:13px 17px}
   .selected-test .st-name{font-weight:600;font-size:14.5px}
-  .selected-test .st-sub{font-size:12px;color:var(--slate)}
-  .selected-test .st-price{font-weight:700;font-size:16px}
-  .selected-test button{background:none;border:0;font-family:inherit;font-size:12px;font-weight:600;color:var(--pine);text-decoration:underline;cursor:pointer}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-  .field{margin-bottom:13px}
-  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
-  .field input,.field select{width:100%;font-family:inherit;font-size:14.5px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;outline:none;background:#fff;color:var(--ink)}
-  .field input:focus,.field select:focus{border-color:var(--pine)}
-  .field input.err{border-color:var(--err)}
+  .selected-test .st-price{font-weight:700;white-space:nowrap}
+  .selected-test button{background:none;border:0;cursor:pointer;color:var(--slate);font-size:12.5px;font-family:inherit;text-decoration:underline}
+  .no-test{font-size:14px;color:var(--slate)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--navy)}
+  .field input,.field select{width:100%;font-family:inherit;font-size:14.5px;padding:11px 14px;border:1.5px solid var(--line);border-radius:8px;outline:none;color:var(--ink);background:#fff}
+  .field input:focus,.field select:focus{border-color:var(--green)}
+  .field input.err,.field select.err{border-color:var(--err)}
   .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .choice{position:relative;border:1px solid var(--line);border-radius:10px;padding:14px 15px;cursor:pointer;background:#fff}
+  .choice{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;background:#fff}
   .choice input{position:absolute;opacity:0}
-  .choice .c-title{font-size:14px;font-weight:600;padding-right:70px}
-  .choice .c-desc{font-size:12px;color:var(--slate);margin-top:2px}
-  .choice .c-fee{position:absolute;top:11px;right:13px;font-size:11px;font-weight:700;color:var(--pine);background:var(--lime-soft);border-radius:999px;padding:3px 10px}
-  .choice.sel{border-color:var(--pine);background:var(--lime-soft)}
-  .summary{position:sticky;top:76px}
-  .summary h3{font-size:16px;font-weight:600;margin-bottom:14px;color:var(--pine-deep)}
+  .choice .c-title{font-size:14px;font-weight:600;padding-right:76px;color:var(--navy)}
+  .choice .c-desc{font-size:12.5px;color:var(--slate);margin-top:3px}
+  .choice .c-fee{position:absolute;top:12px;right:14px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--green);background:var(--green-soft);border-radius:999px;padding:2px 10px}
+  .choice.sel{border-color:var(--green);background:var(--green-soft)}
+  .summary{position:sticky;top:84px}
+  .summary h3{font-size:16px;font-weight:700;margin-bottom:14px;color:var(--navy)}
   .srow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;color:var(--slate);gap:10px}
   .srow .sv{color:var(--ink);font-weight:500;text-align:right}
-  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:13px;font-size:15px;color:var(--ink)}
-  .srow.total .sv{font-weight:700;font-size:19px}
-  .incl{font-size:12px;color:var(--slate);background:var(--lime-soft);border-radius:9px;padding:10px 13px;margin:11px 0 15px}
-  .paybtn{width:100%;font-size:14px;padding:15px 20px;background:var(--pine);color:#fff}
-  .paybtn:hover{background:#8A4225}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:15.5px}
+  .srow.total .sv{font-weight:700;font-size:19px;color:var(--navy)}
+  .incl{font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:8px;padding:10px 14px;margin:12px 0 16px}
+  .paybtn{width:100%;font-size:15px;padding:15px 20px}
   .paybtn:disabled{opacity:.55;cursor:default}
-  .secure{text-align:center;font-size:11px;color:#9AA49C;margin-top:9px}
-  .demo-tag{font-size:11px;color:#9AA49C;text-align:center;margin-top:7px}
+  .secure{text-align:center;font-size:12px;color:#8A94A6;margin-top:10px}
+  .err-box{display:none;margin-top:12px;background:#FDECEC;color:var(--err);border:1px solid #F3C2BE;border-radius:10px;padding:10px 13px;font-size:13px}
   .confirm{display:none}
   .confirm.show{display:block}
-  .conf-icon{width:50px;height:50px;border-radius:999px;background:var(--lime-soft);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-  .confirm h3{font-size:24px;font-weight:700;color:var(--pine-deep);text-transform:uppercase}
-  .ref{display:inline-block;font-size:12.5px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 15px}
-  .conf-chip{display:inline-flex;align-items:center;background:var(--lime-soft);border:1px solid rgba(18,40,35,.25);border-radius:999px;padding:9px 17px;font-weight:600;font-size:14px}
-  .conf-list{margin:18px 0;display:grid;gap:10px}
-  .conf-item{display:flex;gap:10px;font-size:14px;color:var(--slate)}
-  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:999px;background:var(--lime-soft);display:inline-flex;align-items:center;justify-content:center}
-  .partner{margin-top:24px;background:var(--pine-deep);color:#fff;border-radius:14px;padding:24px 26px}
-  .partner h4{font-family:"Instrument Sans",sans-serif;font-size:17px;color:var(--lime);font-weight:600}
-  .partner p{font-size:13px;color:rgba(255,255,255,.75);margin:9px 0 16px}
-  .overlay{position:fixed;inset:0;background:rgba(12,27,23,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
-  .overlay.show{display:flex}
-  .modal{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(12,27,23,.45)}
-  .modal-head{background:var(--pine-deep);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;gap:16px}
-  .modal-head h4{font-size:19px;font-weight:600;text-transform:uppercase}
-  .modal-head p{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px}
-  .modal-head button{background:none;border:0;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;white-space:nowrap}
-  .cal-dates{display:flex;gap:8px;overflow-x:auto;padding:16px 24px 6px;flex:none}
-  .dchip{flex:none;border:1px solid var(--line);border-radius:10px;padding:7px 13px;cursor:pointer;text-align:center;background:#fff;font-family:inherit}
-  .dchip .dw{font-size:10px;color:var(--slate);font-weight:600;text-transform:uppercase}
-  .dchip .dd{font-size:14px;font-weight:600;margin-top:1px}
-  .dchip.sel{border-color:var(--pine);background:var(--lime-soft)}
-  .cal-note{font-size:12px;color:var(--slate);padding:5px 24px 0}
-  .cal-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:13px 24px 16px;overflow-y:auto}
-  .slot{border:1px solid var(--line);border-radius:9px;padding:9px 6px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;background:#fff;font-family:inherit;color:var(--ink)}
-  .slot.sel{border-color:var(--pine);background:var(--lime-soft);font-weight:600}
-  .slot:disabled{opacity:.3;cursor:default}
-  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-top:1px solid var(--line);flex:none}
-  .modal-foot .pb{font-size:11px;color:#9AA49C}
-  .addon-card{margin-top:26px;background:#fff;border:1px dashed var(--pine);border-radius:16px;padding:24px 26px}
-  .addon-card h3{font-family:"Instrument Sans",sans-serif;font-size:19px;font-weight:700;color:var(--pine-deep)}
-  .addon-card .count{font-size:12.5px;color:var(--slate);margin:4px 0 8px}
-  .alist{display:grid;grid-template-columns:1fr 1fr;gap:0 36px}
-  @media(max-width:700px){.alist{grid-template-columns:1fr}}
-  .arow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:13.5px;cursor:pointer}
-  .arow input{accent-color:var(--pine);width:16px;height:16px;flex:none;cursor:pointer}
-  .arow span:first-of-type{flex:1}
-  .arow .ap{margin-left:auto;font-weight:600;white-space:nowrap}
-  footer{border-top:1px solid var(--line);padding:26px 0;background:#fff}
-  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;color:var(--slate)}
+  .conf-icon{width:52px;height:52px;border-radius:999px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+  .confirm h3{font-size:22px;font-weight:700;color:var(--navy)}
+  .ref{display:inline-block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 16px}
+  .conf-chip{display:inline-flex;align-items:center;background:var(--green-soft);border:1px solid rgba(10,127,73,.35);border-radius:10px;padding:10px 18px;font-weight:600;font-size:14.5px}
+  .conf-list{margin:20px 0;display:grid;gap:11px}
+  .conf-item{display:flex;gap:11px;font-size:14px;color:var(--slate)}
+  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:50%;background:rgba(10,127,73,.18);display:inline-flex;align-items:center;justify-content:center}
+  footer{border-top:1px solid var(--line);padding:28px 0}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12.5px;color:var(--slate)}
   .foot .pby{font-weight:600;color:var(--ink)}
-  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
-  @media(max-width:960px){.panels{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
-  @media(max-width:700px){.book-grid{grid-template-columns:1fr}.summary{position:static}.grid2,.choice-row{grid-template-columns:1fr}.cal-slots{grid-template-columns:repeat(3,1fr)}.stats-inner{grid-template-columns:1fr;gap:8px}.steps{grid-template-columns:1fr}}
+  @media(max-width:900px){.panels{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){
+    .panels{grid-template-columns:1fr}
+    .book-grid{grid-template-columns:1fr}
+    .summary{position:static}
+    .grid2,.choice-row{grid-template-columns:1fr}
+    .hero-inner{padding:44px 20px 44px}
+    section{padding:44px 0}
+    .card{padding:22px 18px}
+  }
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none !important}}
 </style>
 </head>
 <body>
 
-<div class="ribbon"><strong>Preview</strong> — Como Wellness ordering page. Final panels and pricing are being confirmed; orders open shortly.</div>
-
 <header class="nav">
   <div class="nav-inner">
-    <a class="logo" href="#top">
-      <span class="top">COMO WELLNESS</span>
-      <span class="sub">Blood testing powered by Express Pathology</span>
+    <a class="logo" href="#top" aria-label="Como Wellness">
+      <span class="wm">
+        <span class="top" style="letter-spacing:.14em">COMO WELLNESS</span><br>
+        <span class="sub">Blood testing powered by Express Pathology</span>
+      </span>
     </a>
-    <a class="btn btn-lime btn-sm" href="#panels">Order your bloods</a>
+    <a class="btn btn-green btn-sm" href="#tests">Order a blood test</a>
   </div>
 </header>
 
 <div class="hero" id="top">
   <div class="hero-inner">
-    <span class="eyebrow">Como Wellness · Grounded in science</span>
-    <h1>The blood work behind<br>your <span class="accent">protocol.</span></h1>
-    <p>Your Como panel, ordered in two minutes. A qualified nurse collects at your home, workplace or accommodation — or walk into any of 2,000+ collection centres. Results reviewed, then straight to your Como doctor.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-lime" href="#panels">Order your bloods</a>
-      <a class="btn btn-ghost" href="#how">How it works</a>
-    </div>
-  </div>
-  <div class="stats">
-    <div class="stats-inner">
-      <div class="stat"><div class="n">60+ mobile collectors</div><div class="l">Nationwide network</div></div>
-      <div class="stat"><div class="n">At your door</div><div class="l">Home, work or accommodation</div></div>
-      <div class="stat"><div class="n">Reviewed</div><div class="l">Every result checked before release</div></div>
-    </div>
+    <span class="eyebrow" style="letter-spacing:2.5px">Grounded in science · Guided by nature</span>
+    <h1 style="text-transform:uppercase;letter-spacing:.07em;font-weight:600">The blood work<br>behind your <span class="accent">protocol.</span></h1>
+    
+    <p>Choose your panel, then have your bloods collected at home, work or your accommodation by a qualified nurse — or walk into one of 2,000+ collection centres nationally. Results are reviewed, then go straight to your Como doctor.</p>
   </div>
 </div>
 
-<section id="how">
-  <div class="wrap">
-    <div class="kicker">Clear path</div>
-    <h2 class="sec">Four steps. Fully handled.</h2>
-    <div class="steps">
-      <div class="step"><div class="num">1</div><h3>Order online</h3><p>Pick your panel, enter your details once. Your pathology request is issued electronically.</p></div>
-      <div class="step"><div class="num">2</div><h3>A nurse comes to you</h3><p>Home, work or accommodation, at a time you choose — early-morning slots for fasting panels.</p></div>
-      <div class="step"><div class="num">3</div><h3>Results reviewed</h3><p>Samples go to an accredited lab the same day. Every result is checked before release.</p></div>
-      <div class="step"><div class="num">4</div><h3>Your protocol, adjusted</h3><p>Data lands with your Como Wellness doctor — proof your protocol is working, and what to change.</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="panels" style="padding-top:0">
+<section id="tests">
   <div class="wrap">
     <div class="kicker">Choose your panel</div>
-    <h2 class="sec">Como Wellness panels</h2>
-    <p class="sub">Three tiers built around Como protocols — final panel composition and pricing being confirmed with the Como clinical team. Every marker shown up front.</p>
+    <h2 class="sec">Blood test panels</h2>
+    <p class="sub">Every marker is shown up front — the same panel at the start of your protocol and at every review, so your results compare like for like.</p>
     <div class="panels">
+
       <div class="panel" id="pan-baseline">
-        <span class="ptag">Panel 01</span>
+        <div class="pnum">PANEL 01</div>
         <h3>Como Baseline</h3>
-        <div class="price">$TBC <span>incl. GST</span></div>
+        <div class="price" data-price="baseline">$TBC <span>incl. GST</span></div>
         <div class="count">The core screen before any protocol</div>
-        <button type="button" class="mtoggle" data-list="ml-1">Hide markers</button>
-        <ul class="mlist" id="ml-1">
-          <li><strong>Blood health</strong> — Full Blood Count</li>
-          <li><strong>Organ function</strong> — kidney, liver and electrolytes</li>
-          <li><strong>Metabolic</strong> — fasting glucose, HbA1c, full lipid profile</li>
-          <li><strong>Inflammation</strong> — hs-CRP</li>
-          <li><strong>Thyroid</strong> — TSH</li>
-          <li><strong>Micronutrients</strong> — iron studies, vitamin D</li>
+        <button type="button" class="mtoggle" data-list="ml-baseline">Hide markers</button>
+        <ul class="mlist" id="ml-baseline">
+          <li>Full Blood Count</li>
+          <li>Kidney, liver &amp; electrolytes</li>
+          <li>Fasting glucose, HbA1c</li>
+          <li>Full lipid profile</li>
+          <li>CRP (high sensitivity)</li>
+          <li>TSH</li>
+          <li>Iron studies, Vitamin D</li>
         </ul>
         <button class="btn btn-dark btn-sm" type="button" data-pick="baseline">Select Baseline</button>
       </div>
-      <div class="panel feature" id="pan-protocol">
-        <span class="ptag">Panel 02 — peptide protocols</span>
+
+      <div class="panel" id="pan-protocol">
+        <div class="pnum">PANEL 02 — PEPTIDE PROTOCOLS</div>
         <h3>Peptide Protocol Panel</h3>
-        <div class="price">$TBC <span>incl. GST</span></div>
+        <div class="price" data-price="protocol">$TBC <span>incl. GST</span></div>
         <div class="count">Baseline plus the markers your doctor monitors on protocol</div>
-        <button type="button" class="mtoggle" data-list="ml-2">Hide markers</button>
-        <ul class="mlist" id="ml-2">
-          <li><strong>Everything in Como Baseline</strong></li>
-          <li><strong>Pancreas</strong> — lipase, amylase</li>
-          <li><strong>Growth</strong> — IGF-1</li>
-          <li><strong>Metabolic depth</strong> — fasting insulin</li>
-          <li><strong>Hormones</strong> — testosterone + SHBG, oestradiol (E2)</li>
-          <li><strong>Thyroid</strong> — free T3, free T4</li>
+        <button type="button" class="mtoggle" data-list="ml-protocol">Hide markers</button>
+        <ul class="mlist" id="ml-protocol">
+          <li>Everything in Como Baseline</li>
+          <li>Lipase, Amylase</li>
+          <li>IGF-1</li>
+          <li>Fasting insulin</li>
+          <li>Testosterone + SHBG, Oestradiol (E2)</li>
+          <li>Free T3, Free T4</li>
         </ul>
-        <button class="btn btn-lime btn-sm" type="button" data-pick="protocol">Select Protocol Panel</button>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="protocol">Select Protocol Panel</button>
       </div>
+
       <div class="panel" id="pan-complete">
-        <span class="ptag">Panel 03</span>
+        <div class="pnum">PANEL 03</div>
         <h3>Como Complete</h3>
-        <div class="price">$TBC <span>incl. GST</span></div>
+        <div class="price" data-price="complete">$TBC <span>incl. GST</span></div>
         <div class="count">The full metabolic, hormone and recovery screen</div>
-        <button type="button" class="mtoggle" data-list="ml-3">Hide markers</button>
-        <ul class="mlist" id="ml-3">
-          <li><strong>Everything in the Peptide Protocol Panel</strong></li>
-          <li><strong>Adrenal</strong> — morning cortisol, DHEA-S</li>
-          <li><strong>Pituitary</strong> — LH, FSH, prolactin</li>
-          <li><strong>Methylation</strong> — vitamin B12, folate, homocysteine</li>
-          <li><strong>Minerals</strong> — magnesium, zinc</li>
-          <li><strong>Inflammation and muscle</strong> — LDH, creatine kinase</li>
+        <button type="button" class="mtoggle" data-list="ml-complete">Hide markers</button>
+        <ul class="mlist" id="ml-complete">
+          <li>Everything in the Peptide Protocol Panel</li>
+          <li>Morning cortisol, DHEA-S</li>
+          <li>LH, FSH, Prolactin</li>
+          <li>Vitamin B12, Folate, Homocysteine</li>
+          <li>Magnesium, Zinc</li>
+          <li>LDH, Creatine kinase</li>
         </ul>
         <button class="btn btn-dark btn-sm" type="button" data-pick="complete">Select Complete</button>
       </div>
-    </div>
 
-    <div class="pnote">Panels are fixed per protocol, so results compare like for like at every review — proof the protocol is working. Collected on Express Pathology request forms, fully private, no referral needed.</div>
+    </div>
   </div>
 </section>
 
-<section class="book-sec" id="order">
+<section class="book-sec" id="checkout">
   <div class="wrap">
     <div class="kicker">Checkout</div>
     <h2 class="sec">Complete your order</h2>
     <div class="book-grid">
       <div class="card" id="formCard">
         <div class="fstep">
-          <div class="fstep-head"><span class="num">1</span><h3>Your panel</h3></div>
+          <div class="fstep-head"><span class="num">STEP 01</span><h3>Your test</h3></div>
           <div class="no-test" id="noTest">Select a panel above to begin.</div>
           <div class="selected-test" id="selTest" style="display:none">
-            <div><div class="st-name" id="stName"></div><div class="st-sub" id="stSub"></div></div>
+            <div><div class="st-name" id="stName"></div></div>
             <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
           </div>
-          <div id="selAddons"></div>
         </div>
         <div class="fstep">
-          <div class="fstep-head"><span class="num">2</span><h3>How would you like your bloods collected?</h3></div>
+          <div class="fstep-head"><span class="num">STEP 02</span><h3>How would you like your bloods collected?</h3></div>
           <div class="choice-row">
             <label class="choice sel" id="chHome">
               <input type="radio" name="cmode" value="home" checked>
               <div class="c-title">At-home nurse visit</div>
-              <div class="c-desc">Home, office or gym — choose your exact time after checkout</div>
-              <span class="c-fee">+ $TBC</span>
+              <div class="c-desc">A qualified nurse comes to you — our team confirms the time within 4 hours</div>
+              <span class="c-fee">+ $75</span>
             </label>
             <label class="choice" id="chClinic">
               <input type="radio" name="cmode" value="clinic">
-              <div class="c-title">Collection centre</div>
-              <div class="c-desc">Walk into any of 2,000+ centres — no appointment needed</div>
+              <div class="c-title">In-clinic collection</div>
+              <div class="c-desc">Walk into one of 2,000+ collection centres — no appointment needed</div>
               <span class="c-fee">Included</span>
             </label>
           </div>
-          <div class="field" style="margin-top:14px">
-            <label for="postcode">Postcode</label>
-            <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 2000">
+          <div id="prefWrap" style="margin-top:14px">
+            <div class="grid2">
+              <div class="field"><label for="prefDate">Preferred visit date</label><input id="prefDate" type="date"></div>
+              <div class="field"><label for="prefTime">Preferred time</label>
+                <select id="prefTime"><option>Morning</option><option>Afternoon</option><option>No preference</option></select>
+              </div>
+            </div>
+            <div class="mnote" style="margin:0">Our team contacts you within 4 hours to confirm the exact visit time.</div>
           </div>
         </div>
         <div class="fstep">
-          <div class="fstep-head"><span class="num">3</span><h3>Your details</h3></div>
+          <div class="fstep-head"><span class="num">STEP 03</span><h3>Your details</h3></div>
           <div class="grid2">
             <div class="field"><label for="fname">First name</label><input id="fname"></div>
             <div class="field"><label for="lname">Last name</label><input id="lname"></div>
@@ -311,63 +257,52 @@
           </div>
           <div class="grid2">
             <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
-            <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+            <div class="field"><label for="sex">Sex (for reference ranges)</label>
+              <select id="sex"><option value="">Select</option><option>Female</option><option>Male</option></select>
+            </div>
           </div>
+          <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+          <div class="grid2">
+            <div class="field"><label for="suburb">Suburb</label><input id="suburb"></div>
+            <div class="field"><label for="state">State</label>
+              <select id="state"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+            </div>
+          </div>
+          <div class="field" style="max-width:48%"><label for="postcode">Postcode</label><input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 2000"></div>
         </div>
       </div>
 
       <div class="card confirm" id="confirmCard">
-        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#A4502E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#5A2232" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h3 id="confHead">Your order is confirmed</h3>
         <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-          <span class="conf-chip" id="confTime">—</span>
+          <span class="conf-chip" id="confTime">Paid</span>
           <span class="ref" id="bookingRef">Order reference —</span>
         </div>
         <div class="conf-list" id="confList"></div>
-        <div class="partner">
-          <h4>For the Como Wellness team</h4>
-          <p>This flow runs on Doorstep, Express Pathology's booking engine. Pathology is ordered on Express forms — fully private, no Medicare involvement — with every result reviewed before release and reports returned to your doctors. Panels are fixed per program so results are comparable at every retest. Open the sandbox to see the engine directly.</p>
-          <a class="btn btn-lime btn-sm" href="https://devbookings.expresspathology.com.au/book/demo">Open the live booking sandbox</a>
-        </div>
+        <button class="btn btn-dark btn-sm" type="button" onclick="location.href='/como'">Place another order</button>
       </div>
 
       <div class="card summary" id="summaryCard">
         <h3>Your order</h3>
         <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
         <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
-        <div id="sAddonRows"></div>
         <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
-        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$TBC</span></div>
+        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
         <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
-        <div class="incl">Your pathology request form is issued electronically and travels with your order — nothing to print. Results are reviewed and returned to your Como Wellness doctor.</div>
-        <button class="btn paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
+        <div class="incl" id="sNote">Your pathology request form is issued electronically and emailed to you with your confirmation — nothing to print for home visits. Results are reviewed and sent to your Como Wellness doctor.</div>
+        <button class="btn btn-green paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
         <div class="secure">Secure card payment via Stripe · Powered by Express Pathology</div>
-        <div class="demo-tag">Preview checkout — ordering opens when panels and pricing are finalised.</div>
+        <div class="err-box" id="orderErr"></div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="overlay" id="calOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div><h4>Choose your visit time</h4><p id="calSub">Live availability in your area</p></div>
-      <button type="button" id="calLater">Choose later</button>
-    </div>
-    <div class="cal-dates" id="calDates"></div>
-    <div class="cal-note">Fasting and hormone panels collect best in the morning. Water is fine.</div>
-    <div class="cal-slots" id="calSlots"></div>
-    <div class="modal-foot">
-      <span class="pb">Powered by Express Pathology</span>
-      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
-    </div>
-  </div>
-</div>
-
 <footer>
   <div class="foot">
-    <span class="pby">Blood testing powered by Express Pathology</span>
-    <span>Ordering page for Como Wellness (preview) · express@expresspathology.com.au · 02 9545 2940</span>
+    <span class="pby">Powered by Express Pathology</span>
+    <span>Blood test ordering for Como Wellness · express@expresspathology.com.au · 02 9545 2940</span>
   </div>
 </footer>
 
@@ -375,81 +310,102 @@
 (function(){
   var $ = function(id){ return document.getElementById(id); };
   var PANELS = {
-    baseline: {n:'Como Baseline', p:null, sub:'Core screen'},
-    protocol: {n:'Peptide Protocol Panel', p:null, sub:'Baseline + protocol monitoring'},
-    complete: {n:'Como Complete', p:null, sub:'Full metabolic, hormone and recovery screen'}
+    baseline: {n:'Como Baseline',          p:null},
+    protocol: {n:'Peptide Protocol Panel', p:null},
+    complete: {n:'Como Complete',          p:null}
   };
-  var ADDONS = {};
-  var HOME_FEE = null; /* TBC */
+  var HOME_FEE = 75;
   var selPanel = null;
-  function chosenAddons(){
-    return Array.prototype.slice.call(document.querySelectorAll('.achk:checked')).map(function(c){ return c.dataset.key; });
+
+  /* paid return from Stripe */
+  var q = new URLSearchParams(location.search);
+  if (q.get('paid') === '1'){
+    var home = q.get('home') === '1';
+    $('bookingRef').textContent = 'Order reference ' + (q.get('ref') || '');
+    $('confTime').textContent = home ? 'At-home nurse visit' : 'In-clinic collection';
+    function confItem(text){
+      return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#5A2232" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
+    }
+    $('confList').innerHTML = home
+      ? confItem('Payment received. A confirmation email with your pathology request form is on its way.') +
+        confItem('Our team will contact you within 4 hours to confirm the exact time of your visit — your nurse brings everything, nothing to print.') +
+        confItem('Results are reviewed and sent to your Como Wellness doctor.')
+      : confItem('Payment received. A confirmation email with your pathology request form is on its way.') +
+        confItem('Print your request form and bring it with photo ID to any partner collection centre — no appointment needed.') +
+        confItem('Results are reviewed and sent to your Como Wellness doctor.');
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    document.addEventListener('DOMContentLoaded', function(){ $('confirmCard').scrollIntoView({behavior:'smooth', block:'center'}); });
   }
 
   document.querySelectorAll('.mtoggle').forEach(function(btn){
     btn.addEventListener('click', function(){
       var list = $(btn.dataset.list);
       var hidden = list.classList.toggle('hidden');
-      btn.textContent = hidden ? 'Show markers' : 'Hide markers';
+      btn.textContent = hidden ? (btn.dataset.show || 'Show markers') : (btn.dataset.hide || 'Hide markers');
+      if (btn.dataset.swap){ $(btn.dataset.swap).classList.toggle('hidden', !hidden); }
     });
   });
 
   function money(v){ return '$' + v.toFixed(2); }
-  function priceLabel(p){ return p == null ? 'TBC' : money(p); }
 
   document.querySelectorAll('[data-pick]').forEach(function(btn){
     btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
   });
   function pick(key){
     selPanel = key;
-    Object.keys(PANELS).forEach(function(k){ var el = $('pan-' + k); if (el) el.classList.toggle('sel', k === key); });
+    Object.keys(PANELS).forEach(function(k){ $('pan-' + k).classList.toggle('sel', k === key); });
     $('noTest').style.display = 'none';
     $('selTest').style.display = 'flex';
+    $('stName').textContent = PANELS[key].n;
+    $('stPrice').textContent = PANELS[key].p == null ? 'TBC' : money(PANELS[key].p);
     updateSummary();
-    $('order').scrollIntoView({behavior:'smooth'});
+    $('checkout').scrollIntoView({behavior:'smooth'});
   }
-  $('stChange').addEventListener('click', function(){ $('panels').scrollIntoView({behavior:'smooth'}); });
+  $('stChange').addEventListener('click', function(){ $('tests').scrollIntoView({behavior:'smooth'}); });
 
   var chHome = $('chHome'), chClinic = $('chClinic');
   function setMode(home){
     chHome.classList.toggle('sel', home);
     chClinic.classList.toggle('sel', !home);
+    $('prefWrap').style.display = home ? 'block' : 'none';
     updateSummary();
   }
   chHome.addEventListener('click', function(){ setMode(true); });
   chClinic.addEventListener('click', function(){ setMode(false); });
   function isHome(){ return document.querySelector('input[name="cmode"]:checked').value === 'home'; }
 
-  document.querySelectorAll('.achk').forEach(function(c){ c.addEventListener('change', updateSummary); });
   function updateSummary(){
     var home = isHome();
-    $('sMode').textContent = home ? 'At-home nurse visit' : 'Collection centre';
+    $('sMode').textContent = home ? 'At-home nurse visit' : 'In-clinic collection';
     $('sFeeRow').style.display = home ? 'flex' : 'none';
-    var keys = chosenAddons();
-    var sel = $('selAddons'), sum = $('sAddonRows');
-    sel.innerHTML = ''; sum.innerHTML = '';
-    keys.forEach(function(k){
-      var a = ADDONS[k];
-      sel.innerHTML += '<div class="selected-test" style="display:flex;margin-top:10px"><div><div class="st-name">' + a.n + '</div></div><span class="st-price">' + money(a.p) + '</span></div>';
-      sum.innerHTML += '<div class="srow"><span>' + a.n + '</span><span class="sv">' + money(a.p) + '</span></div>';
-    });
     if (selPanel){
       var t = PANELS[selPanel];
-      var addonSum = keys.reduce(function(acc, k){ return acc + ADDONS[k].p; }, 0);
-      $('stName').textContent = t.n;
-      $('stSub').textContent = t.sub;
-      $('stPrice').textContent = t.p == null ? 'TBC' : money(t.p);
       $('sPanel').textContent = t.n;
       $('sPanelPrice').textContent = t.p == null ? 'TBC' : money(t.p);
-      $('sTotal').textContent = 'TBC';
-      $('payBtn').disabled = false;
-      $('payBtn').textContent = 'Confirm order';
+      if (t.p == null){
+        $('sTotal').textContent = 'TBC';
+        $('payBtn').disabled = false;
+        $('payBtn').textContent = 'Ordering opens shortly';
+      } else {
+        var total = t.p + (home ? HOME_FEE : 0);
+        $('sTotal').textContent = money(total);
+        $('payBtn').disabled = false;
+        $('payBtn').textContent = 'Confirm and pay ' + money(total);
+      }
     }
   }
   $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+  (function(){ var d = new Date(); d.setDate(d.getDate() + 1); $('prefDate').min = d.toISOString().slice(0,10); })();
 
   $('payBtn').addEventListener('click', function(){
-    var required = ['postcode','fname','lname','email','mobile','dob','addr'];
+    if (selPanel && PANELS[selPanel].p == null){
+      $('orderErr').textContent = 'Panels and pricing are being finalised with the Como Wellness team — ordering opens shortly. Questions? Call 02 9545 2940.';
+      $('orderErr').style.display = 'block';
+      return;
+    }
+    var required = ['fname','lname','email','mobile','dob','sex','addr','suburb','state','postcode'];
     var ok = true, firstBad = null;
     required.forEach(function(id){
       var el = $(id);
@@ -459,90 +415,27 @@
     });
     if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
     var btn = this;
-    btn.textContent = 'Processing'; btn.disabled = true;
-    setTimeout(function(){
-      var ref = 'CW-' + Math.random().toString(36).slice(2,7).toUpperCase();
-      $('bookingRef').textContent = 'Order reference ' + ref;
-      if (isHome()){ openCalendar(); } else { finishClinic(); }
-    }, 900);
-  });
-
-  function confItem(text){
-    return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#A4502E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
-  }
-  function showConfirm(){
-    $('formCard').style.display = 'none';
-    $('summaryCard').style.display = 'none';
-    $('confirmCard').classList.add('show');
-    $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
-  }
-  function finishClinic(){
-    $('confHead').textContent = 'Your order is confirmed';
-    $('confTime').textContent = 'Collection centre';
-    $('confList').innerHTML =
-      confItem('Your order confirmation is on its way by email.') +
-      confItem('Your request form is issued electronically — walk into any of 2,000+ partner collection centres, no appointment needed. A fasted morning visit works best.') +
-      confItem('Every result is reviewed before release, and your report is returned to your Como Wellness doctor.');
-    showConfirm();
-  }
-
-  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var SLOTS=['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am'];
-  var calDates=[], selDate=0, selSlot=-1;
-  function slotFree(d, i){ return ((d.getDate()*31 + i*17 + d.getMonth()*7) % 10) > 2; }
-  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
-  function openCalendar(){
-    calDates=[]; var s=new Date(); s.setDate(s.getDate()+1);
-    for(var i=0;i<10;i++){ var d=new Date(s); d.setDate(s.getDate()+i); calDates.push(d); }
-    selDate=0; selSlot=-1;
-    $('calSub').textContent='Live availability for postcode ' + $('postcode').value;
-    renderDates(); renderSlots(); updC();
-    $('calOverlay').classList.add('show');
-  }
-  function renderDates(){
-    var w=$('calDates'); w.innerHTML='';
-    calDates.forEach(function(d,i){
-      var b=document.createElement('button'); b.type='button';
-      b.className='dchip'+(i===selDate?' sel':'');
-      b.innerHTML='<div class="dw">'+DAYS[d.getDay()]+'</div><div class="dd">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>';
-      b.addEventListener('click',function(){ selDate=i; selSlot=-1; updC(); renderDates(); renderSlots(); });
-      w.appendChild(b);
-    });
-  }
-  function renderSlots(){
-    var w=$('calSlots'); w.innerHTML='';
-    var d=calDates[selDate];
-    SLOTS.forEach(function(t,i){
-      var b=document.createElement('button'); b.type='button';
-      b.className='slot'+(i===selSlot?' sel':''); b.textContent=t;
-      if(!slotFree(d,i)){ b.disabled=true; }
-      else{ b.addEventListener('click',function(){ selSlot=i; updC(); renderSlots(); }); }
-      w.appendChild(b);
-    });
-  }
-  function updC(){
-    var c=$('calConfirm');
-    if(selSlot<0){ c.disabled=true; c.textContent='Select a time'; }
-    else{ c.disabled=false; c.textContent='Confirm '+dateLabel(calDates[selDate])+', '+SLOTS[selSlot]; }
-  }
-  $('calConfirm').addEventListener('click',function(){
-    $('calOverlay').classList.remove('show');
-    $('confHead').textContent='Your home collection is booked';
-    $('confTime').textContent=dateLabel(calDates[selDate])+' · '+SLOTS[selSlot];
-    $('confList').innerHTML=
-      confItem('A confirmation email is on its way, with a reminder 24 hours before your visit.') +
-      confItem('Your request form is issued electronically and travels with your booking. Fasting guidance is included — water is fine.') +
-      confItem('A qualified nurse in your area has been matched to your booking. Every result is reviewed before release and returned to your Como Wellness doctor.');
-    showConfirm();
-  });
-  $('calLater').addEventListener('click',function(){
-    $('calOverlay').classList.remove('show');
-    $('confHead').textContent='Your order is confirmed';
-    $('confTime').textContent='Visit time to be arranged';
-    $('confList').innerHTML=
-      confItem('Your order confirmation is on its way by email.') +
-      confItem('Our team will be in touch shortly to arrange your visit time.');
-    showConfirm();
+    btn.textContent = 'Taking you to payment…'; btn.disabled = true;
+    $('orderErr').style.display = 'none';
+    fetch('/api/como-order', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      panel: selPanel,
+      collection: isHome() ? 'home' : 'clinic',
+      preferredDate: $('prefDate').value, preferredTime: $('prefTime').value,
+      firstName: $('fname').value, lastName: $('lname').value,
+      email: $('email').value, phone: $('mobile').value,
+      dob: $('dob').value, sex: $('sex').value,
+      address: $('addr').value, suburb: $('suburb').value, state: $('state').value, postcode: $('postcode').value
+    })})
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if (!res.ok || !res.j.url) throw new Error(res.j && res.j.error || 'We could not start checkout.');
+        location.href = res.j.url;
+      })
+      .catch(function(e){
+        $('orderErr').textContent = e.message || 'We could not start checkout. Please call us on 02 9545 2940.';
+        $('orderErr').style.display = 'block';
+        updateSummary();
+      });
   });
 })();
 </script>
