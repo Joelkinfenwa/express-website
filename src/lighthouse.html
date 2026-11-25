@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lighthouse WBH — Diagnostics Ordering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--pine:#122823;--pine-deep:#0C1B17;--lime:#D2FD81;--lime-soft:rgba(210,253,129,.14);--ink:#101814;--slate:#55615A;--line:#E2E7E2;--bg:#FFFFFF;--bg-soft:#F4F7F3;--err:#C25B5B}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Figtree",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,.price,.st-price{font-family:"Instrument Sans",sans-serif}
+  .ribbon{background:var(--pine-deep);color:rgba(210,253,129,.85);font-size:12.5px;text-align:center;padding:7px 16px}
+  .ribbon strong{color:#fff;font-weight:600}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(12,27,23,.95);backdrop-filter:blur(10px)}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{text-decoration:none;line-height:1.15}
+  .logo .top{font-family:"Instrument Sans",sans-serif;font-weight:700;font-size:16px;letter-spacing:.12em;color:#fff}
+  .logo .sub{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(210,253,129,.8)}
+  .btn{display:inline-block;text-decoration:none;font-family:"Instrument Sans",sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:0;border-radius:999px;text-align:center;transition:background .12s}
+  .btn-lime{background:var(--lime);color:var(--pine-deep);padding:12px 26px}
+  .btn-lime:hover{background:#C2F567}
+  .btn-dark{background:var(--pine);color:#fff;padding:12px 26px}
+  .btn-dark:hover{background:#1A382F}
+  .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);padding:12px 26px}
+  .btn-ghost:hover{border-color:#fff}
+  .btn-sm{font-size:13px;padding:9px 18px}
+  .hero{background:linear-gradient(160deg,#0C1B17 0%,#122823 60%,#1C3A31 130%);color:#fff}
+  .hero-inner{max-width:1120px;margin:0 auto;padding:72px 24px 66px}
+  .eyebrow{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--lime);margin-bottom:18px}
+  .hero h1{font-size:clamp(32px,4.8vw,54px);font-weight:700;line-height:1.08;letter-spacing:-.015em;max-width:720px;text-transform:uppercase}
+  .hero h1 .accent{color:var(--lime)}
+  .hero p{margin-top:18px;font-size:16.5px;color:rgba(255,255,255,.75);max-width:560px}
+  .hero-ctas{margin-top:32px;display:flex;flex-wrap:wrap;gap:13px}
+  .stats{background:rgba(255,255,255,.04);border-top:1px solid rgba(210,253,129,.15)}
+  .stats-inner{max-width:1120px;margin:0 auto;padding:16px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center}
+  .stat .n{font-family:"Instrument Sans",sans-serif;font-weight:700;color:var(--lime);font-size:15px}
+  .stat .l{font-size:12.5px;color:rgba(255,255,255,.6)}
+  section{padding:58px 0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .kicker{font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7A9444;margin-bottom:10px}
+  h2.sec{font-size:clamp(25px,3.4vw,36px);font-weight:700;letter-spacing:-.01em;color:var(--pine-deep);text-transform:uppercase}
+  p.sub{margin-top:10px;color:var(--slate);font-size:15.5px;max-width:620px}
+  .steps{margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .step{background:var(--bg-soft);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .step .num{font-family:"Instrument Sans",sans-serif;width:30px;height:30px;border-radius:999px;background:var(--pine);color:var(--lime);font-weight:600;font-size:13.5px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .step h3{font-size:15.5px;font-weight:600;color:var(--pine-deep)}
+  .step p{font-size:13px;color:var(--slate);margin-top:5px}
+  .panels{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
+  .panel.feature{border-color:var(--pine);box-shadow:0 10px 32px rgba(18,40,35,.1)}
+  .panel.sel{border-color:var(--pine);box-shadow:0 0 0 2px var(--pine)}
+  .ptag{align-self:flex-start;font-family:"Instrument Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pine);background:var(--lime-soft);border:1px solid rgba(18,40,35,.12);border-radius:999px;padding:3px 11px;margin-bottom:10px}
+  .panel.feature .ptag{background:var(--pine);color:var(--lime);border-color:var(--pine)}
+  .panel h3{font-size:19px;font-weight:700;color:var(--pine-deep)}
+  .price{font-size:22px;font-weight:700;margin:8px 0 2px;color:var(--pine-deep)}
+  .price span{font-size:12px;font-weight:500;color:var(--slate)}
+  .count{font-size:12.5px;color:var(--slate);margin-bottom:10px}
+  .mtoggle{align-self:flex-start;background:none;border:0;padding:0;margin-bottom:8px;font-family:inherit;font-size:12.5px;font-weight:600;color:#5E7A33;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .mlist{list-style:none;margin:0 0 16px;flex:1}
+  .mlist.hidden{display:none}
+  .mlist li{font-size:12.5px;color:var(--slate);padding:5px 0 5px 16px;border-bottom:1px dashed var(--line);position:relative}
+  .mlist li:last-child{border-bottom:0}
+  .mlist li::before{content:"";position:absolute;left:1px;top:11px;width:5px;height:5px;border-radius:999px;background:#9CC25B}
+  .mlist li strong{color:var(--ink);font-weight:600}
+  .panel .btn{margin-top:auto}
+  .pnote{margin-top:16px;font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:12px;padding:12px 16px}
+  .book-sec{background:var(--bg-soft);border-top:1px solid var(--line)}
+  .book-grid{margin-top:30px;display:grid;grid-template-columns:1fr 350px;gap:26px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px}
+  .fstep{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .fstep:last-child{border:0;margin:0;padding:0}
+  .fstep-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  .fstep-head .num{width:26px;height:26px;flex:none;border-radius:999px;background:var(--pine);color:var(--lime);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:"Instrument Sans",sans-serif}
+  .fstep-head h3{font-size:16px;font-weight:600;color:var(--pine-deep)}
+  .no-test{font-size:14px;color:var(--slate);background:var(--bg-soft);border:1px dashed var(--line);border-radius:10px;padding:16px 18px}
+  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--lime-soft);border:1px solid rgba(18,40,35,.25);border-radius:10px;padding:13px 16px}
+  .selected-test .st-name{font-weight:600;font-size:14.5px}
+  .selected-test .st-sub{font-size:12px;color:var(--slate)}
+  .selected-test .st-price{font-weight:700;font-size:16px}
+  .selected-test button{background:none;border:0;font-family:inherit;font-size:12px;font-weight:600;color:var(--pine);text-decoration:underline;cursor:pointer}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+  .field input,.field select{width:100%;font-family:inherit;font-size:14.5px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;outline:none;background:#fff;color:var(--ink)}
+  .field input:focus,.field select:focus{border-color:var(--pine)}
+  .field input.err{border-color:var(--err)}
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1px solid var(--line);border-radius:10px;padding:14px 15px;cursor:pointer;background:#fff}
+  .choice input{position:absolute;opacity:0}
+  .choice .c-title{font-size:14px;font-weight:600;padding-right:70px}
+  .choice .c-desc{font-size:12px;color:var(--slate);margin-top:2px}
+  .choice .c-fee{position:absolute;top:11px;right:13px;font-size:11px;font-weight:700;color:var(--pine);background:var(--lime-soft);border-radius:999px;padding:3px 10px}
+  .choice.sel{border-color:var(--pine);background:var(--lime-soft)}
+  .summary{position:sticky;top:76px}
+  .summary h3{font-size:16px;font-weight:600;margin-bottom:14px;color:var(--pine-deep)}
+  .srow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;color:var(--slate);gap:10px}
+  .srow .sv{color:var(--ink);font-weight:500;text-align:right}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:13px;font-size:15px;color:var(--ink)}
+  .srow.total .sv{font-weight:700;font-size:19px}
+  .incl{font-size:12px;color:var(--slate);background:var(--lime-soft);border-radius:9px;padding:10px 13px;margin:11px 0 15px}
+  .paybtn{width:100%;font-size:14px;padding:15px 20px;background:var(--pine);color:#fff}
+  .paybtn:hover{background:#1A382F}
+  .paybtn:disabled{opacity:.55;cursor:default}
+  .secure{text-align:center;font-size:11px;color:#9AA49C;margin-top:9px}
+  .demo-tag{font-size:11px;color:#9AA49C;text-align:center;margin-top:7px}
+  .confirm{display:none}
+  .confirm.show{display:block}
+  .conf-icon{width:50px;height:50px;border-radius:999px;background:var(--lime-soft);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .confirm h3{font-size:24px;font-weight:700;color:var(--pine-deep);text-transform:uppercase}
+  .ref{display:inline-block;font-size:12.5px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 15px}
+  .conf-chip{display:inline-flex;align-items:center;background:var(--lime-soft);border:1px solid rgba(18,40,35,.25);border-radius:999px;padding:9px 17px;font-weight:600;font-size:14px}
+  .conf-list{margin:18px 0;display:grid;gap:10px}
+  .conf-item{display:flex;gap:10px;font-size:14px;color:var(--slate)}
+  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:999px;background:var(--lime-soft);display:inline-flex;align-items:center;justify-content:center}
+  .partner{margin-top:24px;background:var(--pine-deep);color:#fff;border-radius:14px;padding:24px 26px}
+  .partner h4{font-family:"Instrument Sans",sans-serif;font-size:17px;color:var(--lime);font-weight:600}
+  .partner p{font-size:13px;color:rgba(255,255,255,.75);margin:9px 0 16px}
+  .overlay{position:fixed;inset:0;background:rgba(12,27,23,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(12,27,23,.45)}
+  .modal-head{background:var(--pine-deep);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;gap:16px}
+  .modal-head h4{font-size:19px;font-weight:600;text-transform:uppercase}
+  .modal-head p{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px}
+  .modal-head button{background:none;border:0;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;white-space:nowrap}
+  .cal-dates{display:flex;gap:8px;overflow-x:auto;padding:16px 24px 6px;flex:none}
+  .dchip{flex:none;border:1px solid var(--line);border-radius:10px;padding:7px 13px;cursor:pointer;text-align:center;background:#fff;font-family:inherit}
+  .dchip .dw{font-size:10px;color:var(--slate);font-weight:600;text-transform:uppercase}
+  .dchip .dd{font-size:14px;font-weight:600;margin-top:1px}
+  .dchip.sel{border-color:var(--pine);background:var(--lime-soft)}
+  .cal-note{font-size:12px;color:var(--slate);padding:5px 24px 0}
+  .cal-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:13px 24px 16px;overflow-y:auto}
+  .slot{border:1px solid var(--line);border-radius:9px;padding:9px 6px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;background:#fff;font-family:inherit;color:var(--ink)}
+  .slot.sel{border-color:var(--pine);background:var(--lime-soft);font-weight:600}
+  .slot:disabled{opacity:.3;cursor:default}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-top:1px solid var(--line);flex:none}
+  .modal-foot .pb{font-size:11px;color:#9AA49C}
+  .addon-card{margin-top:26px;background:#fff;border:1px dashed var(--pine);border-radius:16px;padding:24px 26px}
+  .addon-card h3{font-family:"Instrument Sans",sans-serif;font-size:19px;font-weight:700;color:var(--pine-deep)}
+  .addon-card .count{font-size:12.5px;color:var(--slate);margin:4px 0 8px}
+  .alist{display:grid;grid-template-columns:1fr 1fr;gap:0 36px}
+  @media(max-width:700px){.alist{grid-template-columns:1fr}}
+  .arow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:13.5px;cursor:pointer}
+  .arow input{accent-color:var(--pine);width:16px;height:16px;flex:none;cursor:pointer}
+  .arow span:first-of-type{flex:1}
+  .arow .ap{margin-left:auto;font-weight:600;white-space:nowrap}
+  footer{border-top:1px solid var(--line);padding:26px 0;background:#fff}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;color:var(--slate)}
+  .foot .pby{font-weight:600;color:var(--ink)}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+  @media(max-width:960px){.panels{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.book-grid{grid-template-columns:1fr}.summary{position:static}.grid2,.choice-row{grid-template-columns:1fr}.cal-slots{grid-template-columns:repeat(3,1fr)}.stats-inner{grid-template-columns:1fr;gap:8px}.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="ribbon"><strong>Preview</strong> — Lighthouse WBH ordering page. Ordering opens shortly.</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top">
+      <span class="top">LIGHTHOUSE</span>
+      <span class="sub">Diagnostics powered by Express Pathology</span>
+    </a>
+    <a class="btn btn-lime btn-sm" href="#panels">Order your bloods</a>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <span class="eyebrow">Lighthouse Diagnostics</span>
+    <h1>You can't improve<br>what you <span class="accent">don't measure.</span></h1>
+    <p>Your Lighthouse panel, ordered in two minutes. A qualified nurse collects at your home, office or gym — or walk into any of 2,000+ collection centres. Results reviewed, then straight to your Lighthouse clinician.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-lime" href="#panels">Order your bloods</a>
+      <a class="btn btn-ghost" href="#how">How it works</a>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stats-inner">
+      <div class="stat"><div class="n">60+ mobile collectors</div><div class="l">Nationwide network</div></div>
+      <div class="stat"><div class="n">At your door</div><div class="l">Home, office or gym</div></div>
+      <div class="stat"><div class="n">Reviewed</div><div class="l">Every result checked before release</div></div>
+    </div>
+  </div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <div class="kicker">Clear path</div>
+    <h2 class="sec">Four steps. Zero guesswork.</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h3>Order online</h3><p>Pick your panel, enter your details once. Your pathology request is issued electronically.</p></div>
+      <div class="step"><div class="num">2</div><h3>A nurse comes to you</h3><p>Home, office or gym, at a time you choose — early-morning slots for fasting and hormone panels.</p></div>
+      <div class="step"><div class="num">3</div><h3>Results reviewed</h3><p>Samples go to an accredited lab the same day. Every result is checked before release.</p></div>
+      <div class="step"><div class="num">4</div><h3>Your protocol, adjusted</h3><p>Data lands with your Lighthouse clinician — proof your protocol is working, and what to change.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="panels" style="padding-top:0">
+  <div class="wrap">
+    <div class="kicker">Choose your panel</div>
+    <h2 class="sec">Lighthouse panels</h2>
+    <p class="sub">Your panel library, priced as it runs today — from the annual check-up to the full ULTRA screen, with every individual test available as an add-on. All prices include GST.</p>
+    <div class="panels">
+      <div class="panel" id="pan-checkup2">
+        <span class="ptag">Panel 01</span>
+        <h3>Check Up 1</h3>
+        <div class="price">$128 <span>incl. GST</span></div>
+        <div class="count">10 test groups · The essential annual check-up screen.</div>
+        <button type="button" class="mtoggle" data-list="ml-checkup2">Hide markers</button>
+        <ul class="mlist" id="ml-checkup2"><li>Full Blood Count / ESR (FBC/ESR)</li><li>Liver Function (LFT)</li><li>Kidney Function (UEC)</li><li>Creatine Kinase (CK)</li><li>Cholesterol / TG / HDL / LDL</li><li>Glucose</li><li>Magnesium</li><li>High Sensitivity CRP</li><li>Vitamin D</li><li>HbA1c</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="checkup2">Select Check Up 1</button>
+      </div>
+      <div class="panel" id="pan-sportsbb3">
+        <span class="ptag">Panel 02</span>
+        <h3>Check Up 2</h3>
+        <div class="price">$172 <span>incl. GST</span></div>
+        <div class="count">14 test groups · The Standard panel without PSA, with Creatine Kinase included.</div>
+        <button type="button" class="mtoggle" data-list="ml-sportsbb3">Hide markers</button>
+        <ul class="mlist" id="ml-sportsbb3"><li>Free and Total Testosterone</li><li>E2 (Oestradiol), SHBG</li><li>Liver Function (LFT)</li><li>Kidney Function (UEC)</li><li>Magnesium</li><li>Cholesterol / TG / HDL / LDL</li><li>Glucose</li><li>High Sensitivity CRP</li><li>Full Blood Count</li><li>FSH/LH, Prolactin, Progesterone</li><li>DHEAS, Cortisol</li><li>IGF-1</li><li>Insulin</li><li>Creatine Kinase (CK)</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="sportsbb3">Select Check Up 2</button>
+      </div>
+      <div class="panel feature" id="pan-standard">
+        <span class="ptag">Panel 03 — Lighthouse standard</span>
+        <h3>Standard Blood Panel</h3>
+        <div class="price">$195 <span>incl. GST</span></div>
+        <div class="count">15 test groups · The standard Lighthouse panel — full hormone picture plus metabolic and organ function.</div>
+        <button type="button" class="mtoggle" data-list="ml-standard">Hide markers</button>
+        <ul class="mlist" id="ml-standard"><li>Free and Total Testosterone</li><li>E2 (Oestradiol), SHBG</li><li>Liver Function (LFT)</li><li>Kidney Function (UEC)</li><li>Magnesium</li><li>Cholesterol / TG / HDL / LDL</li><li>Glucose</li><li>High Sensitivity CRP</li><li>Full Blood Count</li><li>FSH/LH, Prolactin, Progesterone</li><li>DHEAS, Cortisol</li><li>IGF-1</li><li>Insulin</li><li>Creatine Kinase (CK)</li><li>PSA</li></ul>
+        <button class="btn btn-lime btn-sm" type="button" data-pick="standard">Select Standard</button>
+      </div>
+      <div class="panel" id="pan-advanced2">
+        <span class="ptag">Panel 04</span>
+        <h3>Check Up Advanced 2 + Hormone</h3>
+        <div class="price">$298 <span>incl. GST</span></div>
+        <div class="count">17 test groups · The advanced check-up with thyroid, iron, vitamins and the full hormone screen.</div>
+        <button type="button" class="mtoggle" data-list="ml-advanced2">Hide markers</button>
+        <ul class="mlist" id="ml-advanced2"><li>Full Blood Count / ESR (FBC/ESR)</li><li>Liver Function (LFT)</li><li>Kidney Function (UEC)</li><li>Creatine Kinase (CK)</li><li>Cholesterol / TG / HDL / LDL</li><li>Magnesium</li><li>High Sensitivity CRP</li><li>Glucose</li><li>Iron Studies</li><li>Thyroid Function — TSH / FT3 / FT4</li><li>Vitamin B12, Vitamin D</li><li>HbA1c</li><li>Insulin</li><li>Free and Total Testosterone, SHBG</li><li>E2 (Oestradiol)</li><li>Progesterone, Prolactin, FSH/LH</li><li>DHEAS, Cortisol</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="advanced2">Select Advanced 2 + Hormone</button>
+      </div>
+      <div class="panel" id="pan-ultra">
+        <span class="ptag">Panel 05</span>
+        <h3>Check Up ULTRA</h3>
+        <div class="price">$496 <span>incl. GST</span></div>
+        <div class="count">22 test groups · The deepest screen — pancreas, parathyroid, advanced lipids, pituitary, thyroid antibodies and more.</div>
+        <button type="button" class="mtoggle" data-list="ml-ultra">Hide markers</button>
+        <ul class="mlist" id="ml-ultra"><li>Full Blood Count / ESR (FBC/ESR)</li><li>Liver Function (LFT), Kidney Function (UEC)</li><li>Amylase, Lipase</li><li>Parathyroid Hormone (PTH), Calcium/cCa</li><li>Creatine Kinase (CK)</li><li>Cholesterol / TG / HDL / LDL</li><li>Apolipoprotein A1/B, Lipoprotein(a)</li><li>Glucose, HbA1c</li><li>High Sensitivity CRP</li><li>Free and Total Testosterone, SHBG</li><li>E2 (Oestradiol), FSH/LH, DHEAS</li><li>Prolactin, Progesterone</li><li>Cortisol, ACTH</li><li>IGF-1, Growth Hormone</li><li>Insulin, C-Peptide</li><li>Vitamin B12, Folate (B9), Homocysteine</li><li>Vitamin D</li><li>TSH / FT3 / FT4</li><li>Thyroglobulin ab (TGab)</li><li>Thyroperoxidase ab (TPO)</li><li>Iron Studies</li><li>Zinc, Magnesium</li></ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="ultra">Select ULTRA</button>
+      </div>
+    </div>
+
+    <div class="addon-card">
+      <h3>Individual tests — add to any panel</h3>
+      <div class="count">Matched to your current pricing. Tick any combination; they travel on the same request form and collection.</div>
+      <div class="alist">
+          <label class="arow"><input type="checkbox" class="achk" data-key="cortisol"><span>Cortisol (Random)</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="crp"><span>High Sensitivity CRP</span><span class="ap">$12</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="dheas"><span>DHEAS</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="fshlh"><span>FSH/LH</span><span class="ap">$49</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="fbc"><span>Full Blood Count (FBC)</span><span class="ap">$22</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="igf1"><span>IGF-1</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="prog"><span>Progesterone</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="prol"><span>Prolactin</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="testo"><span>Testosterone Total + Free + SHBG</span><span class="ap">$49</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="e2"><span>E2 (Oestradiol)</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="insulin"><span>Insulin (Fasting)</span><span class="ap">$29</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="mag"><span>Magnesium</span><span class="ap">$12</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="mba20"><span>MBA20 (HDL/LDL, Glucose)</span><span class="ap">$38</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="ck"><span>Creatine Kinase (CK)</span><span class="ap">$12</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="psa"><span>PSA</span><span class="ap">$25</span></label>
+          <label class="arow"><input type="checkbox" class="achk" data-key="semen"><span>Semen / Sperm Quality + Count</span><span class="ap">$74</span></label>
+      </div>
+    </div>
+
+    <div class="pnote">Panels are fixed per program, so results compare like for like at every retest — proof the protocol is working. Collected on Express Pathology request forms, fully private, no referral needed.</div>
+  </div>
+</section>
+
+<section class="book-sec" id="order">
+  <div class="wrap">
+    <div class="kicker">Checkout</div>
+    <h2 class="sec">Complete your order</h2>
+    <div class="book-grid">
+      <div class="card" id="formCard">
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">1</span><h3>Your panel</h3></div>
+          <div class="no-test" id="noTest">Select a panel above to begin.</div>
+          <div class="selected-test" id="selTest" style="display:none">
+            <div><div class="st-name" id="stName"></div><div class="st-sub" id="stSub"></div></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
+          </div>
+          <div id="selAddons"></div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">2</span><h3>How would you like your bloods collected?</h3></div>
+          <div class="choice-row">
+            <label class="choice sel" id="chHome">
+              <input type="radio" name="cmode" value="home" checked>
+              <div class="c-title">At-home nurse visit</div>
+              <div class="c-desc">Home, office or gym — choose your exact time after checkout</div>
+              <span class="c-fee">+ $TBC</span>
+            </label>
+            <label class="choice" id="chClinic">
+              <input type="radio" name="cmode" value="clinic">
+              <div class="c-title">Collection centre</div>
+              <div class="c-desc">Walk into any of 2,000+ centres — no appointment needed</div>
+              <span class="c-fee">Included</span>
+            </label>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label for="postcode">Postcode</label>
+            <input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 2000">
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">3</span><h3>Your details</h3></div>
+          <div class="grid2">
+            <div class="field"><label for="fname">First name</label><input id="fname"></div>
+            <div class="field"><label for="lname">Last name</label><input id="lname"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="email">Email</label><input id="email" type="email"></div>
+            <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
+            <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card confirm" id="confirmCard">
+        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#122823" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 id="confHead">Your order is confirmed</h3>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <span class="conf-chip" id="confTime">—</span>
+          <span class="ref" id="bookingRef">Order reference —</span>
+        </div>
+        <div class="conf-list" id="confList"></div>
+        <div class="partner">
+          <h4>For the Lighthouse team</h4>
+          <p>This flow runs on Doorstep, Express Pathology's booking engine. Pathology is ordered on Express forms — fully private, no Medicare involvement — with every result reviewed before release and reports returned to your clinicians. Panels are fixed per program so results are comparable at every retest. Open the sandbox to see the engine directly.</p>
+          <a class="btn btn-lime btn-sm" href="https://devbookings.expresspathology.com.au/book/demo">Open the live booking sandbox</a>
+        </div>
+      </div>
+
+      <div class="card summary" id="summaryCard">
+        <h3>Your order</h3>
+        <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
+        <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
+        <div id="sAddonRows"></div>
+        <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
+        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$TBC</span></div>
+        <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
+        <div class="incl">Your pathology request form is issued electronically and travels with your order — nothing to print. Results are reviewed and returned to your Lighthouse clinician.</div>
+        <button class="btn paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
+        <div class="secure">Secure card payment via Stripe · Powered by Express Pathology</div>
+        <div class="demo-tag">Preview checkout — ordering opens shortly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" id="calOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h4>Choose your visit time</h4><p id="calSub">Live availability in your area</p></div>
+      <button type="button" id="calLater">Choose later</button>
+    </div>
+    <div class="cal-dates" id="calDates"></div>
+    <div class="cal-note">Fasting and hormone panels collect best in the morning. Water is fine.</div>
+    <div class="cal-slots" id="calSlots"></div>
+    <div class="modal-foot">
+      <span class="pb">Powered by Express Pathology</span>
+      <button class="btn btn-dark btn-sm" id="calConfirm" disabled>Select a time</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <span class="pby">Diagnostics powered by Express Pathology</span>
+    <span>Ordering page for Lighthouse WBH (preview) · express@expresspathology.com.au · 02 9545 2940</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var PANELS = {"checkup2": {"n": "Check Up 1", "p": 128, "sub": "10 test groups"}, "sportsbb3": {"n": "Check Up 2", "p": 172, "sub": "14 test groups"}, "standard": {"n": "Standard Blood Panel", "p": 195, "sub": "15 test groups"}, "advanced2": {"n": "Check Up Advanced 2 + Hormone", "p": 298, "sub": "17 test groups"}, "ultra": {"n": "Check Up ULTRA", "p": 496, "sub": "22 test groups"}};
+  var ADDONS = {"cortisol": {"n": "Cortisol (Random)", "p": 29}, "crp": {"n": "High Sensitivity CRP", "p": 12}, "dheas": {"n": "DHEAS", "p": 29}, "fshlh": {"n": "FSH/LH", "p": 49}, "fbc": {"n": "Full Blood Count (FBC)", "p": 22}, "igf1": {"n": "IGF-1", "p": 29}, "prog": {"n": "Progesterone", "p": 29}, "prol": {"n": "Prolactin", "p": 29}, "testo": {"n": "Testosterone Total + Free + SHBG", "p": 49}, "e2": {"n": "E2 (Oestradiol)", "p": 29}, "insulin": {"n": "Insulin (Fasting)", "p": 29}, "mag": {"n": "Magnesium", "p": 12}, "mba20": {"n": "MBA20 (HDL/LDL, Glucose)", "p": 38}, "ck": {"n": "Creatine Kinase (CK)", "p": 12}, "psa": {"n": "PSA", "p": 25}, "semen": {"n": "Semen / Sperm Quality + Count", "p": 74}};
+  var HOME_FEE = null; /* TBC — Joel to confirm the Lighthouse home visit fee */
+  var selPanel = null;
+  function chosenAddons(){
+    return Array.prototype.slice.call(document.querySelectorAll('.achk:checked')).map(function(c){ return c.dataset.key; });
+  }
+
+  document.querySelectorAll('.mtoggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var list = $(btn.dataset.list);
+      var hidden = list.classList.toggle('hidden');
+      btn.textContent = hidden ? 'Show markers' : 'Hide markers';
+    });
+  });
+
+  function money(v){ return '$' + v.toFixed(2); }
+  function priceLabel(p){ return p == null ? 'TBC' : money(p); }
+
+  document.querySelectorAll('[data-pick]').forEach(function(btn){
+    btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
+  });
+  function pick(key){
+    selPanel = key;
+    Object.keys(PANELS).forEach(function(k){ var el = $('pan-' + k); if (el) el.classList.toggle('sel', k === key); });
+    $('noTest').style.display = 'none';
+    $('selTest').style.display = 'flex';
+    updateSummary();
+    $('order').scrollIntoView({behavior:'smooth'});
+  }
+  $('stChange').addEventListener('click', function(){ $('panels').scrollIntoView({behavior:'smooth'}); });
+
+  var chHome = $('chHome'), chClinic = $('chClinic');
+  function setMode(home){
+    chHome.classList.toggle('sel', home);
+    chClinic.classList.toggle('sel', !home);
+    updateSummary();
+  }
+  chHome.addEventListener('click', function(){ setMode(true); });
+  chClinic.addEventListener('click', function(){ setMode(false); });
+  function isHome(){ return document.querySelector('input[name="cmode"]:checked').value === 'home'; }
+
+  document.querySelectorAll('.achk').forEach(function(c){ c.addEventListener('change', updateSummary); });
+  function updateSummary(){
+    var home = isHome();
+    $('sMode').textContent = home ? 'At-home nurse visit' : 'Collection centre';
+    $('sFeeRow').style.display = home ? 'flex' : 'none';
+    var keys = chosenAddons();
+    var sel = $('selAddons'), sum = $('sAddonRows');
+    sel.innerHTML = ''; sum.innerHTML = '';
+    keys.forEach(function(k){
+      var a = ADDONS[k];
+      sel.innerHTML += '<div class="selected-test" style="display:flex;margin-top:10px"><div><div class="st-name">' + a.n + '</div></div><span class="st-price">' + money(a.p) + '</span></div>';
+      sum.innerHTML += '<div class="srow"><span>' + a.n + '</span><span class="sv">' + money(a.p) + '</span></div>';
+    });
+    if (selPanel){
+      var t = PANELS[selPanel];
+      var addonSum = keys.reduce(function(acc, k){ return acc + ADDONS[k].p; }, 0);
+      $('stName').textContent = t.n;
+      $('stSub').textContent = t.sub;
+      $('stPrice').textContent = money(t.p);
+      $('sPanel').textContent = t.n;
+      $('sPanelPrice').textContent = money(t.p);
+      var base = t.p + addonSum;
+      $('sTotal').textContent = (home && HOME_FEE == null) ? money(base) + ' + visit fee' : money(base + (home ? HOME_FEE : 0));
+      $('payBtn').disabled = false;
+      $('payBtn').textContent = 'Confirm order — ' + money(base) + (home ? ' + visit' : '');
+    }
+  }
+  $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+
+  $('payBtn').addEventListener('click', function(){
+    var required = ['postcode','fname','lname','email','mobile','dob','addr'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1);
+      el.classList.toggle('err', bad);
+      if (bad){ ok = false; if (!firstBad) firstBad = el; }
+    });
+    if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    var btn = this;
+    btn.textContent = 'Processing'; btn.disabled = true;
+    setTimeout(function(){
+      var ref = 'LH-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      $('bookingRef').textContent = 'Order reference ' + ref;
+      if (isHome()){ openCalendar(); } else { finishClinic(); }
+    }, 900);
+  });
+
+  function confItem(text){
+    return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#122823" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
+  }
+  function showConfirm(){
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    $('confirmCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function finishClinic(){
+    $('confHead').textContent = 'Your order is confirmed';
+    $('confTime').textContent = 'Collection centre';
+    $('confList').innerHTML =
+      confItem('Your order confirmation is on its way by email.') +
+      confItem('Your request form is issued electronically — walk into any of 2,000+ partner collection centres, no appointment needed. A fasted morning visit works best.') +
+      confItem('Every result is reviewed before release, and your report is returned to your Lighthouse clinician.');
+    showConfirm();
+  }
+
+  var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var SLOTS=['7:00 am','7:30 am','8:00 am','8:30 am','9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am'];
+  var calDates=[], selDate=0, selSlot=-1;
+  function slotFree(d, i){ return ((d.getDate()*31 + i*17 + d.getMonth()*7) % 10) > 2; }
+  function dateLabel(d){ return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+  function openCalendar(){
+    calDates=[]; var s=new Date(); s.setDate(s.getDate()+1);
+    for(var i=0;i<10;i++){ var d=new Date(s); d.setDate(s.getDate()+i); calDates.push(d); }
+    selDate=0; selSlot=-1;
+    $('calSub').textContent='Live availability for postcode ' + $('postcode').value;
+    renderDates(); renderSlots(); updC();
+    $('calOverlay').classList.add('show');
+  }
+  function renderDates(){
+    var w=$('calDates'); w.innerHTML='';
+    calDates.forEach(function(d,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='dchip'+(i===selDate?' sel':'');
+      b.innerHTML='<div class="dw">'+DAYS[d.getDay()]+'</div><div class="dd">'+d.getDate()+' '+MONTHS[d.getMonth()]+'</div>';
+      b.addEventListener('click',function(){ selDate=i; selSlot=-1; updC(); renderDates(); renderSlots(); });
+      w.appendChild(b);
+    });
+  }
+  function renderSlots(){
+    var w=$('calSlots'); w.innerHTML='';
+    var d=calDates[selDate];
+    SLOTS.forEach(function(t,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='slot'+(i===selSlot?' sel':''); b.textContent=t;
+      if(!slotFree(d,i)){ b.disabled=true; }
+      else{ b.addEventListener('click',function(){ selSlot=i; updC(); renderSlots(); }); }
+      w.appendChild(b);
+    });
+  }
+  function updC(){
+    var c=$('calConfirm');
+    if(selSlot<0){ c.disabled=true; c.textContent='Select a time'; }
+    else{ c.disabled=false; c.textContent='Confirm '+dateLabel(calDates[selDate])+', '+SLOTS[selSlot]; }
+  }
+  $('calConfirm').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Your home collection is booked';
+    $('confTime').textContent=dateLabel(calDates[selDate])+' · '+SLOTS[selSlot];
+    $('confList').innerHTML=
+      confItem('A confirmation email is on its way, with a reminder 24 hours before your visit.') +
+      confItem('Your request form is issued electronically and travels with your booking. Fasting guidance is included — water is fine.') +
+      confItem('A qualified nurse in your area has been matched to your booking. Every result is reviewed before release and returned to your Lighthouse clinician.');
+    showConfirm();
+  });
+  $('calLater').addEventListener('click',function(){
+    $('calOverlay').classList.remove('show');
+    $('confHead').textContent='Your order is confirmed';
+    $('confTime').textContent='Visit time to be arranged';
+    $('confList').innerHTML=
+      confItem('Your order confirmation is on its way by email.') +
+      confItem('Our team will be in touch shortly to arrange your visit time.');
+    showConfirm();
+  });
+})();
+</script>
+</body>
+</html>
