@@ -241,11 +241,6 @@
       "permanent": true
     },
     {
-      "source": "/careers/:path*",
-      "destination": "/careers",
-      "permanent": true
-    },
-    {
       "source": "/join",
       "destination": "/careers",
       "permanent": true
