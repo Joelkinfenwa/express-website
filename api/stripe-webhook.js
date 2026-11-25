@@ -6,7 +6,8 @@ import { stripe, verifySignature } from '../lib/stripe.js';
 import { findOrder } from '../lib/original-order.js';
 import PRICES from '../lib/price-index.mjs';
 import { requestFormPdf, orderFromSession } from '../lib/request-form.js';
-import { patientEmail, homeUpgradePaidEmail } from '../lib/patient-email.js';
+import { patientEmail, homeUpgradePaidEmail, clinicOrderEmail } from '../lib/patient-email.js';
+import { ETN } from '../lib/etn.mjs';
 import { orderNumber } from '../lib/order-number.js';
 import { klaviyoEvent } from '../lib/klaviyo.js';
 
@@ -124,6 +125,64 @@ export default async function handler(req, res) {
       await send({ from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()), subject: `Payment received (not a website order): ${total} from ${who}`,
         html: `<p>A payment was received outside the website checkout, for example through a Stripe payment link. No confirmation was sent to the customer.</p><p>Amount: ${esc(total)}<br>Customer: ${esc(who)}${s.customer_details && s.customer_details.email ? ' (' + esc(s.customer_details.email) + ')' : ''}<br>Stripe session: ${esc(s.id)}</p>` });
       return res.status(200).json({ received: true, external: true });
+    }
+    // Empowered Through Nutrition order (/empowered): client paid by card at checkout. Issue the
+    // request form with the panel tests, email the team and the patient, and record the order so it
+    // appears in /admin with a trackable stage.
+    if (m.order_type === 'etn_order') {
+      const panel = ETN.panels[m.panel];
+      if (!panel) { console.error('etn_order with unknown panel:', m.panel); return res.status(200).json({ received: true }); }
+      const home = m.collection === 'home';
+      const pt = { firstName: m.first_name, lastName: m.last_name, email: s.customer_email || (s.customer_details || {}).email || '', phone: m.phone, dob: m.dob, sex: m.sex, address: m.address, suburb: m.suburb, state: m.state, postcode: m.postcode };
+      const total = (s.amount_total || 0) / 100;
+      const when = [m.preferred_date, m.preferred_time].filter(Boolean).join(', ');
+
+      let form = null, formError = '';
+      try {
+        const bytes = await requestFormPdf({
+          reference: m.reference, patient: pt,
+          items: [{ title: `${panel.n} — Empowered Through Nutrition`, lines: panel.lines }],
+          fasting: !!panel.fasting,
+          notes: 'Empowered Through Nutrition order — paid in full at checkout. Results are reviewed and shared with the Empowered Through Nutrition coaching team.'
+        });
+        form = { filename: `Pathology request form ${m.reference}.pdf`, content: Buffer.from(bytes).toString('base64') };
+      } catch (e) { formError = e.message; console.error('etn request form failed:', e.message); }
+
+      const rows = [['Order', m.reference], ['Clinic', ETN.clinic], ['Panel', `${panel.n} — $${panel.p} incl. GST`],
+        ['Collection', home ? `Home visit (+$${ETN.homeFee}) — contact the patient within 4 hours to confirm the time` : 'Collection centre'],
+        ['Preferred', home ? (when || 'No preference') : ''], ['Paid', `$${total.toFixed(2)} incl. GST (Stripe)`],
+        ['Patient', `${pt.firstName} ${pt.lastName}`], ['DOB', pt.dob], ['Sex', pt.sex], ['Email', pt.email], ['Phone', pt.phone],
+        ['Address', [pt.address, pt.suburb, pt.state, pt.postcode].filter(Boolean).join(', ')]];
+      await send({
+        from: process.env.ENQUIRY_FROM, to: process.env.ENQUIRY_TO.split(',').map((x) => x.trim()),
+        subject: `ETN ORDER ${m.reference} (PAID): ${pt.firstName} ${pt.lastName} — ${panel.n} — ${home ? 'Home visit ' + pt.postcode : 'Collection centre'}`,
+        html: `<table>${rows.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5A645E">${esc(k)}</td><td style="padding:4px 0">${esc(String(v))}</td></tr>`).join('')}</table>` + (form
+          ? '<p>The pathology request form is attached and has been emailed to the patient.</p>'
+          : `<p style="color:#B3261E"><strong>Request form generation failed (${esc(formError)}) — generate and send it manually.</strong></p>`),
+        ...(form ? { attachments: [form] } : {})
+      });
+
+      if (pt.email) {
+        try {
+          const pe = clinicOrderEmail({ reference: m.reference, clinic: ETN.clinic, firstName: pt.firstName, state: pt.state, preferredDate: m.preferred_date, preferredTime: m.preferred_time, address: pt.address, suburb: pt.suburb, postcode: pt.postcode, tests: panel.lines, home, attached: !!form, paid: true });
+          await send({ from: process.env.ENQUIRY_FROM, to: [pt.email], reply_to: process.env.ENQUIRY_TO.split(',')[0], subject: pe.subject, html: pe.html, text: pe.text, ...(form ? { attachments: [form] } : {}) });
+        } catch (e) { console.error('etn patient email failed:', e.message); }
+      }
+
+      try {
+        await stripe('POST', '/customers', {
+          description: `ETN order ${m.reference} (${pt.firstName} ${pt.lastName})`, email: pt.email,
+          metadata: {
+            type: 'clinic_order', partner: ETN.partner, reference: m.reference,
+            patient: `${pt.firstName} ${pt.lastName}`.slice(0, 120), email: pt.email, phone: pt.phone, dob: pt.dob, sex: pt.sex,
+            items: `${panel.n} (paid)`, tests: panel.lines.join('; ').slice(0, 480),
+            collection: home ? 'Home visit' : 'Collection centre', preferred: when,
+            total: String(total), address: [pt.address, pt.suburb, pt.state, pt.postcode].filter(Boolean).join(', ').slice(0, 480),
+            ops_stage: 'form_sent'
+          }
+        });
+      } catch (e) { console.error('etn order record failed:', e.message); }
+      return res.status(200).json({ received: true, etn: true });
     }
     // Home visit upgrade on a clinic order (/optimal-home): notify the team, confirm to the
     // patient, and mark the clinic order record. No request form or order number is involved.

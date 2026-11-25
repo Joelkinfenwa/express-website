@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empowered Through Nutrition — Blood Tests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#020A32;--ink:#0B1230;--slate:#4A5468;--green:#0A7F49;--green-soft:rgba(10,127,73,.08);--line:#E3E8F0;--bg:#FFFFFF;--bg-soft:#F6F8F7;--ok:#0A7F49;--err:#D64545}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:1120px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;line-height:1.15}
+  .logo .badge{width:34px;height:34px;flex:none;border-radius:999px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:.02em}
+  .logo .wm .top{font-weight:700;font-size:15px;color:var(--navy)}
+  .logo .wm .sub{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.18em;color:var(--slate);text-transform:uppercase}
+  .btn{display:inline-block;text-decoration:none;font-family:inherit;font-weight:600;font-size:14.5px;cursor:pointer;border:0;border-radius:8px;text-align:center;transition:background .12s}
+  .btn-dark{background:var(--navy);color:#fff;padding:12px 24px}
+  .btn-dark:hover{background:#0E1A52}
+  .btn-green{background:var(--green);color:#fff;padding:12px 24px}
+  .btn-green:hover{background:#086A3D}
+  .btn-sm{font-size:13px;padding:9px 16px}
+  .hero{border-bottom:1px solid var(--line)}
+  .hero-inner{max-width:1120px;margin:0 auto;padding:60px 24px 56px}
+  .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.75px;text-transform:uppercase;color:var(--slate);display:block;margin-bottom:14px}
+  .hero h1{font-size:clamp(30px,4.6vw,50px);font-weight:700;line-height:1.08;letter-spacing:-.02em;max-width:680px;color:var(--navy)}
+  .hero h1 .accent{color:var(--green)}
+  .tlbar{height:5px;width:220px;border-radius:999px;margin:22px 0 0;background:linear-gradient(90deg,#D64545 0%,#E8A33D 38%,#0A7F49 72%,#0A7F49 100%)}
+  .hero p{margin-top:18px;font-size:16.5px;color:var(--slate);max-width:560px}
+  section{padding:56px 0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .kicker{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.75px;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:10px}
+  h2.sec{font-size:clamp(24px,3vw,36px);font-weight:700;letter-spacing:-.015em;color:var(--navy)}
+  p.sub{margin-top:10px;color:var(--slate);font-size:15.5px;max-width:600px}
+  .panels{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+  .panel > .btn{margin-top:auto}
+  .panel{background:#fff;border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;padding:24px;display:flex;flex-direction:column;transition:box-shadow .12s,border-color .12s}
+  .panel.sel{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .pnum{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;font-weight:600;color:var(--green);margin-bottom:8px}
+  .panel h3{font-size:18px;font-weight:700;line-height:1.25;color:var(--navy)}
+  .panel .price{font-size:23px;font-weight:700;margin:8px 0 2px;color:var(--navy)}
+  .panel .price span{font-size:12px;font-weight:500;color:var(--slate)}
+  .panel .count{font-size:12.5px;color:var(--slate);margin-bottom:12px}
+  .mtoggle{background:none;border:0;cursor:pointer;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--green);text-align:left;padding:0;margin-bottom:10px}
+  .mtoggle:hover{text-decoration:underline}
+  .mlist{list-style:none;margin:0 0 16px;flex:1}
+  .mlist.hidden{display:none}
+  .mlist li{font-size:13px;color:var(--slate);padding:4px 0 4px 18px;position:relative;border-bottom:1px dashed var(--line)}
+  .mlist li:last-child{border-bottom:0}
+  .mlist.cols{column-count:2;column-gap:20px}
+  .mlist.cols li{break-inside:avoid}
+  @media(max-width:480px){.mlist.cols{column-count:1}}
+  .mlist li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--green);opacity:.65}
+  .mnote{font-size:11.5px;color:#8A94A6;margin:-8px 0 14px}
+  .book-sec{background:var(--bg-soft);border-top:1px solid var(--line)}
+  .book-grid{margin-top:34px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px}
+  .fstep{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .fstep:last-child{border:0;margin:0;padding:0}
+  .fstep-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .fstep-head .num{font-family:"IBM Plex Mono",ui-monospace,monospace;flex:none;color:var(--green);font-weight:600;font-size:13px}
+  .fstep-head h3{font-size:16.5px;font-weight:700;color:var(--navy)}
+  .selected-test{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--green-soft);border:1px solid rgba(10,127,73,.35);border-radius:10px;padding:13px 17px}
+  .selected-test .st-name{font-weight:600;font-size:14.5px}
+  .selected-test .st-price{font-weight:700;white-space:nowrap}
+  .selected-test button{background:none;border:0;cursor:pointer;color:var(--slate);font-size:12.5px;font-family:inherit;text-decoration:underline}
+  .no-test{font-size:14px;color:var(--slate)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--navy)}
+  .field input,.field select{width:100%;font-family:inherit;font-size:14.5px;padding:11px 14px;border:1.5px solid var(--line);border-radius:8px;outline:none;color:var(--ink);background:#fff}
+  .field input:focus,.field select:focus{border-color:var(--green)}
+  .field input.err,.field select.err{border-color:var(--err)}
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;background:#fff}
+  .choice input{position:absolute;opacity:0}
+  .choice .c-title{font-size:14px;font-weight:600;padding-right:76px;color:var(--navy)}
+  .choice .c-desc{font-size:12.5px;color:var(--slate);margin-top:3px}
+  .choice .c-fee{position:absolute;top:12px;right:14px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;font-weight:600;color:var(--green);background:var(--green-soft);border-radius:999px;padding:2px 10px}
+  .choice.sel{border-color:var(--green);background:var(--green-soft)}
+  .summary{position:sticky;top:84px}
+  .summary h3{font-size:16px;font-weight:700;margin-bottom:14px;color:var(--navy)}
+  .srow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;color:var(--slate);gap:10px}
+  .srow .sv{color:var(--ink);font-weight:500;text-align:right}
+  .srow.total{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:15.5px}
+  .srow.total .sv{font-weight:700;font-size:19px;color:var(--navy)}
+  .incl{font-size:12.5px;color:var(--slate);background:var(--bg-soft);border-radius:8px;padding:10px 14px;margin:12px 0 16px}
+  .paybtn{width:100%;font-size:15px;padding:15px 20px}
+  .paybtn:disabled{opacity:.55;cursor:default}
+  .secure{text-align:center;font-size:12px;color:#8A94A6;margin-top:10px}
+  .err-box{display:none;margin-top:12px;background:#FDECEC;color:var(--err);border:1px solid #F3C2BE;border-radius:10px;padding:10px 13px;font-size:13px}
+  .confirm{display:none}
+  .confirm.show{display:block}
+  .conf-icon{width:52px;height:52px;border-radius:999px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+  .confirm h3{font-size:22px;font-weight:700;color:var(--navy)}
+  .ref{display:inline-block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;font-weight:600;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:6px 16px}
+  .conf-chip{display:inline-flex;align-items:center;background:var(--green-soft);border:1px solid rgba(10,127,73,.35);border-radius:10px;padding:10px 18px;font-weight:600;font-size:14.5px}
+  .conf-list{margin:20px 0;display:grid;gap:11px}
+  .conf-item{display:flex;gap:11px;font-size:14px;color:var(--slate)}
+  .tick{width:17px;height:17px;flex:none;margin-top:2px;border-radius:50%;background:rgba(10,127,73,.18);display:inline-flex;align-items:center;justify-content:center}
+  footer{border-top:1px solid var(--line);padding:28px 0}
+  .foot{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12.5px;color:var(--slate)}
+  .foot .pby{font-weight:600;color:var(--ink)}
+  @media(max-width:900px){.panels{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){
+    .panels{grid-template-columns:1fr}
+    .book-grid{grid-template-columns:1fr}
+    .summary{position:static}
+    .grid2,.choice-row{grid-template-columns:1fr}
+    .hero-inner{padding:44px 20px 44px}
+    section{padding:44px 0}
+    .card{padding:22px 18px}
+  }
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top" aria-label="Empowered Through Nutrition">
+      <span class="badge">ETN</span>
+      <span class="wm">
+        <span class="top">Empowered Through Nutrition</span><br>
+        <span class="sub">Testing + Nutrition Coaching</span>
+      </span>
+    </a>
+    <a class="btn btn-green btn-sm" href="#tests">Order a blood test</a>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <span class="eyebrow">Blood testing · powered by Express Pathology</span>
+    <h1>Test. Coach. <span class="accent">Retest.</span><br>Starting with your bloods.</h1>
+    <div class="tlbar" aria-hidden="true"></div>
+    <p>Choose your panel, then have your bloods collected at home by a mobile nurse — or walk into one of 2,000+ collection centres nationally. Results are reviewed alongside your coach.</p>
+  </div>
+</div>
+
+<section id="tests">
+  <div class="wrap">
+    <div class="kicker">Choose your panel</div>
+    <h2 class="sec">Blood test panels</h2>
+    <p class="sub">Every marker is shown up front — the same panel at the start of your programme and at Week 12, so your results compare like for like.</p>
+    <div class="panels">
+
+      <div class="panel" id="pan-core">
+        <div class="pnum">PANEL 01</div>
+        <h3>Core</h3>
+        <div class="price" data-price="core">$133 <span>incl. GST</span></div>
+        <div class="count">7 tests</div>
+        <button type="button" class="mtoggle" data-list="ml-core">Hide markers</button>
+        <ul class="mlist" id="ml-core">
+          <li>CRP (high sensitivity)</li>
+          <li>Full Blood Count</li>
+          <li>Testosterone — Total &amp; Free + SHBG</li>
+          <li>Oestradiol (E2)</li>
+          <li>Serum Magnesium</li>
+          <li>MBA20 — liver, kidney, glucose, electrolytes &amp; lipids</li>
+          <li>Vitamin D</li>
+        </ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="core">Select Core</button>
+      </div>
+
+      <div class="panel" id="pan-plus">
+        <div class="pnum">PANEL 02</div>
+        <h3>Plus</h3>
+        <div class="price" data-price="plus">$206 <span>incl. GST</span></div>
+        <div class="count">Everything in Core + 5 more</div>
+        <button type="button" class="mtoggle" data-list="ml-plus">Hide markers</button>
+        <ul class="mlist" id="ml-plus">
+          <li>Everything in Core</li>
+          <li>FSH</li>
+          <li>LH</li>
+          <li>HbA1c</li>
+          <li>Prolactin</li>
+          <li>Thyroid panel — TSH, Free T3, Free T4</li>
+        </ul>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="plus">Select Plus</button>
+      </div>
+
+      <div class="panel" id="pan-ultimate">
+        <div class="pnum">PANEL 03</div>
+        <h3>Ultimate Competitive Physique</h3>
+        <div class="price" data-price="ultimate">$327 <span>incl. GST</span></div>
+        <div class="count">24 tests — full competitive screen</div>
+        <ul class="mlist" id="ml-ultimate-sum">
+          <li>Full blood health &amp; inflammation</li>
+          <li>Metabolic — lipids, HbA1c, insulin</li>
+          <li>Micronutrients — iron studies, B12, folate, vitamin D, zinc</li>
+          <li>Homocysteine &amp; thyroid function</li>
+          <li>Adrenal — cortisol, DHEAS</li>
+          <li>Full hormone screen + IGF-1 &amp; Growth Hormone</li>
+        </ul>
+        <button type="button" class="mtoggle" data-list="ml-ultimate" data-swap="ml-ultimate-sum" data-show="Show all 24 markers" data-hide="Hide markers">Show all 24 markers</button>
+        <ul class="mlist cols hidden" id="ml-ultimate">
+          <li>Full Blood Count &amp; general blood health</li>
+          <li>Inflammation markers</li>
+          <li>Liver function</li>
+          <li>Kidney function</li>
+          <li>Lipids</li>
+          <li>HbA1c</li>
+          <li>Insulin</li>
+          <li>Iron studies</li>
+          <li>Vitamin B12</li>
+          <li>Folate</li>
+          <li>Vitamin D</li>
+          <li>Zinc</li>
+          <li>Homocysteine</li>
+          <li>Thyroid function</li>
+          <li>Cortisol</li>
+          <li>DHEAS</li>
+          <li>FSH</li>
+          <li>LH</li>
+          <li>Prolactin</li>
+          <li>Progesterone</li>
+          <li>Oestradiol (E2)</li>
+          <li>Testosterone + SHBG</li>
+          <li>IGF-1</li>
+          <li>Growth Hormone</li>
+        </ul>
+        <div class="mnote">Fasting panel — nothing to eat for 8 hours before collection, water is fine. Cortisol and testosterone collect best in the morning.</div>
+        <button class="btn btn-dark btn-sm" type="button" data-pick="ultimate">Select Ultimate</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="book-sec" id="checkout">
+  <div class="wrap">
+    <div class="kicker">Checkout</div>
+    <h2 class="sec">Complete your order</h2>
+    <div class="book-grid">
+      <div class="card" id="formCard">
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">STEP 01</span><h3>Your test</h3></div>
+          <div class="no-test" id="noTest">Select a panel above to begin.</div>
+          <div class="selected-test" id="selTest" style="display:none">
+            <div><div class="st-name" id="stName"></div></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="st-price" id="stPrice"></span><button type="button" id="stChange">Change</button></div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">STEP 02</span><h3>How would you like your bloods collected?</h3></div>
+          <div class="choice-row">
+            <label class="choice sel" id="chHome">
+              <input type="radio" name="cmode" value="home" checked>
+              <div class="c-title">At-home nurse visit</div>
+              <div class="c-desc">A qualified nurse comes to you — our team confirms the time within 4 hours</div>
+              <span class="c-fee">+ $75</span>
+            </label>
+            <label class="choice" id="chClinic">
+              <input type="radio" name="cmode" value="clinic">
+              <div class="c-title">In-clinic collection</div>
+              <div class="c-desc">Walk into one of 2,000+ collection centres — no appointment needed</div>
+              <span class="c-fee">Included</span>
+            </label>
+          </div>
+          <div id="prefWrap" style="margin-top:14px">
+            <div class="grid2">
+              <div class="field"><label for="prefDate">Preferred visit date</label><input id="prefDate" type="date"></div>
+              <div class="field"><label for="prefTime">Preferred time</label>
+                <select id="prefTime"><option>Morning</option><option>Afternoon</option><option>No preference</option></select>
+              </div>
+            </div>
+            <div class="mnote" style="margin:0">Our team contacts you within 4 hours to confirm the exact visit time.</div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-head"><span class="num">STEP 03</span><h3>Your details</h3></div>
+          <div class="grid2">
+            <div class="field"><label for="fname">First name</label><input id="fname"></div>
+            <div class="field"><label for="lname">Last name</label><input id="lname"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="email">Email</label><input id="email" type="email"></div>
+            <div class="field"><label for="mobile">Mobile</label><input id="mobile" inputmode="tel"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
+            <div class="field"><label for="sex">Sex (for reference ranges)</label>
+              <select id="sex"><option value="">Select</option><option>Female</option><option>Male</option></select>
+            </div>
+          </div>
+          <div class="field"><label for="addr">Street address</label><input id="addr" placeholder="Unit / street"></div>
+          <div class="grid2">
+            <div class="field"><label for="suburb">Suburb</label><input id="suburb"></div>
+            <div class="field"><label for="state">State</label>
+              <select id="state"><option value="">Select</option><option>NSW</option><option>VIC</option><option>QLD</option><option>SA</option><option>WA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+            </div>
+          </div>
+          <div class="field" style="max-width:48%"><label for="postcode">Postcode</label><input id="postcode" inputmode="numeric" maxlength="4" placeholder="e.g. 2000"></div>
+        </div>
+      </div>
+
+      <div class="card confirm" id="confirmCard">
+        <div class="conf-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="#0A7F49" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 id="confHead">Your order is confirmed</h3>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <span class="conf-chip" id="confTime">Paid</span>
+          <span class="ref" id="bookingRef">Order reference —</span>
+        </div>
+        <div class="conf-list" id="confList"></div>
+        <button class="btn btn-dark btn-sm" type="button" onclick="location.href='/empowered'">Place another order</button>
+      </div>
+
+      <div class="card summary" id="summaryCard">
+        <h3>Your order</h3>
+        <div class="srow"><span>Panel</span><span class="sv" id="sPanel">—</span></div>
+        <div class="srow"><span>Panel price</span><span class="sv" id="sPanelPrice">—</span></div>
+        <div class="srow"><span>Collection</span><span class="sv" id="sMode">At-home nurse visit</span></div>
+        <div class="srow" id="sFeeRow"><span>Home visit</span><span class="sv">$75.00</span></div>
+        <div class="srow total"><span>Total</span><span class="sv" id="sTotal">—</span></div>
+        <div class="incl" id="sNote">Your pathology request form is issued electronically and emailed to you with your confirmation — nothing to print for home visits. Results are reviewed and shared with your Empowered Through Nutrition coach.</div>
+        <button class="btn btn-green paybtn" id="payBtn" type="button" disabled>Select a panel to continue</button>
+        <div class="secure">Secure card payment via Stripe · Powered by Express Pathology</div>
+        <div class="err-box" id="orderErr"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot">
+    <span class="pby">Powered by Express Pathology</span>
+    <span>Blood test ordering for Empowered Through Nutrition · express@expresspathology.com.au · 02 9545 2940</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var PANELS = {
+    core:    {n:'Core',                          p:133},
+    plus:    {n:'Plus',                          p:206},
+    ultimate:{n:'Ultimate Competitive Physique', p:327}
+  };
+  var HOME_FEE = 75;
+  var selPanel = null;
+
+  /* paid return from Stripe */
+  var q = new URLSearchParams(location.search);
+  if (q.get('paid') === '1'){
+    var home = q.get('home') === '1';
+    $('bookingRef').textContent = 'Order reference ' + (q.get('ref') || '');
+    $('confTime').textContent = home ? 'At-home nurse visit' : 'In-clinic collection';
+    function confItem(text){
+      return '<div class="conf-item"><span class="tick"><svg viewBox="0 0 10 10" fill="none" width="9" height="9"><path d="M1.5 5.2 4 7.7 8.5 2.5" stroke="#0A7F49" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>' + text + '</span></div>';
+    }
+    $('confList').innerHTML = home
+      ? confItem('Payment received. A confirmation email with your pathology request form is on its way.') +
+        confItem('Our team will contact you within 4 hours to confirm the exact time of your visit — your nurse brings everything, nothing to print.') +
+        confItem('Results are reviewed and shared with your Empowered Through Nutrition coach.')
+      : confItem('Payment received. A confirmation email with your pathology request form is on its way.') +
+        confItem('Print your request form and bring it with photo ID to any partner collection centre — no appointment needed.') +
+        confItem('Results are reviewed and shared with your Empowered Through Nutrition coach.');
+    $('formCard').style.display = 'none';
+    $('summaryCard').style.display = 'none';
+    $('confirmCard').classList.add('show');
+    document.addEventListener('DOMContentLoaded', function(){ $('confirmCard').scrollIntoView({behavior:'smooth', block:'center'}); });
+  }
+
+  document.querySelectorAll('.mtoggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var list = $(btn.dataset.list);
+      var hidden = list.classList.toggle('hidden');
+      btn.textContent = hidden ? (btn.dataset.show || 'Show markers') : (btn.dataset.hide || 'Hide markers');
+      if (btn.dataset.swap){ $(btn.dataset.swap).classList.toggle('hidden', !hidden); }
+    });
+  });
+
+  function money(v){ return '$' + v.toFixed(2); }
+
+  document.querySelectorAll('[data-pick]').forEach(function(btn){
+    btn.addEventListener('click', function(){ pick(btn.dataset.pick); });
+  });
+  function pick(key){
+    selPanel = key;
+    Object.keys(PANELS).forEach(function(k){ $('pan-' + k).classList.toggle('sel', k === key); });
+    $('noTest').style.display = 'none';
+    $('selTest').style.display = 'flex';
+    $('stName').textContent = PANELS[key].n;
+    $('stPrice').textContent = money(PANELS[key].p);
+    updateSummary();
+    $('checkout').scrollIntoView({behavior:'smooth'});
+  }
+  $('stChange').addEventListener('click', function(){ $('tests').scrollIntoView({behavior:'smooth'}); });
+
+  var chHome = $('chHome'), chClinic = $('chClinic');
+  function setMode(home){
+    chHome.classList.toggle('sel', home);
+    chClinic.classList.toggle('sel', !home);
+    $('prefWrap').style.display = home ? 'block' : 'none';
+    updateSummary();
+  }
+  chHome.addEventListener('click', function(){ setMode(true); });
+  chClinic.addEventListener('click', function(){ setMode(false); });
+  function isHome(){ return document.querySelector('input[name="cmode"]:checked').value === 'home'; }
+
+  function updateSummary(){
+    var home = isHome();
+    $('sMode').textContent = home ? 'At-home nurse visit' : 'In-clinic collection';
+    $('sFeeRow').style.display = home ? 'flex' : 'none';
+    if (selPanel){
+      var t = PANELS[selPanel];
+      $('sPanel').textContent = t.n;
+      $('sPanelPrice').textContent = money(t.p);
+      var total = t.p + (home ? HOME_FEE : 0);
+      $('sTotal').textContent = money(total);
+      $('payBtn').disabled = false;
+      $('payBtn').textContent = 'Confirm and pay ' + money(total);
+    }
+  }
+  $('postcode').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,4); });
+  (function(){ var d = new Date(); d.setDate(d.getDate() + 1); $('prefDate').min = d.toISOString().slice(0,10); })();
+
+  $('payBtn').addEventListener('click', function(){
+    var required = ['fname','lname','email','mobile','dob','sex','addr','suburb','state','postcode'];
+    var ok = true, firstBad = null;
+    required.forEach(function(id){
+      var el = $(id);
+      var bad = !el.value || (id === 'postcode' && el.value.length !== 4) || (id === 'email' && el.value.indexOf('@') === -1);
+      el.classList.toggle('err', bad);
+      if (bad){ ok = false; if (!firstBad) firstBad = el; }
+    });
+    if (!ok){ firstBad.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    var btn = this;
+    btn.textContent = 'Taking you to payment…'; btn.disabled = true;
+    $('orderErr').style.display = 'none';
+    fetch('/api/etn-order', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      panel: selPanel,
+      collection: isHome() ? 'home' : 'clinic',
+      preferredDate: $('prefDate').value, preferredTime: $('prefTime').value,
+      firstName: $('fname').value, lastName: $('lname').value,
+      email: $('email').value, phone: $('mobile').value,
+      dob: $('dob').value, sex: $('sex').value,
+      address: $('addr').value, suburb: $('suburb').value, state: $('state').value, postcode: $('postcode').value
+    })})
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if (!res.ok || !res.j.url) throw new Error(res.j && res.j.error || 'We could not start checkout.');
+        location.href = res.j.url;
+      })
+      .catch(function(e){
+        $('orderErr').textContent = e.message || 'We could not start checkout. Please call us on 02 9545 2940.';
+        $('orderErr').style.display = 'block';
+        updateSummary();
+      });
+  });
+})();
+</script>
+</body>
+</html>
