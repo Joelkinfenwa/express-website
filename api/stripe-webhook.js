@@ -143,7 +143,7 @@ export default async function handler(req, res) {
           reference: m.reference, patient: pt,
           items: [{ title: `${panel.n} — Empowered Through Nutrition`, lines: panel.lines }],
           fasting: !!panel.fasting,
-          notes: 'Empowered Through Nutrition order — paid in full at checkout. Results are reviewed and shared with the Empowered Through Nutrition coaching team.'
+          notes: 'Empowered Through Nutrition order — paid in full at checkout. Results go to the ETN coaching team.'
         });
         form = { filename: `Pathology request form ${m.reference}.pdf`, content: Buffer.from(bytes).toString('base64') };
       } catch (e) { formError = e.message; console.error('etn request form failed:', e.message); }

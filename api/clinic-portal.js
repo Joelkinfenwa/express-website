@@ -5,7 +5,10 @@
 import crypto from 'node:crypto';
 import { allCustomers } from '../lib/order-number.js';
 
-const CLINICS = { OHC: { env: 'OHC_PORTAL_PASSWORD', name: 'Optimal Health Clinic' } };
+const CLINICS = {
+  OHC: { env: 'OHC_PORTAL_PASSWORD', name: 'Optimal Health Clinic' },
+  ETN: { env: 'ETN_PORTAL_PASSWORD', name: 'Empowered Through Nutrition' }
+};
 
 // Clinic-facing status from the internal ops stage
 function status(stage) {
