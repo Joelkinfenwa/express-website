@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lighthouse WBH — Order Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0C1B17;--sky:#5E7A33;--sky-light:#D2FD81;--ink:#101814;--slate:#55615A;--line:#E2E7E2;--bg:#F4F7F3;--white:#FFFFFF;--ok:#1E9E6A;--amber:#B97E12;--err:#B3261E}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Instrument Sans",sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  header{background:var(--navy);color:#fff;padding:16px 24px}
+  .head-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .head-inner h1{font-size:17px;font-weight:600}
+  .head-inner .sub{font-size:12px;color:var(--sky-light)}
+  .pby{font-size:11.5px;color:rgba(255,255,255,.75)}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 24px 60px}
+  .gate{max-width:420px;margin:60px auto;background:var(--white);border-radius:18px;padding:34px;text-align:center}
+  .gate h2{font-size:20px;margin-bottom:6px}
+  .gate p{font-size:13.5px;color:var(--slate);margin-bottom:18px}
+  .gate input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:15px;text-align:center}
+  .gate input:focus{outline:none;border-color:var(--sky)}
+  .gate button{width:100%;margin-top:12px;padding:13px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+  .gate .err{display:none;margin-top:12px;color:var(--err);font-size:13px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .stat{background:var(--white);border-radius:14px;padding:16px 18px;cursor:pointer;border:2px solid transparent}
+  .stat.sel{border-color:var(--sky)}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{font-size:12px;color:var(--slate)}
+  .bar{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .bar input{flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:999px;font-family:inherit;font-size:14px;background:var(--white)}
+  .bar input:focus{outline:none;border-color:var(--sky)}
+  .bar button{padding:11px 20px;border:1px solid var(--line);border-radius:999px;background:var(--white);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .tbl{background:var(--white);border-radius:16px;overflow:auto}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{font-size:13.5px;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  .ref{font-weight:600;white-space:nowrap}
+  .muted{color:var(--slate);font-size:12.5px}
+  .chip{display:inline-block;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .chip.awaiting{background:#FFF4DE;color:var(--amber)}
+  .chip.booked{background:#E3F3FF;color:#0b6db3}
+  .chip.collected{background:#EDE9FF;color:#5B46C7}
+  .chip.review{background:#EDE9FF;color:#5B46C7}
+  .chip.sent{background:#E2F6EC;color:var(--ok)}
+  .empty{padding:50px 20px;text-align:center;color:var(--slate);font-size:14px}
+  @media(max-width:640px){.wrap{padding:16px 12px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div><h1>Lighthouse WBH — Order Tracker</h1><div class="sub">Live status of every pathology order placed with Express Pathology</div></div>
+    <span class="pby">Powered by Express Pathology</span>
+  </div>
+</header>
+<div class="wrap">
+  <div class="gate" id="gate">
+    <h2>Team sign in</h2>
+    <p>Enter the portal password provided by Express Pathology.</p>
+    <input id="pw" type="password" placeholder="Portal password" autocomplete="current-password">
+    <button id="goBtn" type="button">View orders</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+  <div id="app" style="display:none">
+    <div class="stats" id="stats"></div>
+    <div class="bar">
+      <input id="search" placeholder="Search by patient name or order reference">
+      <button id="refreshBtn" type="button">Refresh</button>
+      <button id="logoutBtn" type="button">Sign out</button>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Order</th><th>Placed</th><th>Patient</th><th>Panel</th><th>Collection</th><th>Appointment</th><th>Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">No orders match.</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var ORDERS = [], FILTER = '', QUERY = '';
+  var STATS = [['', 'All orders'], ['awaiting', 'Awaiting collection'], ['booked', 'Home visit booked'], ['collected', 'Bloods collected'], ['review', 'Results in review'], ['sent', 'Results sent']];
+  function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function fmtDate(unix){ return new Date(unix * 1000).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }); }
+
+  function load(pw, onFail){
+    return fetch('/api/clinic-portal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ clinic:'LH', password: pw }) })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.j && res.j.error || 'Could not load orders.');
+        ORDERS = res.j.orders || [];
+        sessionStorage.setItem('lh_pw', pw);
+        $('gate').style.display = 'none'; $('app').style.display = 'block';
+        render();
+      })
+      .catch(function(e){ if (onFail) onFail(e.message); });
+  }
+
+  function render(){
+    var counts = {};
+    ORDERS.forEach(function(o){ counts[o.status] = (counts[o.status] || 0) + 1; });
+    $('stats').innerHTML = STATS.map(function(s){
+      var n = s[0] ? (counts[s[0]] || 0) : ORDERS.length;
+      return '<div class="stat' + (FILTER === s[0] ? ' sel' : '') + '" data-f="' + s[0] + '"><div class="n">' + n + '</div><div class="l">' + s[1] + '</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.stat'), function(el){
+      el.addEventListener('click', function(){ FILTER = el.dataset.f; render(); });
+    });
+    var q = QUERY.toLowerCase();
+    var list = ORDERS.filter(function(o){
+      if (FILTER && o.status !== FILTER) return false;
+      if (q && (o.patient + ' ' + o.reference).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    $('rows').innerHTML = list.map(function(o){
+      return '<tr><td class="ref">' + esc(o.reference) + '</td>' +
+        '<td class="muted">' + fmtDate(o.date) + '</td>' +
+        '<td>' + esc(o.patient) + (o.dob ? '<div class="muted">DOB ' + esc(o.dob) + '</div>' : '') + '</td>' +
+        '<td>' + esc(o.items) + '</td>' +
+        '<td>' + esc(o.collection) + (o.preferred ? '<div class="muted">Preferred: ' + esc(o.preferred) + '</div>' : '') + '</td>' +
+        '<td class="muted">' + esc(o.appointment || '—') + '</td>' +
+        '<td><span class="chip ' + esc(o.status) + '">' + esc(o.statusLabel) + '</span></td></tr>';
+    }).join('');
+    $('empty').style.display = list.length ? 'none' : 'block';
+  }
+
+  $('goBtn').addEventListener('click', function(){
+    var pw = $('pw').value;
+    if (!pw) return;
+    $('gateErr').style.display = 'none';
+    $('goBtn').textContent = 'Loading…';
+    load(pw, function(msg){ $('gateErr').textContent = msg; $('gateErr').style.display = 'block'; $('goBtn').textContent = 'View orders'; });
+  });
+  $('pw').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('goBtn').click(); });
+  $('search').addEventListener('input', function(){ QUERY = this.value; render(); });
+  $('refreshBtn').addEventListener('click', function(){ var pw = sessionStorage.getItem('lh_pw'); if (pw) load(pw); });
+  $('logoutBtn').addEventListener('click', function(){ sessionStorage.removeItem('lh_pw'); location.reload(); });
+
+  var saved = sessionStorage.getItem('lh_pw');
+  if (saved) load(saved, function(){ sessionStorage.removeItem('lh_pw'); });
+})();
+</script>
+</body>
+</html>

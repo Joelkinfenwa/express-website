@@ -8,7 +8,8 @@ import { allCustomers } from '../lib/order-number.js';
 const CLINICS = {
   OHC: { env: 'OHC_PORTAL_PASSWORD', name: 'Optimal Health Clinic' },
   ETN: { env: 'ETN_PORTAL_PASSWORD', name: 'Empowered Through Nutrition' },
-  COMO: { env: 'COMO_PORTAL_PASSWORD', name: 'Como Wellness' }
+  COMO: { env: 'COMO_PORTAL_PASSWORD', name: 'Como Wellness' },
+  LH: { env: 'LH_PORTAL_PASSWORD', name: 'Lighthouse WBH' }
 };
 
 // Clinic-facing status from the internal ops stage
