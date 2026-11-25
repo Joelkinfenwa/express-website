@@ -210,7 +210,7 @@ function walk(dir) {
     if (statSync(p).isDirectory()) { mkdirSync(dest, { recursive: true }); walk(p); continue; }
     if (extname(name) !== '.html') { copyFileSync(p, dest); continue; }
     writeFileSync(dest, finalize(fillFragments(readFileSync(p, 'utf8')), rel));
-    if (!['404.html', 'checkout.html', 'order-confirmed.html', 'partner-referral.html', 'quiz.html', 'optimal.html', 'optimal-home.html', 'optimal-portal.html', 'thirdspring.html', 'baseline.html', 'empowered.html', 'empowered-portal.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
+    if (!['404.html', 'checkout.html', 'order-confirmed.html', 'partner-referral.html', 'quiz.html', 'optimal.html', 'optimal-home.html', 'optimal-portal.html', 'thirdspring.html', 'baseline.html', 'empowered.html', 'empowered-portal.html', 'como.html'].includes(name)) pages.push(rel === 'index.html' ? '/' : '/' + rel.replace(/\.html$/, ''));
   }
 }
 
