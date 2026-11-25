@@ -3,7 +3,7 @@
   "siteUrl": "https://expresspathology.com.au",
   "shopUrl": "https://shop.expresspathology.com.au",
   "bookingUrl": "/book",
-  "nurseApplyUrl": "https://bookings.expresspathology.com.au/admin/nurses/new",
+  "nurseApplyUrl": "/contact?topic=careers#form",
   "metroFee": "$129",
   "regionalFee": "$149",
   "homeVisitAddOnFee": "$75",

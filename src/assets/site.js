@@ -172,3 +172,10 @@
     });
   });
 })();
+
+// Contact form: preselect the topic from ?topic= (e.g. the careers page sends ?topic=careers)
+(function () {
+  var sel = document.getElementById('c-topic'); if (!sel) return;
+  var t = (new URLSearchParams(location.search).get('topic') || '').toLowerCase(); if (!t) return;
+  for (var i = 0; i < sel.options.length; i++) { if ((sel.options[i].value + ' ' + sel.options[i].text).toLowerCase().indexOf(t) > -1) { sel.selectedIndex = i; break; } }
+})();
