@@ -216,6 +216,106 @@
       "permanent": true
     },
     {
+      "source": "/nurse-careers",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/nurse-jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/nursing-jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/jobs/:path*",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/careers/:path*",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/join",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/join-us",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/work-with-us",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/become-a-nurse",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/careers",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/nurse-careers",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/nurse-jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/join-our-team",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/join-us",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/work-with-us",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/become-a-nurse",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/become-a-collector",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/pages/phlebotomist-jobs",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
       "source": "/pages/:path*",
       "destination": "/",
       "permanent": true
